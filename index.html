@@ -100,6 +100,10 @@ input::placeholder {color:var(--muted);opacity:1}
 .message time {display:block;margin:4px 2px 0;font-size:var(--text-xs);color:var(--muted)}
 .own time {text-align:right}
 .composer {position:relative;background:var(--paper);border-top:1px solid var(--line);padding:13px 22px max(12px,env(safe-area-inset-bottom))}
+.quick-phrases{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;margin-bottom:8px;padding:2px}
+.quick-phrases::-webkit-scrollbar{display:none}
+.quick-phrases button{flex:none;background:#101317;border:1px solid #1A1F26;color:#A4A6A5;border-radius:999px;font-size:12px;line-height:1;padding:8px 12px;white-space:nowrap}
+.quick-phrases button:active{border-color:#D8B56D}
 .composer form,.comment-area form {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:16px;background:var(--chat);padding:4px}
 .composer input,.comment-area input {flex:1;width:0;padding:8px 4px}
 .send,.primary {background:var(--strong);color:var(--outer);border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-weight:700}
@@ -1087,6 +1091,7 @@ function chatPanel(person, enterChat=false) {
     </section>
     <footer class="composer">
       ${state.picker?`<div class="emoji-picker">${['😊','👋','👍','☕','❤️','🎉'].map(item=>`<button type="button" data-emoji="${item}">${item}</button>`).join('')}</div>`:''}
+      <div class="quick-phrases">${['在忙吗','吃饭了吗','回酒店了','晚安','到家告诉我','明天见'].map(phrase=>`<button type="button" data-quick-phrase="${phrase}">${phrase}</button>`).join('')}</div>
       <form id="message-form">${button('smile',t('选择表情','Chọn biểu tượng'),'data-emoji-picker')}
       <input name="message" maxlength="500" autocomplete="off" placeholder="${t('输入消息…','Nhập tin nhắn…')}" aria-label="${t('输入消息','Nhập tin nhắn')}">
       ${button('translate',t('显示或隐藏译文','Hiện hoặc ẩn bản dịch'),'data-translate aria-pressed="'+(state.translated[person.id]!==false)+'"','icon-button composer-translate')}
@@ -2064,6 +2069,13 @@ root.addEventListener('click', event => {
     }
   }
   if('translate' in d) { state.translated[state.active]=state.translated[state.active]===false; render({preserve:true}); }
+  if(d.quickPhrase!==undefined) {
+    const form=document.querySelector('#message-form');
+    if(form) {
+      form.elements.message.value=d.quickPhrase;
+      form.requestSubmit();
+    }
+  }
   if('emojiPicker' in d) { state.picker=!state.picker; render({preserve:true}); }
   if(d.emoji) {
     const draft=document.querySelector('#message-form input').value;
