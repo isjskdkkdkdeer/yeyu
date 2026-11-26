@@ -113,7 +113,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .message time {display:block;margin:4px 2px 0;font-size:var(--text-xs);color:var(--muted)}
 .own time {text-align:right}
 .composer {position:relative;background:var(--paper);border-top:1px solid var(--line);padding:13px 22px max(12px,env(safe-area-inset-bottom))}
-.quick-phrases{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;margin-bottom:8px;padding:2px}
+.quick-phrases{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;margin-bottom:8px;padding:2px 16px 2px 2px;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 16px),transparent 100%);mask-image:linear-gradient(to right,#000 calc(100% - 16px),transparent 100%)}
 .quick-phrases::-webkit-scrollbar{display:none}
 .quick-phrases button{flex-shrink:0;background:#101317;border:1px solid #1A1F26;color:#A4A6A5;border-radius:999px;font-size:12px;line-height:1;padding:8px 12px;white-space:nowrap}
 .quick-phrases button:active{border-color:#D8B56D}
@@ -405,7 +405,7 @@ button[aria-expanded=true].icon-button { background:var(--choice);color:var(--st
 .contact-id {white-space:nowrap;overflow-wrap:normal}
 .person-row>.icon-button {flex-shrink:0}
 .message-side:empty {display:none}
-.message-status {display:flex;align-items:center;gap:7px;padding:3px 2px 0;color:var(--muted);font-size:var(--text-xs)}
+.message-status {display:flex;align-items:center;gap:7px;padding:3px 2px 0;color:#6E737B;font-size:10px}
 .message-status time {margin:0}
 .own .message-status {justify-content:flex-end}
 .message-status button,.message-translate,.voice-actions button,.composer-tools button {display:inline-flex;align-items:center;gap:5px;color:var(--strong);font-size:var(--text-sm);font-weight:650;padding:4px 5px;min-height:32px;border-radius:7px}
@@ -522,7 +522,7 @@ button.setting-row:active,a.setting-row:active {background:var(--settings-presse
 .translation {margin-top:4px;padding-top:4px;font-size:var(--text-sm);line-height:1.45}
 .message-footer {display:flex;flex-wrap:wrap;align-items:center;gap:0 8px}
 .message-footer>.message-translate {padding:0 4px;gap:4px;font-size:var(--text-xs);min-width:44px}
-.message-footer .message-status {padding-top:0;min-height:24px}
+.message-footer .message-status {padding-top:2px;min-height:24px}
 .own .message-footer {justify-content:flex-end}
 @media (max-width:768px), (max-width:950px) and (pointer:coarse) {
  .timeline {padding-block:6px 8px}
@@ -710,7 +710,7 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .reply-translation-status {display:flex;align-items:center;gap:7px;margin-top:4px;color:var(--muted);font-size:var(--text-xs)}
 .reply-translation-status i {width:5px;height:5px;border-radius:50%;background:#D8B56D;animation:translation-pulse .75s ease-in-out infinite alternate}
 @keyframes translation-pulse {from {opacity:.35} to {opacity:1}}
-.demo-reply-translation,.delivery-checks {color:#D8B56D}
+.demo-reply-translation {color:#D8B56D}.delivery-checks {color:#6E737B}
 .delivery-checks {letter-spacing:-.2em;margin-right:3px}
 @media (prefers-reduced-motion:reduce) {
  .reply-translation-status i {animation:none}
