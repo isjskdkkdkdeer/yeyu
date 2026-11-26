@@ -118,26 +118,40 @@ input::placeholder {color:var(--muted);opacity:1}
 .quick-phrases::-webkit-scrollbar{display:none}
 .quick-phrases button{flex-shrink:0;background:#101317;border:1px solid #1A1F26;color:#A4A6A5;border-radius:999px;font-size:12px;line-height:1;padding:8px 12px;white-space:nowrap}
 .quick-phrases button:active{border-color:#D8B56D}
-.interpret{display:grid;gap:14px}
-.interpret-pane{background:#101317;border:1px solid #1A1F26;border-radius:18px;padding:16px}
-.interpret-pane>header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
-.interpret-who{display:flex;align-items:center;gap:8px;font-size:14px}
-.interpret-who svg{width:18px;height:18px;color:#D8B56D}
-.interpret-lang{font-size:11px;letter-spacing:.08em;color:#A4A6A5}
-.interpret-cards{display:grid;gap:10px;min-height:clamp(140px,30dvh,240px);align-content:start}
-.interpret-card{background:#090B0E;border:1px solid #1A1F26;border-radius:14px;padding:14px}
-.interpret-src{margin:0;font-size:19px;line-height:1.5;color:var(--ink)}
-.interpret-trans{margin:8px 0 0;font-size:18px;line-height:1.5;color:#D8B56D}
-.interpret-pending{margin:8px 0 0;font-size:14px;color:var(--muted)}
-.interpret-card small{display:block;margin-top:8px;color:var(--muted);font-size:11px}
-.interpret-empty{margin:0;color:var(--muted);font-size:14px}
-.interpret-form{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:16px;background:var(--chat);padding:4px;margin-top:12px}
-.interpret-form input{flex:1;width:0;padding:8px 4px;background:transparent;border:0;color:var(--ink);font:inherit}
-.interpret-form input:focus{outline:none}
-.interpret-form:focus-within{border-color:var(--accent)}
-.interpret-hold{width:100%;min-height:44px;margin-top:10px;border:1px solid #1A1F26;border-radius:12px;background:#101317;color:#A4A6A5;font:inherit;display:flex;align-items:center;justify-content:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none}
-.interpret-hold svg{width:18px;height:18px}
-.interpret-hold.holding{border-color:#D8B56D;color:#D8B56D}
+.translate-page{background:#090B0E;overflow:hidden;display:flex;flex-direction:column}
+.translate-page .section-header{background:transparent;border-bottom:0}
+.translate-page .section-content{flex:1;min-height:0;max-width:none;margin:0;padding:0;overflow:hidden;background:#090B0E}
+.interpret-top{position:relative;justify-content:center}
+.interpret-status{font-size:11px;letter-spacing:.14em;color:#6E737B;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.interpret-clear{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#6E737B;opacity:.55;padding:8px;display:grid;place-items:center}
+.interpret-clear svg{width:16px;height:16px}
+.interpret-neo{flex:1;min-height:0;display:flex;flex-direction:column;background:#090B0E;color:#fff;position:relative}
+.interpret-neo .interpret-form{display:none}
+.neo-half{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 22px}
+.neo-peer{border-bottom:1px solid rgba(255,255,255,.06)}
+.neo-mine{padding-bottom:112px}
+.neo-stream{display:flex;flex-direction:column;gap:24px;width:100%}
+.neo-line{overflow-wrap:anywhere}
+.neo-src{margin:0;font-size:22px;line-height:1.45;font-weight:600}
+.neo-trans{margin:6px 0 0;font-size:14px;line-height:1.5}
+.neo-peer .neo-src{color:#E5E7EB;text-shadow:0 0 22px rgba(229,231,235,.14),0 2px 12px rgba(0,0,0,.6)}
+.neo-peer .neo-trans{color:#D8B56D;text-shadow:0 0 14px rgba(216,181,109,.12)}
+.neo-mine .neo-src{color:#fff;text-shadow:0 0 22px rgba(255,255,255,.14),0 2px 12px rgba(0,0,0,.6)}
+.neo-mine .neo-trans{color:#9CA3AF;text-shadow:0 0 14px rgba(156,163,175,.12)}
+.neo-peer .neo-line{transform:rotate(180deg)}
+.neo-old{opacity:.5}
+.neo-old .neo-src{font-size:17px}
+.neo-old .neo-trans{font-size:12px}
+.neo-latest .neo-src{animation:neo-breathe 4s ease-in-out infinite}
+@keyframes neo-breathe{0%,100%{text-shadow:0 0 16px rgba(255,255,255,.10),0 2px 12px rgba(0,0,0,.6)}50%{text-shadow:0 0 30px rgba(255,255,255,.24),0 2px 12px rgba(0,0,0,.6)}}
+.neo-pending{margin:6px 0 0;font-size:13px;color:#6E737B}
+.neo-empty{margin:0;color:rgba(255,255,255,.28);font-size:14px;text-align:center}
+.neo-pill{position:absolute;left:50%;transform:translateX(-50%);bottom:max(20px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:5}
+.neo-dir{flex:none;background:rgba(16,19,23,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);color:#E5E7EB;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:500;white-space:nowrap}
+.neo-mic{width:48px;height:48px;flex:none;border-radius:50%;border:1px solid rgba(216,181,109,.55);background:radial-gradient(circle at 50% 35%,#2A2F36 0%,#101317 55%,#090B0E 100%);color:#D8B56D;display:grid;place-items:center;animation:neo-glow 3.2s ease-in-out infinite}
+.neo-mic svg{width:20px;height:20px}
+.neo-mic.holding{border-color:#D8B56D;color:#fff;animation:none;box-shadow:0 0 0 1px rgba(216,181,109,.35),0 0 26px rgba(216,181,109,.45)}
+@keyframes neo-glow{0%,100%{box-shadow:0 0 0 1px rgba(216,181,109,.12),0 0 14px rgba(216,181,109,.15)}50%{box-shadow:0 0 0 1px rgba(216,181,109,.28),0 0 24px rgba(216,181,109,.32)}}
 .composer form,.comment-area form {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:16px;background:var(--chat);padding:4px}
 .composer input,.comment-area input {flex:1;width:0;padding:8px 4px}
 .send,.primary {background:var(--strong);color:var(--outer);border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-weight:700}
@@ -241,7 +255,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .call-control {position:relative;display:grid;place-items:center;border-radius:50%;width:clamp(45px,11vw,58px);aspect-ratio:1;background:#0b1b17cc;color:white;border:1px solid #ffffff77}
 .call-control:focus-visible {outline-color:#fff}
 .call-control[data-control=captions].enabled {background:#dff3e6;color:#15392c}
-.prompter{position:absolute;left:clamp(14px,7vw,100px);right:clamp(14px,7vw,100px);bottom:calc(180px + env(safe-area-inset-bottom) + clamp(80px,23dvh,230px));z-index:6}
+.prompter{position:absolute;left:clamp(14px,7vw,100px);right:clamp(14px,7vw,100px);bottom:calc(204px + env(safe-area-inset-bottom) + clamp(80px,23dvh,230px));z-index:6}
 .prompter-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(16,19,23,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.4);color:#D8B56D;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:650}
 .prompter-pill svg{width:14px;height:14px}
 .prompter.open .prompter-pill{display:none}
@@ -1047,7 +1061,7 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
-  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, interpret:read('interpret',{peer:[],mine:[]}),
+  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',
   translated:{}, picker:false, prompter:{open:false,cat:'ice',active:null}, call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
@@ -1842,26 +1856,38 @@ function profile() {
   )}
   <button class="titanium-exit" data-sign-out>${t('安全退出','Thoát an toàn')}</button>`;
 }
-function interpretCards(side) {
+function interpretStream(side) {
   const items=(state.interpret[side] || []).slice(-3);
-  if(!items.length) return `<p class="interpret-empty">${t('输入或按住说话，译文会显示在这里。','Nhập hoặc giữ để nói, bản dịch sẽ hiện ở đây.')}</p>`;
-  return items.map(item=>`<div class="interpret-card"><p class="interpret-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="interpret-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="interpret-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>`}<small>${item.time}</small></div>`).join('');
+  if(!items.length) return `<p class="neo-empty">${t('按住下方金键说话，译文会出现在这里。','Giữ phím vàng bên dưới để nói, bản dịch sẽ hiện ở đây.')}</p>`;
+  return items.map((item,i)=>{
+    const latest=i===items.length-1;
+    return `<div class="neo-line${latest?' neo-latest':' neo-old'}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>`}</div>`;
+  }).join('');
+}
+function scrollInterpretStreams(){
+  document.querySelectorAll('.neo-half').forEach(el=>{ el.scrollTop=el.scrollHeight; });
 }
 function translatePage() {
-  const pane=(side,who,langLabel,placeholder)=>{
-    return `<section class="interpret-pane interpret-${side}"><header><span class="interpret-who">${icon(side==='peer'?'people':'user')}<strong>${who}</strong></span><span class="interpret-lang">${langLabel}</span></header>
-    <div class="interpret-cards">${interpretCards(side)}</div>
-    <form class="interpret-form" data-interpret-form="${side}"><input name="interpret" maxlength="300" autocomplete="off" placeholder="${placeholder}" aria-label="${placeholder}"><button class="send" type="submit" aria-label="${t('发送','Gửi')}">${icon('send')}</button></form>
-    <button type="button" class="interpret-hold" data-interpret-hold="${side}">${icon('mic')} ${t('按住说话','Giữ để nói')}</button></section>`;
-  };
-  return `<div class="interpret">
-    ${pane('peer',t('对方 · 越语','Đối phương · Tiếng Việt'),'Tiếng Việt',t('输入越南语…','Nhập tiếng Việt…'))}
-    ${pane('mine',t('我方 · 中文','Tôi · Tiếng Trung'),'简体中文',t('输入中文…','Nhập tiếng Trung…'))}
+  const dir=state.interpretDir || 'mine';
+  const dirLabel=dir==='mine'?t('中 ⇄ 越','Trung ⇄ Việt'):t('越 ⇄ 中','Việt ⇄ Trung');
+  return `<div class="interpret-neo">
+    <form class="interpret-form" data-interpret-form="peer" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
+    <form class="interpret-form" data-interpret-form="mine" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
+    <section class="neo-half neo-peer" aria-label="${t('对方','Đối phương')}"><div class="neo-stream">${interpretStream('peer')}</div></section>
+    <section class="neo-half neo-mine" aria-label="${t('我方','Tôi')}"><div class="neo-stream">${interpretStream('mine')}</div></section>
+    <div class="neo-pill">
+      <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
+      <button type="button" class="neo-mic" data-interpret-hold="${dir}" aria-label="${t('按住说话','Giữ để nói')}">${icon('mic')}</button>
+      <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
+    </div>
   </div>`;
 }
 function otherPage() {
   const [,glyph,zh,vi]=nav.find(item=>item[0]===state.tab);
   const content = {translate:translatePage,me:profile,contacts};
+  if(state.tab==='translate') {
+    return `<main class="section-page translate-page"><header class="section-header interpret-top"><span class="interpret-status">Noctis Neural Stream · ${t('面对面双向','Đối diện hai chiều')}</span><button type="button" class="interpret-clear" data-clear-interpret aria-label="${t('清空对话','Xóa cuộc trò chuyện')}">${icon('trash')}</button></header><div class="section-content">${translatePage()}</div></main>`;
+  }
   return `<main class="section-page"><header class="section-header">${icon(glyph)}<h1>${t(zh,vi)}</h1></header><div class="section-content">${content[state.tab]()}</div></main>`;
 }
 const PROMPTS=[
@@ -2079,6 +2105,7 @@ function render({preserve=false,enterChat=false}={}) {
       input.setSelectionRange(previousInput.selectionStart, previousInput.selectionEnd);
     }
   }
+  if(state.tab==='translate') scrollInterpretStreams();
 }
 
 let timer, toastTimer;
@@ -2101,6 +2128,8 @@ root.addEventListener('click', event => {
   if(!control) return;
   const d=control.dataset;
   if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
+  if('clearInterpret' in d) { state.interpret={peer:[],mine:[]}; save('interpret',state.interpret); render({preserve:true}); return; }
+  if('interpretDir' in d) { state.interpretDir=state.interpretDir==='peer'?'mine':'peer'; stopInterpretRecognition(); render({preserve:true}); return; }
   if('prompterToggle' in d) { state.prompter.open=!state.prompter.open; renderPrompter(); return; }
   if(d.prompterCat) { state.prompter.cat=d.prompterCat; state.prompter.active=null; renderPrompter(); return; }
   if(d.prompterPhrase!==undefined) {
