@@ -741,6 +741,14 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .chat-title .contact-presence {margin-top:2px}
 .contact-signature {color:var(--muted);font-size:var(--text-sm);padding:0 8px}
 .message.own>.message-side {order:1}
+
+/* 聊天回到底部按钮：粘在消息区底部，不占滚动高度；只在用户离开底部时出现 */
+.scroll-to-bottom-wrap { position:sticky;bottom:12px;height:0;overflow:visible;display:flex;justify-content:center;pointer-events:none;z-index:5 }
+.scroll-to-bottom { pointer-events:auto;display:none;align-items:center;gap:6px;background:#1d211e;color:#f4f2ec;border:1px solid #2b2f2b;border-radius:999px;padding:8px 14px;font-size:12px;box-shadow:0 6px 20px #0006 }
+.scroll-to-bottom-wrap.visible .scroll-to-bottom { display:inline-flex }
+.scroll-to-bottom-count { min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#d8b56d;color:#191919;font-size:11px;display:inline-grid;place-items:center }
+.scroll-to-bottom-count[hidden] { display:none }
+@media (hover:hover){.scroll-to-bottom:hover{background:#262a26}}
 </style>
 
 </head>
@@ -980,6 +988,7 @@ function chatPanel(person, enterChat=false) {
         return `<label>${member===demoProfile?t('我的显示语言','Ngôn ngữ của tôi'):label(member)}<select data-member-language="${member.id}" aria-label="${label(member)}"><option value="zh" ${selected==='zh'?'selected':''}>简体中文</option><option value="vi" ${selected==='vi'?'selected':''}>Tiếng Việt</option></select></label>`;
       }).join('')}<label>${t('预览成员视角','Xem theo thành viên')}<select data-group-viewer>${groupMembers(person).map(member=>`<option value="${member.id}" ${(state.groupViewer[person.id] || demoProfile.id)===member.id?'selected':''}>${label(member)}</option>`).join('')}</select></label><small>${t('其他成员的选择仅用于演示。','Lựa chọn của các thành viên khác chỉ dùng để minh họa.')}</small></div>`:''}
       ${messages(person).map((message,index)=>messageRow(person,message,index)).join('')}
+      <div class="scroll-to-bottom-wrap"><button type="button" class="scroll-to-bottom" data-scroll-bottom aria-label="回到底部">↓ <span>回到底部</span><b class="scroll-to-bottom-count" hidden></b></button></div>
     </section>
     <footer class="composer">
       ${state.picker?`<div class="emoji-picker">${['😊','👋','👍','☕','❤️','🎉'].map(item=>`<button type="button" data-emoji="${item}">${item}</button>`).join('')}</div>`:''}
@@ -1018,7 +1027,7 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   const canToggle=!translating && state.translated[person.id]!==false && !primaryTranslation && !meta?.voice;
   const originalDetails=primaryTranslation?`<details class="message-original-details" ${meta?.voice?'open':''}><summary>${t('查看原文','Xem nguyên văn')}</summary><div class="message-original" lang="${textLanguage(lang)}">${escape(original)}</div></details>`:'';
 
-  return `<article class="message ${own?'own':''}"><div class="message-side">${avatar(own?demoProfile:author,'tiny')}</div><div class="message-content">
+  return `<article class="message ${own?'own':''}" data-mid="${key}"><div class="message-side">${avatar(own?demoProfile:author,'tiny')}</div><div class="message-content">
     ${person.group&&!own?`<small class="sender">${label(author)}</small>`:''}
     <div class="bubble ${primaryTranslation?'bubble-translated':''}">
       ${primaryTranslation?`<small class="bubble-engine">${meta?.translationRoute==='cloud'?'CLOUD':meta?.translationRoute==='native'?'NATIVE':meta?.translationRoute==='gemini'?'GEMINI':'DEMO'}</small>`:''}
@@ -1191,7 +1200,7 @@ const demoReplies=[
   ['Anh ăn tối chưa? Em đang nấu bún riêu nè.','你吃晚饭了吗？我正在煮蟹粉米线呢。'],
   ['Cuối tuần này mình về quê thăm bố mẹ, anh đi cùng em không?','这个周末我回老家看爸妈，你陪我一起去吗？']
 ];
-function refreshDemoReply(person, followLatest=true) {
+function refreshDemoReply(person, followLatest=false) {
   save('messages',state.sent);
   if(!state.signedOut && !state.call && state.tab==='messages' && state.active===person.id) {
     if(followLatest) state.scrollLatest=true;
@@ -1205,7 +1214,7 @@ function queueDemoReply(person) {
   const reply=['vi',original,translation,clock(),speaker,{demoReply:true}];
   pendingReplyTranslations.add(reply[5]);
   sent.push(reply);
-  refreshDemoReply(person);
+  refreshDemoReply(person, true);
   setTimeout(()=>{
     pendingReplyTranslations.delete(reply[5]);
     attachMessageTranslation(person,reply,translation);
@@ -1246,6 +1255,7 @@ function queueDemoMessage(text,lang,translation,voice=false,payload=null) {
   }
   if(!voice) attachMessageTranslation(person,message,translation);
   state.picker=false;
+  chatFollowing=true; chatUnreadBelow=0;
   state.scrollLatest=true;
   sendDemoMessage(person,message);
 }
@@ -1523,12 +1533,12 @@ const TranslationEngine=platform.TranslationEngine={
     const message=[fromLang,sourceText.trim().slice(0,500),'',clock(),person.name,{received:true}];
     (state.sent[person.id] ||= []).push(message);
     attachMessageTranslation(person,message,'');
-    refreshDemoReply(person);
+    refreshDemoReply(person, true);
     return true;
   }
 };
 const liveTranslations=new Map();
-function attachMessageTranslation(person,message,fallback,{followLatest=true}={}) {
+function attachMessageTranslation(person,message,fallback,{followLatest=false}={}) {
   const [lang,text,,,,meta]=message;
   const payload={sourceText:text,fromLang:lang,toLang:otherLanguage(lang),honorificProfile:meta.context || conversationContext(person.id)};
   const hasRemote=!operationOffline()&&(typeof platform.webkit?.messageHandlers?.nativeTranslate?.postMessage==='function'||getGeminiKey()||(cloudTranslationEnabled && /^https?:$/.test(platform.location?.protocol || '')));
@@ -1998,26 +2008,55 @@ function captionsAtBottom(area) {
   return area.scrollHeight-area.clientHeight-Math.max(0,area.scrollTop)<=4;
 }
 
-function chatNearBottom(timeline) {
-  return !!timeline && timeline.scrollHeight-timeline.clientHeight-Math.max(0,timeline.scrollTop)<=36;
-}
-function restoreChatPosition(timeline,previous,{preserve,followLatest}) {
-  const sameConversation=previous?.clientHeight>0 && previous.dataset?.conversation===timeline.dataset?.conversation;
-  if(followLatest && (!sameConversation || chatNearBottom(previous))) {
-    timeline.scrollTop=Math.max(0,timeline.scrollHeight-timeline.clientHeight);
-  } else if(sameConversation && (preserve || followLatest)) {
-    timeline.scrollTop=Math.max(0,previous.scrollTop);
+/* ---------- 聊天滚动：微信 / Telegram 式跟随与锚点 ---------- */
+/* 唯一滚动入口：只有新消息到达、且用户正在底部附近（80px 内）时才跟随到底部；
+   翻译状态、消息状态、组件重渲染一律不强制滚动，改用滚动锚点保持阅读位置。 */
+const CHAT_FOLLOW_PX = 80;
+let chatFollowing = true;
+let chatUnreadBelow = 0;
+function isTimelineNearBottom(el, px = CHAT_FOLLOW_PX) { return !el || (el.scrollHeight - el.scrollTop - el.clientHeight <= px); }
+function timelineAnchor(el) {
+  if (!el) return null;
+  const top = el.getBoundingClientRect().top;
+  const conversation = el.dataset?.conversation;
+  for (const row of el.querySelectorAll('[data-mid]')) {
+    const r = row.getBoundingClientRect();
+    if (r.bottom > top + 1) return { mid: row.dataset.mid, gap: r.top - top, scrollHeight: el.scrollHeight, scrollTop: el.scrollTop, conversation };
   }
+  return { mid: null, gap: 0, scrollHeight: el.scrollHeight, scrollTop: el.scrollTop, conversation };
 }
-
+function restoreTimelineAnchor(el, anchor, fallbackTop) {
+  if (!el) return;
+  if (anchor?.mid) {
+    const row = el.querySelector('[data-mid="' + CSS.escape(anchor.mid) + '"]');
+    if (row) { el.scrollTop = Math.max(0, el.scrollTop + (row.getBoundingClientRect().top - el.getBoundingClientRect().top) - anchor.gap); return; }
+  }
+  if (anchor) el.scrollTop = Math.max(0, anchor.scrollTop + (el.scrollHeight - anchor.scrollHeight));
+  else if (typeof fallbackTop === 'number') el.scrollTop = fallbackTop;
+}
+function syncScrollToBottomButton(el) {
+  if (!el) return;
+  const wrap = el.querySelector('.scroll-to-bottom-wrap');
+  if (!wrap) return;
+  const show = el.scrollHeight - el.scrollTop - el.clientHeight > CHAT_FOLLOW_PX;
+  wrap.classList.toggle('visible', show);
+  const count = wrap.querySelector('.scroll-to-bottom-count');
+  if (count) { count.textContent = chatUnreadBelow > 99 ? '99+' : String(chatUnreadBelow); count.hidden = !(show && chatUnreadBelow > 0); }
+}
+/* 时间线每次重渲染都会换新节点，滚动监听挂在常驻的 root 上用捕获阶段接住 */
+root.addEventListener('scroll', event => {
+  const timeline = event.target;
+  if (!timeline?.classList?.contains('timeline')) return;
+  chatFollowing = isTimelineNearBottom(timeline);
+  if (chatFollowing) chatUnreadBelow = 0;
+  syncScrollToBottomButton(timeline);
+}, true);
 function render({preserve=false,enterChat=false}={}) {
   const oldTimeline=document.querySelector('.timeline');
   const oldSection=document.querySelector('.section-page');
-  const previousChat=oldTimeline && {
-    scrollTop:oldTimeline.scrollTop,scrollHeight:oldTimeline.scrollHeight,
-    clientHeight:oldTimeline.clientHeight,dataset:oldTimeline.dataset
-  };
   const oldSectionScroll=oldSection?.scrollTop;
+  const wasFollowing=isTimelineNearBottom(oldTimeline);
+  const chatAnchor=timelineAnchor(oldTimeline);
   const previousInput=document.querySelector('#message-form input');
   const draft=previousInput?.value || '';
   const hadComposerFocus=previousInput && previousInput===document.activeElement;
@@ -2047,8 +2086,15 @@ function render({preserve=false,enterChat=false}={}) {
   if(state.pendingTranscript) root.querySelector('[data-transcript-action="cancel"]')?.focus();
   const timeline=document.querySelector('.timeline');
   if(timeline) {
-    restoreChatPosition(timeline,previousChat,{preserve,followLatest:state.scrollLatest});
+    const sameConversation=chatAnchor?.conversation && chatAnchor.conversation===timeline.dataset?.conversation;
+    if(state.scrollLatest && (!sameConversation || wasFollowing)) timeline.scrollTop=timeline.scrollHeight;
+    else {
+      if(state.scrollLatest && !wasFollowing) chatUnreadBelow++;
+      if(sameConversation) restoreTimelineAnchor(timeline,chatAnchor,oldScroll);
+      else timeline.scrollTop=timeline.scrollHeight;
+    }
     state.scrollLatest=false;
+    syncScrollToBottomButton(timeline);
   }
   if(preserve && oldSection) document.querySelector('.section-page').scrollTop=oldSectionScroll;
   if(preserve && timeline) {
@@ -2082,13 +2128,14 @@ root.addEventListener('click', event => {
   const control=event.target.closest('button');
   if(!control) return;
   const d=control.dataset;
+  if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
   if(d.tab) { state.voiceDraft=null; state.profilePage='home'; state.messageMenu=false; state.friendPanel=null; state.tab=d.tab; state.mobileChat=false; render(); }
   if(d.chat) {
     state.messageMenu=false; state.friendPanel=null; state.voiceDraft=null;
     if(state.tab!=='messages') { state.filter='all'; state.search=''; }
     if(matchMedia('(max-width: 950px)').matches) state.details=false;
     state.active=d.chat; state.tab='messages'; state.mobileChat=true; state.picker=false;
-    state.read[d.chat]=true; save('read',state.read); render({enterChat:true});
+    state.read[d.chat]=true; save('read',state.read); state.scrollLatest=true; render({enterChat:true});
   }
   if(d.filter) { state.filter=d.filter; render({preserve:true}); }
   if('back' in d) { state.voiceDraft=null; state.mobileChat=false; render(); }
@@ -2368,12 +2415,12 @@ function keepComposerVisible() {
     const height=Math.round(viewport.height+viewport.offsetTop);
     const composer=input.closest('.composer');
     const timeline=document.querySelector('.timeline');
-    const follow=chatNearBottom(timeline);
+    const follow=!!timeline && isTimelineNearBottom(timeline);
     document.documentElement.style?.setProperty('--chat-viewport-height',`${height}px`);
     const align=()=>{
       if(document.activeElement!==input) return;
       if(composer && composer.getBoundingClientRect().bottom>height+1) composer.scrollIntoView({block:'nearest',behavior:'auto'});
-      if(follow) timeline.scrollTop=Math.max(0,timeline.scrollHeight-timeline.clientHeight);
+      if(follow && timeline) timeline.scrollTop=timeline.scrollHeight;
     };
     if(typeof platform.requestAnimationFrame==='function') platform.requestAnimationFrame(align); else align();
   }
