@@ -279,7 +279,7 @@ input::placeholder {color:var(--muted);opacity:1}
  .other-shell .sidebar {order:2}
  .other-shell .brand,.other-shell .sidebar-person {display:none}
  .section-page {flex:1;min-height:0}
- .section-header {min-height:calc(61px + env(safe-area-inset-top));padding:max(5px,env(safe-area-inset-top)) 14px 5px}
+ .section-header {min-height:calc(61px + env(safe-area-inset-top));padding:max(16px,env(safe-area-inset-top)) 14px 5px}
  .section-content {padding:13px}
  .call-controls span {font-size:var(--text-xs)}
 }
@@ -675,8 +675,8 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .call-hud-subtitles [data-caption-size="2"] :is(.hud-source-text,.hud-target-text) {font-size:1.3125rem}
 @media (max-width:768px), (max-width:950px) and (pointer:coarse) {
  .shell {height:100vh;height:100dvh}
- .brand,.chat-header,.section-header,.call-header {padding-top:max(14px,env(safe-area-inset-top, 0px))}
- .chat-header,.section-header {min-height:calc(60px + max(14px,env(safe-area-inset-top, 0px)))}
+ .brand,.chat-header,.section-header,.call-header {padding-top:max(16px,env(safe-area-inset-top, 0px))}
+ .chat-header,.section-header {min-height:calc(60px + max(16px,env(safe-area-inset-top, 0px)))}
  .message-shell.with-details.mobile-open .details {inset:0;width:100%;height:100%;border:0;overscroll-behavior:contain;padding-bottom:max(12px,env(safe-area-inset-bottom, 0px))}
  .message-shell.with-details.mobile-open .details-heading {position:sticky;top:0;z-index:1;background:var(--paper);padding-top:max(12px,env(safe-area-inset-top, 0px))}
  .call-hud-subtitles .caption-scroll {height:clamp(68px,18dvh,170px)}
