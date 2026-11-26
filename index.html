@@ -122,34 +122,33 @@ input::placeholder {color:var(--muted);opacity:1}
 .translate-page .section-header{background:transparent;border-bottom:0}
 .translate-page .section-content{flex:1;min-height:0;max-width:none;margin:0;padding:0;overflow:hidden;background:#090B0E}
 .interpret-top{position:relative;justify-content:center}
-.interpret-status{font-size:11px;letter-spacing:.14em;color:#6E737B;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.interpret-status{font-size:12px;letter-spacing:.14em;color:rgba(216,181,109,.5);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .interpret-clear{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#6E737B;opacity:.55;padding:8px;display:grid;place-items:center}
 .interpret-clear svg{width:16px;height:16px}
 .interpret-neo{flex:1;min-height:0;display:flex;flex-direction:column;background:#090B0E;color:#fff;position:relative}
 .interpret-neo .interpret-form{display:none}
-.neo-half{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 22px}
-.neo-peer{border-bottom:1px solid rgba(255,255,255,.06)}
+.neo-half{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;justify-content:flex-end;padding:24px 24px}
 .neo-mine{padding-bottom:112px}
-.neo-stream{display:flex;flex-direction:column;gap:24px;width:100%}
+.neo-stream{display:flex;flex-direction:column;gap:32px;width:100%}
 .neo-line{overflow-wrap:anywhere}
-.neo-src{margin:0;font-size:22px;line-height:1.45;font-weight:600}
-.neo-trans{margin:6px 0 0;font-size:14px;line-height:1.5}
+.neo-src{margin:0;font-size:20px;line-height:1.6;font-weight:600}
+.neo-trans{margin:8px 0 0;font-size:14px;line-height:1.6}
 .neo-peer .neo-src{color:#E5E7EB;text-shadow:0 0 22px rgba(229,231,235,.14),0 2px 12px rgba(0,0,0,.6)}
 .neo-peer .neo-trans{color:#D8B56D;text-shadow:0 0 14px rgba(216,181,109,.12)}
 .neo-mine .neo-src{color:#fff;text-shadow:0 0 22px rgba(255,255,255,.14),0 2px 12px rgba(0,0,0,.6)}
 .neo-mine .neo-trans{color:#9CA3AF;text-shadow:0 0 14px rgba(156,163,175,.12)}
 .neo-peer .neo-line{transform:rotate(180deg)}
 .neo-old{opacity:.5}
-.neo-old .neo-src{font-size:17px}
+.neo-old .neo-src{font-size:16px}
 .neo-old .neo-trans{font-size:12px}
 .neo-latest .neo-src{animation:neo-breathe 4s ease-in-out infinite}
 @keyframes neo-breathe{0%,100%{text-shadow:0 0 16px rgba(255,255,255,.10),0 2px 12px rgba(0,0,0,.6)}50%{text-shadow:0 0 30px rgba(255,255,255,.24),0 2px 12px rgba(0,0,0,.6)}}
 .neo-pending{margin:6px 0 0;font-size:13px;color:#6E737B}
 .neo-empty{margin:0;color:rgba(255,255,255,.28);font-size:14px;text-align:center}
-.neo-pill{position:absolute;left:50%;transform:translateX(-50%);bottom:max(20px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:5}
-.neo-dir{flex:none;background:rgba(16,19,23,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);color:#E5E7EB;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:500;white-space:nowrap}
-.neo-mic{width:48px;height:48px;flex:none;border-radius:50%;border:1px solid rgba(216,181,109,.55);background:radial-gradient(circle at 50% 35%,#2A2F36 0%,#101317 55%,#090B0E 100%);color:#D8B56D;display:grid;place-items:center;animation:neo-glow 3.2s ease-in-out infinite}
-.neo-mic svg{width:20px;height:20px}
+.neo-pill{position:fixed;left:50%;transform:translateX(-50%);bottom:max(24px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:5}
+.neo-dir{flex:none;background:transparent;border:1px solid rgba(255,255,255,.18);color:#E5E7EB;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:500;white-space:nowrap}
+.neo-mic{width:56px;height:56px;flex:none;border-radius:50%;border:1px solid rgba(216,181,109,.55);background:radial-gradient(circle at 50% 35%,#2A2F36 0%,#0D1013 55%,#090B0E 100%);color:#D8B56D;display:grid;place-items:center;animation:neo-glow 3.2s ease-in-out infinite}
+.neo-mic svg{width:24px;height:24px}
 .neo-mic.holding{border-color:#D8B56D;color:#fff;animation:none;box-shadow:0 0 0 1px rgba(216,181,109,.35),0 0 26px rgba(216,181,109,.45)}
 @keyframes neo-glow{0%,100%{box-shadow:0 0 0 1px rgba(216,181,109,.12),0 0 14px rgba(216,181,109,.15)}50%{box-shadow:0 0 0 1px rgba(216,181,109,.28),0 0 24px rgba(216,181,109,.32)}}
 .composer form,.comment-area form {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:16px;background:var(--chat);padding:4px}
