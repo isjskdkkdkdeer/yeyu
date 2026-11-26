@@ -2088,7 +2088,7 @@ function render({preserve=false,enterChat=false}={}) {
   const timeline=document.querySelector('.timeline');
   if(timeline) {
     const sameConversation=chatAnchor?.conversation && chatAnchor.conversation===timeline.dataset?.conversation;
-    if(state.scrollLatest && (!sameConversation || wasFollowing)) timeline.scrollTop=timeline.scrollHeight;
+    if(state.scrollLatest && (!sameConversation || wasFollowing || chatFollowing)) { chatUnreadBelow=0; timeline.scrollTop=timeline.scrollHeight; }
     else {
       if(state.scrollLatest && !wasFollowing) chatUnreadBelow++;
       if(sameConversation) restoreTimelineAnchor(timeline,chatAnchor,oldScroll);
