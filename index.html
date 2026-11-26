@@ -1330,18 +1330,15 @@ async function requestCloudTranslation(payload,onPartial) {
 }
 
 // 黑钛金神经引擎：Google Gemini 实时中越同传（Google AI Studio 免费 Key，只存在本机 localStorage）
-// 端点由 Ha 给的短链解析而来：generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
 const GEMINI_API_BASE='https://generativelanguage.googleapis.com/v1beta/models/';
-const GEMINI_PRIMARY_MODEL='gemini-2.0-flash';
-const GEMINI_FALLBACK_MODEL='gemini-3.8-flash';
+const GEMINI_PRIMARY_MODEL='gemini-3.8-flash';
+const GEMINI_FALLBACK_MODEL='gemini-3.5-flash-lite';
 const GEMINI_SYSTEM_INSTRUCTION=`你是一个精通中越双语的高端私密社交同传引擎。请将用户输入的语言直接翻译为目标语言（中文转地道越南语，或越南语转自然中文）。 翻译规则：
 绝对严禁使用生硬的 'Tôi/Bạn' 机械称谓。
 默认使用社交中自然亲切的代词：男方自称/对方称 'Anh'，女方自称/对方称 'Em'。
 语气要自然、现代、有社交温度，符合西贡/河内当下年轻高知群体真实聊天习惯。
 只输出最终翻译结果纯文本，绝对严禁任何解释、拼音或额外标点。`;
 const getGeminiKey=()=>String(read('gemini-api-key','') || '').trim();
-const getGeminiModel=()=>read('gemini-model',GEMINI_PRIMARY_MODEL) || GEMINI_PRIMARY_MODEL;
-const saveGeminiModel=model=>save('gemini-model',model);
 let engineKeyToastShown=false;
 let engineTesting=false;
 const engineStatusText=()=>{
@@ -1353,12 +1350,21 @@ const engineStatusText=()=>{
 };
 function geminiErrorText(error) {
   if(error?.code==='NO_KEY') return t('请先填入 Gemini Key','Vui lòng nhập Gemini Key trước');
-  if(error?.status===400) return t('Key 无效，请检查后重新粘贴','Key không hợp lệ, vui lòng kiểm tra lại');
-  if(error?.status===403) return t('Key 无权访问该模型','Key không có quyền dùng mô hình này');
-  if(error?.status===404) return t('模型暂时不可用','Mô hình tạm thời không khả dụng');
-  if(error?.status===429) return t('请求太频繁，稍后再试','Quá nhiều yêu cầu, thử lại sau');
-  if(error?.name==='AbortError') return t('请求超时，请重试','Hết thời gian chờ, thử lại');
-  return t('网络错误，请检查网络后重试','Lỗi mạng, kiểm tra lại kết nối');
+  if(error?.name==='AbortError') return t('请求超时（15 秒）','Hết thời gian chờ (15 giây)');
+  if(error?.code==='FETCH_FAILED') return t('浏览器未收到 HTTP 响应。请检查 Google API 是否可达，或换用 Safari／Chrome 直接打开。','Trình duyệt không nhận được phản hồi HTTP. Kiểm tra kết nối tới API Google hoặc mở trực tiếp trong Safari/Chrome.');
+  if(error?.code==='INVALID_RESPONSE' || error?.name==='SyntaxError') return t('Gemini 返回了无法解析的响应','Không đọc được phản hồi của Gemini');
+  if(error?.code==='EMPTY_TRANSLATION') return t('Gemini 返回成功，但没有文本结果','Gemini trả về thành công nhưng không có văn bản');
+  if(error?.status) {
+    const detail={
+      400:t('请求参数或 Key 有误；请查看下方错误原因','Tham số hoặc Key không hợp lệ'),
+      401:t('身份验证失败','Xác thực thất bại'),
+      403:t('访问被拒；检查 Key 限制、项目权限或区域','Quyền truy cập bị từ chối'),
+      404:t('模型不可用或该项目无权使用','Mô hình không khả dụng cho dự án'),
+      429:t('已达到请求频率或项目配额','Đã vượt giới hạn hoặc hạn ngạch')
+    }[error.status] || t('Google API 请求失败','Yêu cầu API Google thất bại');
+    return `HTTP ${error.status}${error.reason?' · '+error.reason:''} · ${detail}`;
+  }
+  return t('测试未完成，请重试','Không hoàn tất kiểm tra. Hãy thử lại.');
 }
 function geminiTextFromJson(data) {
   const parts=data?.candidates?.[0]?.content?.parts || [];
@@ -1369,18 +1375,33 @@ async function requestGemini(model,key,body,stream,onPartial) {
   const timer=setTimeout(()=>controller.abort(),15000);
   try {
     const action=stream?'streamGenerateContent':'generateContent';
-    const url=GEMINI_API_BASE+model+':'+action+'?key='+encodeURIComponent(key)+(stream?'&alt=sse':'');
-    const response=await platform.fetch(url,{
-      method:'POST',signal:controller.signal,
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
-    if(!response.ok) {
-      const error=new Error('Gemini 返回 '+response.status);
-      error.status=response.status;
-      throw error;
+    const url=GEMINI_API_BASE+model+':'+action+(stream?'?alt=sse':'');
+    let response;
+    try {
+      response=await platform.fetch(url,{
+        method:'POST',signal:controller.signal,
+        headers:{'Content-Type':'application/json','x-goog-api-key':key},
+        body:JSON.stringify(body)
+      });
+    } catch(cause) {
+      if(cause?.name==='AbortError') throw cause;
+      throw Object.assign(new Error('Gemini fetch failed'),{code:'FETCH_FAILED',cause});
     }
-    if(!stream) return geminiTextFromJson(await response.json());
+    if(!response.ok) {
+      let payload;
+      try {payload=await response.json();} catch(error) {if(error?.name==='AbortError') throw error;}
+      const reason=[...(Array.isArray(payload?.error?.details)?payload.error.details:[]).map(item=>item.reason),payload?.error?.status]
+        .find(value=>typeof value==='string' && /^[A-Z][A-Z0-9_]{1,75}$/.test(value));
+      throw Object.assign(new Error('Gemini HTTP '+response.status),{status:response.status,reason});
+    }
+    if(!stream) {
+      try {return geminiTextFromJson(await response.json());}
+      catch(error) {
+        if(error?.name==='AbortError') throw error;
+        throw Object.assign(new Error('Gemini response is not valid JSON'),{code:'INVALID_RESPONSE'});
+      }
+    }
+    if(!response.body?.getReader) throw Object.assign(new Error('Gemini stream unavailable'),{code:'STREAM_UNAVAILABLE'});
     const reader=response.body.getReader();
     const decoder=new TextDecoder();
     let buffer='',text='';
@@ -1416,33 +1437,34 @@ async function callGeminiTranslate(text,fromLang,toLang,roleContext,onPartial) {
     contents:[{parts:[{text}]}],
     generationConfig:{temperature:0.3,maxOutputTokens:512}
   };
-  const models=[getGeminiModel(),GEMINI_PRIMARY_MODEL,GEMINI_FALLBACK_MODEL].filter((model,index,list)=>list.indexOf(model)===index);
+  const models=[GEMINI_PRIMARY_MODEL,GEMINI_FALLBACK_MODEL];
   let lastError=null;
   for(const model of models) {
     try {
       let translated='';
-      try { translated=await requestGemini(model,key,body,true,text=>onPartial?.(text)); }
+      try { translated=await requestGemini(model,key,body,typeof onPartial==='function',onPartial); }
       catch(streamError) {
-        if(streamError.status===404) throw streamError;
+        if(streamError.code!=='STREAM_UNAVAILABLE') throw streamError;
         translated=await requestGemini(model,key,body,false);
       }
-      if(!translated) throw new Error('Gemini 返回空译文');
-      saveGeminiModel(model);
+      if(!translated) throw Object.assign(new Error('Empty Gemini translation'),{code:'EMPTY_TRANSLATION'});
       return {text:translated,ms:Math.round(performance.now()-start),model};
     } catch(error) {
       lastError=error;
-      if(error.status===404) continue; // 该模型已下线，换下一个模型重试
+      if(error.status===404) continue;
       break; // Key 无效、限流、网络问题：不再换模型
     }
   }
   throw lastError || new Error('Gemini 翻译失败');
 }
 async function requestGeminiTranslation(payload,onPartial) {
-  const result=await callGeminiTranslate(payload.sourceText,payload.fromLang,payload.toLang,payload.honorificProfile || defaultContext,text=>onPartial?.(text));
+  const result=await callGeminiTranslate(payload.sourceText,payload.fromLang,payload.toLang,payload.honorificProfile || defaultContext,onPartial);
   return result.text;
 }
 async function testGeminiEngine() {
   if(engineTesting) return;
+  const input=document.querySelector('#gemini-key-input');
+  if(input) save('gemini-api-key',input.value);
   const key=getGeminiKey();
   if(!key) { state.engineTest={status:'error',message:t('请先填入 Gemini Key','Vui lòng nhập Gemini Key trước')}; render({preserve:true}); return; }
   engineTesting=true;
@@ -1838,12 +1860,12 @@ function profile() {
   if(state.profilePage==='cache-mode') return panel(t('通话字幕本地缓存','Lưu phụ đề trên thiết bị'),
     pick('cache',t('阅后即焚','Xóa khi kết thúc'), 'discard',t('挂断后清除本次临时字幕','Xóa phụ đề tạm khi kết thúc'))+
     pick('cache',t('保留本地记录','Lưu bản ghi cục bộ'),'keep',t('挂断后可手动保存文字','Có thể lưu bản ghi dạng văn bản sau khi kết thúc')));
-  if(state.profilePage==='engine') return panel(t('黑钛金神经引擎设置','Cài đặt Neural Engine'),`<p>${t('接 Google Gemini 2.0 Flash 实时中越同传。Key 只存在这台设备的浏览器里，刷新不会丢。','Kết nối Gemini 2.0 Flash để phiên dịch Việt–Trung theo thời gian thực. Key chỉ lưu trong trình duyệt của thiết bị này.')}</p>
+  if(state.profilePage==='engine') return panel(t('黑钛金神经引擎设置','Cài đặt Neural Engine'),`<p>${t('接 Google Gemini 3.8 Flash 实时中越同传。Key 只存在这台设备的浏览器里，刷新不会丢。','Kết nối Gemini 3.8 Flash để phiên dịch Việt–Trung theo thời gian thực. Key chỉ lưu trong trình duyệt của thiết bị này.')}</p>
     <label class="engine-label" for="gemini-key-input">Gemini API Key</label>
     <div class="engine-key-row"><input id="gemini-key-input" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('请输入 Google AI Studio 免费申请的 Gemini API Key','Nhập Gemini API Key miễn phí từ Google AI Studio')}" value="${escape(getGeminiKey())}"><button type="button" class="text-button" data-show-engine-key>${t('显示','Hiện')}</button></div>
     <div class="engine-actions"><button type="button" class="primary" data-test-engine>${t('引擎状态测试','Kiểm tra trạng thái')}</button><button type="button" class="text-button" data-clear-engine-key>${t('清除 Key','Xóa Key')}</button></div>
-    <p class="engine-status ${state.engineTest?.status==='ready'?'ready':state.engineTest?.status==='error'?'error':''}" id="engine-status" role="status">${engineStatusText()}</p>
-    <p class="engine-note">${t('没有 Key？去 ','Chưa có Key? Vào ')}<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>${t(' 免费申请一个，粘贴到上面就行。2.0 Flash 对新 Key 可能已下线，会自动换成 3.8 Flash。',' để xin một Key miễn phí rồi dán vào đây. Nếu Key mới không dùng được 2.0 Flash, ứng dụng sẽ tự đổi sang 3.8 Flash.')}</p>`);
+    <p class="engine-status ${state.engineTest?.status==='ready'?'ready':state.engineTest?.status==='error'?'error':''}" id="engine-status" role="status">${escape(engineStatusText())}</p>
+    <p class="engine-note">${t('没有 Key？去 ','Chưa có Key? Vào ')}<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>${t(' 免费申请一个，粘贴到上面就行。遇到模型不可用（404）时会尝试 3.5 Flash-Lite。',' để xin một Key miễn phí rồi dán vào đây. Nếu mô hình không khả dụng (404), ứng dụng thử 3.5 Flash-Lite.')}</p>`);
   if(state.profilePage==='translation' || state.profilePage==='general') return panel(t('界面语言','Ngôn ngữ giao diện'),[['zh','简体中文'],['vi','Tiếng Việt']].map(([id,text])=>`<button class="titanium-row" data-lang="${id}" aria-pressed="${id===state.lang}"><span>${text}</span>${id===state.lang?icon('check'):''}</button>`).join(''));
   if(state.profilePage==='about') return panel(t('关于夜语','Giới thiệu DạNgữ'),`<p>${brandName}<br>${brandSubtitle}</p><p>Clean-47</p><p>${demo()}</p>`);
 
