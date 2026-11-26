@@ -267,6 +267,15 @@ input::placeholder {color:var(--muted);opacity:1}
 .profile-fields {margin:0}
 .profile-fields>div,.profile-field-link {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:8px 0;border-top:1px solid var(--line)}
 .profile-fields dd {margin:0;color:var(--muted);text-align:end}
+.edit-avatar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.edit-avatar>div{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.edit-form{display:grid;gap:12px}
+.edit-form label{display:grid;gap:6px;font-size:14px}
+.edit-form label>span{color:var(--muted);font-size:13px}
+.edit-form input,.edit-form select{min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--chat);color:var(--ink);font:inherit;width:100%;box-sizing:border-box}
+.edit-form input:focus,.edit-form select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.edit-actions{display:flex;gap:10px;margin-top:16px}
+.edit-actions .social-button{flex:1;justify-content:center}
 .profile-field-link {width:100%;text-align:start;color:var(--strong)}
 
 /* Shared control states */
@@ -852,6 +861,105 @@ const read = (key, fallback) => {
   catch { return fallback; }
 };
 const save = (key, value) => { try { localStorage.setItem('noiloi-' + key, JSON.stringify(value)); } catch {} };
+// 资料修改（头像、名字、性别、地区、简介、签名）只保存在这台设备上，刷新还在；没改过就用默认。
+const DEFAULT_AVATAR = demoProfile.avatarUrl;
+const DEFAULT_FRIEND_AVATARS = {};
+chats.forEach(chat => { DEFAULT_FRIEND_AVATARS[chat.id] = chat.avatarUrl; });
+const friendOverrides = read('friend-overrides', {});
+Object.assign(demoProfile, read('my-profile', {}));
+chats.forEach(chat => { if (friendOverrides[chat.id]) Object.assign(chat, friendOverrides[chat.id]); });
+function saveMyProfile() {
+  save('my-profile', {name: demoProfile.name, vi: demoProfile.vi, avatarUrl: demoProfile.avatarUrl, gender: demoProfile.gender, region: demoProfile.region});
+}
+function saveFriendOverrides(person) {
+  friendOverrides[person.id] = {name: person.name, vi: person.vi, avatarUrl: person.avatarUrl, bio: person.bio, signature: person.signature};
+  save('friend-overrides', friendOverrides);
+}
+// 换头像：从相册选图或拍照，压到 256px 再存本地（图片太大 localStorage 装不下）。
+let avatarTarget = null;
+// 换头像会整页重渲染，先把正在填的表单值暂存，渲染完再填回去，不然刚打的字会丢。
+let pendingProfileForm = null;
+let pendingFriendForm = null;
+function collectMyProfileForm() {
+  const name = document.querySelector('#edit-my-name');
+  if (!name) return null;
+  return {name: name.value, vi: document.querySelector('#edit-my-name-vi')?.value || '',
+    gender: document.querySelector('#edit-my-gender')?.value || '未填写',
+    regionZh: document.querySelector('#edit-my-region-zh')?.value || '',
+    regionVi: document.querySelector('#edit-my-region-vi')?.value || ''};
+}
+function fillMyProfileForm(v) {
+  if (!v) return;
+  const set = (id, value) => { const el = document.querySelector(id); if (el) el.value = value; };
+  set('#edit-my-name', v.name); set('#edit-my-name-vi', v.vi); set('#edit-my-gender', v.gender);
+  set('#edit-my-region-zh', v.regionZh); set('#edit-my-region-vi', v.regionVi);
+}
+function collectFriendForm() {
+  const name = document.querySelector('#edit-friend-name');
+  if (!name) return null;
+  return {name: name.value, vi: document.querySelector('#edit-friend-name-vi')?.value || '',
+    bioZh: document.querySelector('#edit-friend-bio-zh')?.value || '',
+    bioVi: document.querySelector('#edit-friend-bio-vi')?.value || '',
+    signature: document.querySelector('#edit-friend-signature')?.value || ''};
+}
+function fillFriendForm(v) {
+  if (!v) return;
+  const set = (id, value) => { const el = document.querySelector(id); if (el) el.value = value; };
+  set('#edit-friend-name', v.name); set('#edit-friend-name-vi', v.vi);
+  set('#edit-friend-bio-zh', v.bioZh); set('#edit-friend-bio-vi', v.bioVi);
+  set('#edit-friend-signature', v.signature);
+}
+const avatarPicker = document.createElement('input');
+avatarPicker.type = 'file';
+avatarPicker.id = 'avatar-picker';
+avatarPicker.accept = 'image/*';
+avatarPicker.hidden = true;
+document.body.append(avatarPicker);
+avatarPicker.addEventListener('change', () => {
+  const file = avatarPicker.files && avatarPicker.files[0];
+  avatarPicker.value = '';
+  if (!file || !avatarTarget) return;
+  const target = avatarTarget;
+  avatarTarget = null;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 256 / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        if (!blob) { notify(t('图片读取失败，请换一张试试', 'Không đọc được ảnh, thử ảnh khác')); return; }
+        const next = new FileReader();
+        next.onload = () => {
+          const url = String(next.result || '');
+          if (!url.startsWith('data:image/')) return;
+          if (target.kind === 'me') {
+            demoProfile.avatarUrl = url;
+            saveMyProfile();
+          } else {
+            const person = find(target.id);
+            if (!person) return;
+            person.avatarUrl = url;
+            saveFriendOverrides(person);
+          }
+          pendingProfileForm = collectMyProfileForm();
+          pendingFriendForm = collectFriendForm();
+          render();
+          fillMyProfileForm(pendingProfileForm);
+          fillFriendForm(pendingFriendForm);
+          notify(t('头像已更换', 'Đã đổi ảnh đại diện'));
+        };
+        next.readAsDataURL(blob);
+      }, 'image/jpeg', 0.85);
+    };
+    img.onerror = () => notify(t('图片读取失败，请换一张试试', 'Không đọc được ảnh, thử ảnh khác'));
+    img.src = String(reader.result || '');
+  };
+  reader.readAsDataURL(file);
+});
 const policies=[
   ['auto','自动智能降级','Tự động chuyển phương án','端侧 NPU → 离线模型 → 云端容灾','NPU trên máy → mô hình ngoại tuyến → đám mây'],
   ['offline','本机离线隐私优先','Ưu tiên riêng tư trên máy','Apple NPU · 零流量方案','Apple NPU · Phương án không dùng dữ liệu mạng'],
@@ -874,7 +982,7 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), likes:read('likes',{}), comments:read('comments',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'', feedMode:'friends',
-  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, offlineDemo:false, locationStatus:null,
+  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, locationStatus:null,
   translated:{}, postTranslated:{}, comment:null, picker:false, call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
@@ -1482,12 +1590,30 @@ function closeCall() {
   render({preserve:true});
 }
 
+function friendEditForm(person) {
+  const bio = person.bio || ['', ''];
+  const customAvatar = person.avatarUrl !== DEFAULT_FRIEND_AVATARS[person.id];
+  return `<div class="edit-form">
+    <div class="edit-avatar">${avatar(person, 'large')}<div>
+      <button type="button" class="social-button" data-change-avatar="${person.id}">${t('更换头像', 'Đổi ảnh đại diện')}</button>
+      ${customAvatar ? `<button type="button" class="text-button" data-reset-avatar="${person.id}">${t('恢复默认头像', 'Khôi phục ảnh mặc định')}</button>` : ''}
+    </div></div>
+    <label><span>${t('名字', 'Tên')}</span><input id="edit-friend-name" type="text" value="${escape(person.name)}" maxlength="24" autocomplete="off"></label>
+    <label><span>${t('越南名字', 'Tên tiếng Việt')}</span><input id="edit-friend-name-vi" type="text" value="${escape(person.vi)}" maxlength="24" autocomplete="off"></label>
+    <label><span>${t('简介（中文）', 'Giới thiệu (tiếng Trung)')}</span><input id="edit-friend-bio-zh" type="text" value="${escape(bio[0])}" maxlength="40" autocomplete="off"></label>
+    <label><span>${t('简介（越南语）', 'Giới thiệu (tiếng Việt)')}</span><input id="edit-friend-bio-vi" type="text" value="${escape(bio[1])}" maxlength="40" autocomplete="off"></label>
+    <label><span>${t('签名', 'Chữ ký')}</span><input id="edit-friend-signature" type="text" value="${escape(person.signature || '')}" maxlength="80" autocomplete="off"></label>
+    <div class="edit-actions"><button type="button" class="social-button" data-save-friend>${t('保存', 'Lưu')}</button>
+    <button type="button" class="text-button" data-cancel-friend-edit>${t('取消', 'Hủy')}</button></div>
+  </div>`;
+}
 function details(person) {
   const enabled=state.translated[person.id]!==false;
   const context=conversationContext(person.id);
   const field=(name,label,options)=>`<label><span>${label}</span><select data-context-key="${name}" data-context-chat="${person.id}">${options.map(([value,text])=>`<option value="${value}" ${context[name]===value?'selected':''}>${text}</option>`).join('')}</select></label>`;
   return `<aside class="details"><div class="details-heading">${icon('info')}<h2>${t('会话信息','Thông tin trò chuyện')}</h2>${button('more',t('关闭会话信息','Đóng thông tin'),'data-details','icon-button dismiss')}</div>
     <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
+    ${state.editFriend === person.id ? friendEditForm(person) : (chats.some(c => c.id === person.id) ? `<button type="button" class="text-button" data-edit-friend="${person.id}">${t('编辑资料', 'Chỉnh sửa hồ sơ')}</button>` : '')}
     <div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>
     <div class="detail-settings"><h3>${t('翻译设置','Cài đặt bản dịch')}</h3>
       <div class="setting"><span class="setting-icon">${icon('translate')}</span><div><strong>${t('显示译文','Hiện bản dịch')}</strong><small>${t('中文 ↔ 越南语','Tiếng Trung ↔ Tiếng Việt')}</small></div>
@@ -1605,7 +1731,26 @@ function profile() {
     ];
     return `${back('home')}<section class="card settings-card"><h2>${t('个人资料','Thông tin cá nhân')}</h2>
       <dl class="profile-fields">${fields.map(([name,value])=>`<div><dt>${name}</dt><dd>${value}</dd></div>`).join('')}</dl>
-      <button class="profile-field-link" data-profile-page="qr"><span>${t('我的二维码','Mã QR của tôi')}</span>${icon('qr')}</button></section>`;
+      <button class="profile-field-link" data-profile-page="qr"><span>${t('我的二维码','Mã QR của tôi')}</span>${icon('qr')}</button>
+      <button class="profile-field-link" data-profile-page="edit"><span>${t('编辑资料','Chỉnh sửa hồ sơ')}</span>${icon('next')}</button></section>`;
+  }
+  if (state.profilePage==='edit') {
+    const customAvatar = demoProfile.avatarUrl !== DEFAULT_AVATAR;
+    return `${back('details')}<section class="card settings-card"><h2>${t('编辑资料','Chỉnh sửa hồ sơ')}</h2>
+      <div class="edit-avatar">${avatar(demoProfile,'large')}<div>
+        <button type="button" class="social-button" data-change-avatar="me">${t('更换头像','Đổi ảnh đại diện')}</button>
+        ${customAvatar?`<button type="button" class="text-button" data-reset-avatar="me">${t('恢复默认头像','Khôi phục ảnh mặc định')}</button>`:''}
+      </div></div>
+      <div class="edit-form">
+        <label><span>${t('名字','Tên')}</span><input id="edit-my-name" type="text" value="${escape(demoProfile.name)}" maxlength="24" autocomplete="off"></label>
+        <label><span>${t('越南名字','Tên tiếng Việt')}</span><input id="edit-my-name-vi" type="text" value="${escape(demoProfile.vi)}" maxlength="24" autocomplete="off"></label>
+        <label><span>${t('性别','Giới tính')}</span><select id="edit-my-gender">${[['未填写','Chưa cung cấp'],['男','Nam'],['女','Nữ']].map(([zh,vi])=>`<option value="${zh}" ${demoProfile.gender[0]===zh?'selected':''}>${t(zh,vi)}</option>`).join('')}</select></label>
+        <label><span>${t('地区（中文）','Khu vực (tiếng Trung)')}</span><input id="edit-my-region-zh" type="text" value="${escape(demoProfile.region[0])}" maxlength="32" autocomplete="off"></label>
+        <label><span>${t('地区（越南语）','Khu vực (tiếng Việt)')}</span><input id="edit-my-region-vi" type="text" value="${escape(demoProfile.region[1])}" maxlength="32" autocomplete="off"></label>
+        <p class="local-note">${t('言聊ID 不可修改，头像和资料只保存在这台设备上。','Không thể đổi 言聊ID. Ảnh và hồ sơ chỉ lưu trên thiết bị này.')}</p>
+      </div>
+      <div class="edit-actions"><button type="button" class="social-button" data-save-profile>${t('保存','Lưu')}</button>
+      <button type="button" class="text-button" data-profile-page="details">${t('取消','Hủy')}</button></div></section>`;
   }
   const pick=(name,labelText,value,sub='')=>`<button class="titanium-row" data-titanium-setting="${name}" data-setting-value="${value}" aria-pressed="${state.titanium[name]===value}"><span>${labelText}${sub?`<small>${sub}</small>`:''}</span>${state.titanium[name]===value?icon('check'):''}</button>`;
   const panel=(title,content)=>`${back('home')}<section class="titanium-card titanium-selection"><h2>${title}</h2>${content}</section>`;
@@ -1940,6 +2085,67 @@ root.addEventListener('click', event => {
     if(d.profilePage==='qr') state.qrBack=state.profilePage;
     state.profilePage=d.profilePage;
     render();
+  }
+  if(d.changeAvatar!==undefined) {
+    avatarTarget = d.changeAvatar==='me' ? {kind:'me'} : {kind:'friend', id:d.changeAvatar};
+    document.querySelector('#avatar-picker')?.click();
+  }
+  if(d.resetAvatar!==undefined) {
+    if(d.resetAvatar==='me') {
+      demoProfile.avatarUrl = DEFAULT_AVATAR;
+      saveMyProfile();
+    } else {
+      const person = find(d.resetAvatar);
+      if(person) {
+        person.avatarUrl = DEFAULT_FRIEND_AVATARS[d.resetAvatar] || person.avatarUrl;
+        saveFriendOverrides(person);
+      }
+    }
+    render();
+    notify(t('头像已恢复默认','Đã khôi phục ảnh mặc định'));
+  }
+  if('saveProfile' in d) {
+    const genders = {'未填写':['未填写','Chưa cung cấp'],'男':['男','Nam'],'女':['女','Nữ']};
+    const name = document.querySelector('#edit-my-name')?.value.trim();
+    const vi = document.querySelector('#edit-my-name-vi')?.value.trim();
+    const gender = document.querySelector('#edit-my-gender')?.value || '未填写';
+    const regionZh = document.querySelector('#edit-my-region-zh')?.value.trim();
+    const regionVi = document.querySelector('#edit-my-region-vi')?.value.trim();
+    if(name) demoProfile.name = name;
+    if(vi) demoProfile.vi = vi;
+    demoProfile.gender = genders[gender] || genders['未填写'];
+    if(regionZh) demoProfile.region[0] = regionZh;
+    if(regionVi) demoProfile.region[1] = regionVi;
+    saveMyProfile();
+    state.profilePage = 'details';
+    render();
+    notify(t('资料已保存','Đã lưu hồ sơ'));
+  }
+  if(d.editFriend!==undefined) {
+    state.editFriend = d.editFriend;
+    render({preserve:true});
+  }
+  if('saveFriend' in d) {
+    const person = find(state.editFriend);
+    if(person) {
+      const name = document.querySelector('#edit-friend-name')?.value.trim();
+      const vi = document.querySelector('#edit-friend-name-vi')?.value.trim();
+      const bioZh = document.querySelector('#edit-friend-bio-zh')?.value.trim();
+      const bioVi = document.querySelector('#edit-friend-bio-vi')?.value.trim();
+      const signature = document.querySelector('#edit-friend-signature')?.value.trim();
+      if(name) person.name = name;
+      if(vi) person.vi = vi;
+      person.bio = [bioZh || '', bioVi || ''];
+      person.signature = signature || '';
+      saveFriendOverrides(person);
+    }
+    state.editFriend = null;
+    render({preserve:true});
+    notify(t('资料已保存','Đã lưu hồ sơ'));
+  }
+  if('cancelFriendEdit' in d) {
+    state.editFriend = null;
+    render({preserve:true});
   }
   if(d.titaniumSetting) {
     state.titanium[d.titaniumSetting]=d.settingValue;
