@@ -1191,10 +1191,10 @@ const demoReplies=[
   ['Anh ăn tối chưa? Em đang nấu bún riêu nè.','你吃晚饭了吗？我正在煮蟹粉米线呢。'],
   ['Cuối tuần này mình về quê thăm bố mẹ, anh đi cùng em không?','这个周末我回老家看爸妈，你陪我一起去吗？']
 ];
-function refreshDemoReply(person) {
+function refreshDemoReply(person, followLatest=true) {
   save('messages',state.sent);
   if(!state.signedOut && !state.call && state.tab==='messages' && state.active===person.id) {
-    state.scrollLatest=true;
+    if(followLatest) state.scrollLatest=true;
     render({preserve:true});
   }
 }
@@ -1528,7 +1528,7 @@ const TranslationEngine=platform.TranslationEngine={
   }
 };
 const liveTranslations=new Map();
-function attachMessageTranslation(person,message,fallback) {
+function attachMessageTranslation(person,message,fallback,{followLatest=true}={}) {
   const [lang,text,,,,meta]=message;
   const payload={sourceText:text,fromLang:lang,toLang:otherLanguage(lang),honorificProfile:meta.context || conversationContext(person.id)};
   const hasRemote=!operationOffline()&&(typeof platform.webkit?.messageHandlers?.nativeTranslate?.postMessage==='function'||getGeminiKey()||(cloudTranslationEnabled && /^https?:$/.test(platform.location?.protocol || '')));
@@ -1545,17 +1545,17 @@ function attachMessageTranslation(person,message,fallback) {
     liveTranslations.set(meta,text);
     if(performance.now()>=nextPaint) {
       nextPaint=performance.now()+80;
-      refreshDemoReply(person);
+      refreshDemoReply(person,followLatest);
     }
   }}).then(result=>{
     liveTranslations.delete(meta);
     message[2]=result.text;
     meta.translationRoute=result.route;
     meta.translationMs=result.elapsedMs;
-    refreshDemoReply(person);
+    refreshDemoReply(person,followLatest);
   }).catch(()=>{
     liveTranslations.delete(meta);
-    refreshDemoReply(person);
+    refreshDemoReply(person,followLatest);
   });
 }
 
@@ -2105,7 +2105,7 @@ root.addEventListener('click', event => {
     const message=messages(person)[Number(d.retryTranslation)];
     state.translationErrors[key]=operationOffline();
     if(message?.[5] && !state.translationErrors[key] && !liveTranslations.has(message[5])) {
-      attachMessageTranslation(person,message,message[2]);
+      attachMessageTranslation(person,message,message[2],{followLatest:false});
     }
     render({preserve:true});
   }
