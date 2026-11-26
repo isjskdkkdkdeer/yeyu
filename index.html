@@ -241,6 +241,27 @@ input::placeholder {color:var(--muted);opacity:1}
 .call-control {position:relative;display:grid;place-items:center;border-radius:50%;width:clamp(45px,11vw,58px);aspect-ratio:1;background:#0b1b17cc;color:white;border:1px solid #ffffff77}
 .call-control:focus-visible {outline-color:#fff}
 .call-control[data-control=captions].enabled {background:#dff3e6;color:#15392c}
+.prompter{position:absolute;left:clamp(14px,7vw,100px);right:clamp(14px,7vw,100px);bottom:calc(163px + env(safe-area-inset-bottom) + clamp(80px,23dvh,230px));z-index:6}
+.prompter-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(16,19,23,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.4);color:#D8B56D;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:650}
+.prompter-pill svg{width:14px;height:14px}
+.prompter.open .prompter-pill{display:none}
+.prompter-card{display:none;background:rgba(16,19,23,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.3);border-radius:18px;padding:12px 14px;color:#fff}
+.prompter.open .prompter-card{display:block}
+.prompter-card>header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.prompter-card>header strong{display:flex;align-items:center;gap:6px;font-size:13px;color:#D8B56D}
+.prompter-card>header strong svg{width:15px;height:15px}
+.prompter-collapse{border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;border-radius:50%;width:28px;height:28px;font-size:16px;line-height:1;display:grid;place-items:center;flex:none}
+.prompter-cats{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px}
+.prompter-cats::-webkit-scrollbar{display:none}
+.prompter-cats button{flex-shrink:0;white-space:nowrap;background:transparent;border:1px solid rgba(255,255,255,.25);color:#e8e8e8;border-radius:999px;padding:6px 12px;font-size:12px}
+.prompter-cats button.on{border-color:#D8B56D;color:#D8B56D;background:rgba(216,181,109,.12)}
+.prompter-list{display:grid;gap:8px;max-height:150px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.prompter-item{display:grid;gap:2px;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;color:#fff;width:100%}
+.prompter-item strong{font-size:14px}
+.prompter-item span{font-size:13px;color:#D8B56D}
+.prompter-item em{font-style:normal;font-size:12px;color:#A4A6A5}
+.prompter-item b{font-size:11px;color:#D8B56D;font-weight:600}
+.prompter-item.active{border-color:rgba(216,181,109,.65);background:rgba(216,181,109,.13)}
 .call-control.disabled {background:#e4e7e5;color:#20362e}
 .call-control.disabled::after {content:"";position:absolute;width:23px;border-top:2px solid currentColor;transform:rotate(-45deg)}
 .call-control.hang-up {background:#c32941;border-color:#e7697b}
@@ -1027,7 +1048,7 @@ const state = {
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
   expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, interpret:read('interpret',{peer:[],mine:[]}),
-  translated:{}, picker:false, call:null, voiceDraft:null, pendingTranscript:null
+  translated:{}, picker:false, prompter:{open:false,cat:'ice',active:null}, call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
 const conversationContext=id=>({...defaultContext,...state.conversationContexts[id]});
@@ -1611,6 +1632,7 @@ function openCall(person,kind) {
   state.call={person,kind,start:Date.now(),mic:true,speaker:true,captions:state.callPreferences.captions,
     followPaused:!state.callPreferences.follow,camera:kind==='video',voiceCount:1,voiceTimes:[0],nextTurn:4,
     rtcMode:!!rtcAdapter,captionRevision:0,finalCaptions:new Map(),captionDrafts:new Map()};
+  state.prompter={open:false,cat:'ice',active:null};
   state.history.unshift({id:person,kind,time:clock()});
   state.history=state.history.slice(0,20);
   save('history',state.history);
@@ -1631,6 +1653,7 @@ function closeCall() {
   }):times.map((time,index)=>[time,...lines[index%lines.length]]);
   state.pendingTranscript=state.titanium.cache==='discard' || !turns.length?null:{person:call.person,kind:call.kind,turns,live:call.rtcMode};
   state.call=null;
+  state.prompter={open:false,cat:'ice',active:null};
   releaseRtc(call);
   render({preserve:true});
 }
@@ -1841,6 +1864,48 @@ function otherPage() {
   const content = {translate:translatePage,me:profile,contacts};
   return `<main class="section-page"><header class="section-header">${icon(glyph)}<h1>${t(zh,vi)}</h1></header><div class="section-content">${content[state.tab]()}</div></main>`;
 }
+const PROMPTS=[
+ {id:'ice',zh:'破冰客套',vi:'Làm quen',items:[
+  {zh:'很高兴认识你',vi:'Rất vui được gặp bạn',say:'热特 味 得 盖普 伴'},
+  {zh:'你今天很漂亮',vi:'Hôm nay em trông rất xinh',say:'轰 内 嗯 冲 热特 星'}]},
+ {id:'biz',zh:'商务询价',vi:'Thương lượng',items:[
+  {zh:'这个价格可以再谈谈吗？',vi:'Giá này có thể thương lượng thêm được không?',say:'亚 内 哥 特 特翁 量 添 得 空'},
+  {zh:'我们明天在办公室碰面？',vi:'Ngày mai chúng ta gặp nhau ở văn phòng nhé?',say:'耐 埋 准 塔 盖普 绕 喔 文 房 涅'}]},
+ {id:'date',zh:'邀约约会',vi:'Hẹn hò',items:[
+  {zh:'晚上一起去喝一杯吗？',vi:'Tối nay cùng đi uống một ly nhé?',say:'妥依 内 拱 滴 翁 莫 李 涅'},
+  {zh:'我叫车去接你',vi:'Anh đặt xe qua đón em nhé',say:'安 达特 些 瓜 东 嗯 涅'}]}
+];
+function speakPrompt(text){
+  if(!('speechSynthesis' in globalThis)) return;
+  try{
+    globalThis.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='vi-VN'; u.rate=.92;
+    globalThis.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function prompterHTML(){
+  const p=state.prompter;
+  const cat=PROMPTS.find(c=>c.id===p.cat)||PROMPTS[0];
+  return `<div class="prompter${p.open?' open':''}" id="prompter">
+    <button type="button" class="prompter-pill" data-prompter-toggle aria-label="${t('提词器','Gợi ý')}">${icon('translate')} ${t('提词','Gợi ý')}</button>
+    <div class="prompter-card" role="dialog" aria-label="${t('提词器','Gợi ý')}">
+      <header><strong>${icon('translate')} ${t('提词器','Gợi ý nói')}</strong><button type="button" class="prompter-collapse" data-prompter-toggle aria-label="${t('收起','Thu gọn')}">⌄</button></header>
+      <div class="prompter-cats">${PROMPTS.map(c=>`<button type="button" class="${c.id===cat.id?'on':''}" data-prompter-cat="${c.id}">${t(c.zh,c.vi)}</button>`).join('')}</div>
+      <div class="prompter-list">${cat.items.map((item,i)=>{
+        const id=cat.id+':'+i, active=p.active===id;
+        return `<button type="button" class="prompter-item${active?' active':''}" data-prompter-phrase="${id}">
+          <strong>${escape(item.zh)}</strong><span>${escape(item.vi)}</span>
+          ${active?`<em>${t('读音','Phát âm')}：${escape(item.say)}</em><b>${t('点一下重播','Chạm để đọc lại')}</b>`:''}
+        </button>`;
+      }).join('')}</div>
+    </div>
+  </div>`;
+}
+function renderPrompter(){
+  const el=document.querySelector('#prompter');
+  if(el) el.outerHTML=prompterHTML();
+}
 function callView() {
   const call=state.call;
   const person=find(call.person);
@@ -1864,6 +1929,7 @@ function callView() {
       </div>
     </section>
     ${call.captions?'':`<p class="captions-off">${t('字幕已关闭','Phụ đề đã tắt')}</p>`}
+    ${prompterHTML()}
     <div class="call-controls">${controls.map(([key,glyph,name])=>`<div><button class="call-control ${call[key]?'enabled':'disabled'}" data-control="${key}" aria-label="${name}" aria-pressed="${call[key]}">${icon(glyph)}</button><span>${name}</span></div>`).join('')}
       <div><button class="call-control hang-up btn-end-call" data-end aria-label="${t('挂断','Kết thúc')}">${icon('end')}</button><span>${t('挂断','Kết thúc')}</span></div>
     </div></main>`;
@@ -2035,6 +2101,15 @@ root.addEventListener('click', event => {
   if(!control) return;
   const d=control.dataset;
   if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
+  if('prompterToggle' in d) { state.prompter.open=!state.prompter.open; renderPrompter(); return; }
+  if(d.prompterCat) { state.prompter.cat=d.prompterCat; state.prompter.active=null; renderPrompter(); return; }
+  if(d.prompterPhrase!==undefined) {
+    const [catId,idx]=d.prompterPhrase.split(':');
+    const cat=PROMPTS.find(c=>c.id===catId);
+    const item=cat?.items[Number(idx)];
+    if(item) { state.prompter.active=d.prompterPhrase; renderPrompter(); speakPrompt(item.vi); }
+    return;
+  }
   if(d.tab) { state.voiceDraft=null; state.profilePage='home'; state.messageMenu=false; state.friendPanel=null; state.tab=d.tab; state.mobileChat=false; render(); }
   if(d.chat) {
     state.messageMenu=false; state.friendPanel=null; state.voiceDraft=null;
