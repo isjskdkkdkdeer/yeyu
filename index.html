@@ -19,7 +19,7 @@
   --shadow-card:none; --shadow-float:0 12px 32px #0008;
   --ink:#F5F6F8; --warm:#D8B56D; --muted:#A4A6A5; --accent:#D8B56D; --strong:#D8B56D;
   --outer:#090B0E; --side:#090B0E; --chat:#090B0E; --paper:#101317; --line:#1A1F26;
-  --soft:#181C22; --choice:#252019; --sent:#211C15; --received:#101317;
+  --soft:#181C22; --choice:#252019; --sent:#211C15; --received:#14181F;
   --arrow:#4E535C; --online:#46C69A;
 }
 * {box-sizing:border-box}
@@ -105,7 +105,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .message.own {justify-content:flex-end}
 .message-content {max-width:min(87%,530px);min-width:0}
 .sender {display:block;font-size:12px;margin:0 0 4px 3px}
-.bubble {border:1px solid var(--line);border-radius:5px 16px 16px 16px;padding:10px 13px;background:var(--received);font-size:var(--text-base);line-height:1.55;overflow-wrap:anywhere}
+.bubble {border:1px solid #1E242D;border-radius:5px 16px 16px 16px;padding:10px 13px;background:var(--received);font-size:var(--text-base);line-height:1.55;overflow-wrap:anywhere}
 .own .bubble {background:var(--sent);border-radius:16px 5px 16px 16px}
 .translation {display:flex;align-items:flex-start;gap:7px;color:var(--muted);font-size:var(--text-sm);line-height:1.55;border-top:1px solid var(--line);margin-top:8px;padding-top:7px}
 .translation svg,.composer-note svg,.detail-foot svg,.text-button svg {width:15px;height:15px;flex:none}
@@ -113,9 +113,9 @@ input::placeholder {color:var(--muted);opacity:1}
 .message time {display:block;margin:4px 2px 0;font-size:var(--text-xs);color:var(--muted)}
 .own time {text-align:right}
 .composer {position:relative;background:var(--paper);border-top:1px solid var(--line);padding:13px 22px max(12px,env(safe-area-inset-bottom))}
-.quick-phrases{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;margin-bottom:8px;padding:2px}
+.quick-phrases{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;margin-bottom:8px;padding:2px}
 .quick-phrases::-webkit-scrollbar{display:none}
-.quick-phrases button{flex:none;background:#101317;border:1px solid #1A1F26;color:#A4A6A5;border-radius:999px;font-size:12px;line-height:1;padding:8px 12px;white-space:nowrap}
+.quick-phrases button{flex-shrink:0;background:#101317;border:1px solid #1A1F26;color:#A4A6A5;border-radius:999px;font-size:12px;line-height:1;padding:8px 12px;white-space:nowrap}
 .quick-phrases button:active{border-color:#D8B56D}
 .interpret{display:grid;gap:14px}
 .interpret-pane{background:#101317;border:1px solid #1A1F26;border-radius:18px;padding:16px}
@@ -264,7 +264,7 @@ input::placeholder {color:var(--muted);opacity:1}
  .message-shell.mobile-open .sidebar {display:none}
  .chat-panel {flex:1}
  .back {display:inline-grid;width:33px}
- .chat-header {min-height:calc(63px + env(safe-area-inset-top));padding:max(3px,env(safe-area-inset-top)) 7px 3px;gap:6px}
+ .chat-header {min-height:calc(63px + env(safe-area-inset-top));padding:max(14px,env(safe-area-inset-top)) 7px 3px;gap:6px}
  .head-actions {gap:0}
  .head-actions .icon-button {width:36px}
  .with-details.mobile-open .details {top:calc(63px + env(safe-area-inset-top))}
@@ -675,8 +675,8 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .call-hud-subtitles [data-caption-size="2"] :is(.hud-source-text,.hud-target-text) {font-size:1.3125rem}
 @media (max-width:768px), (max-width:950px) and (pointer:coarse) {
  .shell {height:100vh;height:100dvh}
- .brand,.chat-header,.section-header,.call-header {padding-top:max(12px,env(safe-area-inset-top, 0px))}
- .chat-header,.section-header {min-height:calc(60px + max(12px,env(safe-area-inset-top, 0px)))}
+ .brand,.chat-header,.section-header,.call-header {padding-top:max(14px,env(safe-area-inset-top, 0px))}
+ .chat-header,.section-header {min-height:calc(60px + max(14px,env(safe-area-inset-top, 0px)))}
  .message-shell.with-details.mobile-open .details {inset:0;width:100%;height:100%;border:0;overscroll-behavior:contain;padding-bottom:max(12px,env(safe-area-inset-bottom, 0px))}
  .message-shell.with-details.mobile-open .details-heading {position:sticky;top:0;z-index:1;background:var(--paper);padding-top:max(12px,env(safe-area-inset-top, 0px))}
  .call-hud-subtitles .caption-scroll {height:clamp(68px,18dvh,170px)}
