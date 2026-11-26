@@ -973,7 +973,7 @@ function chatPanel(person, enterChat=false) {
       ${avatar(person,'small')}<div class="chat-title"><strong>${label(person)} ${demoMark()}</strong><small>${person.signature?escape(person.signature):secondary(person)}</small>${contactPresence(person)}</div>
       <div class="head-actions">${button('phone',t('语音通话','Gọi thoại'),`data-call="voice" data-person="${person.id}"`)}${button('video',t('视频通话','Gọi video'),`data-call="video" data-person="${person.id}"`)}${button('more',t('切换会话信息','Bật/tắt thông tin'),'data-details aria-expanded="'+state.details+'"')}</div>
     </header>
-    <section class="timeline" aria-label="${t('聊天记录','Lịch sử trò chuyện')}">
+    <section class="timeline" data-conversation="${person.id}" aria-label="${t('聊天记录','Lịch sử trò chuyện')}">
       <div class="date-divider"><span>${t('今天','Hôm nay')} <time>${person.messages[0][3]}</time></span></div>
       ${person.group?`<div class="group-languages">${groupMembers(person).map(member=>{
         const selected=state.groupLanguages[person.id]?.[member.id] || (member===demoProfile?state.lang:'vi');
@@ -1998,10 +1998,25 @@ function captionsAtBottom(area) {
   return area.scrollHeight-area.clientHeight-Math.max(0,area.scrollTop)<=4;
 }
 
+function chatNearBottom(timeline) {
+  return !!timeline && timeline.scrollHeight-timeline.clientHeight-Math.max(0,timeline.scrollTop)<=36;
+}
+function restoreChatPosition(timeline,previous,{preserve,followLatest}) {
+  const sameConversation=previous?.clientHeight>0 && previous.dataset?.conversation===timeline.dataset?.conversation;
+  if(followLatest && (!sameConversation || chatNearBottom(previous))) {
+    timeline.scrollTop=Math.max(0,timeline.scrollHeight-timeline.clientHeight);
+  } else if(sameConversation && (preserve || followLatest)) {
+    timeline.scrollTop=Math.max(0,previous.scrollTop);
+  }
+}
+
 function render({preserve=false,enterChat=false}={}) {
   const oldTimeline=document.querySelector('.timeline');
   const oldSection=document.querySelector('.section-page');
-  const oldScroll=oldTimeline?.scrollTop;
+  const previousChat=oldTimeline && {
+    scrollTop:oldTimeline.scrollTop,scrollHeight:oldTimeline.scrollHeight,
+    clientHeight:oldTimeline.clientHeight,dataset:oldTimeline.dataset
+  };
   const oldSectionScroll=oldSection?.scrollTop;
   const previousInput=document.querySelector('#message-form input');
   const draft=previousInput?.value || '';
@@ -2032,13 +2047,7 @@ function render({preserve=false,enterChat=false}={}) {
   if(state.pendingTranscript) root.querySelector('[data-transcript-action="cancel"]')?.focus();
   const timeline=document.querySelector('.timeline');
   if(timeline) {
-    if(state.scrollLatest) {
-      const latest=timeline.lastElementChild;
-      if(latest?.scrollIntoView && timeline.clientHeight) {
-        latest.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-      } else timeline.scrollTop=timeline.scrollHeight;
-    }
-    else if(preserve) timeline.scrollTop=oldScroll;
+    restoreChatPosition(timeline,previousChat,{preserve,followLatest:state.scrollLatest});
     state.scrollLatest=false;
   }
   if(preserve && oldSection) document.querySelector('.section-page').scrollTop=oldSectionScroll;
@@ -2357,13 +2366,14 @@ function keepComposerVisible() {
   const viewport=globalThis.visualViewport;
   if(viewport && matchMedia('(max-width: 768px), (max-width: 950px) and (pointer: coarse)').matches) {
     const height=Math.round(viewport.height+viewport.offsetTop);
-    document.documentElement.style?.setProperty('--chat-viewport-height',`${height}px`);
     const composer=input.closest('.composer');
     const timeline=document.querySelector('.timeline');
+    const follow=chatNearBottom(timeline);
+    document.documentElement.style?.setProperty('--chat-viewport-height',`${height}px`);
     const align=()=>{
       if(document.activeElement!==input) return;
       if(composer && composer.getBoundingClientRect().bottom>height+1) composer.scrollIntoView({block:'nearest',behavior:'auto'});
-      if(timeline) timeline.scrollTop=timeline.scrollHeight;
+      if(follow) timeline.scrollTop=Math.max(0,timeline.scrollHeight-timeline.clientHeight);
     };
     if(typeof platform.requestAnimationFrame==='function') platform.requestAnimationFrame(align); else align();
   }
