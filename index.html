@@ -2054,6 +2054,7 @@ root.addEventListener('scroll', event => {
 function render({preserve=false,enterChat=false}={}) {
   const oldTimeline=document.querySelector('.timeline');
   const oldSection=document.querySelector('.section-page');
+  const oldScroll=oldTimeline?.scrollTop;
   const oldSectionScroll=oldSection?.scrollTop;
   const wasFollowing=isTimelineNearBottom(oldTimeline);
   const chatAnchor=timelineAnchor(oldTimeline);
