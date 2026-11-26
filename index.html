@@ -728,13 +728,26 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .message-menu button:has(>svg) {padding-inline-start:7px}
 .post-actions button:has(>svg) {padding-inline-start:6px}
 .composer-tools button:has(>svg) {padding-inline-start:6px}
+/* Codex 加的头像：真人照片、在线状态、签名（better-ui：照片头像的边由图片描边定，不再另加一圈） */
+.avatar:not(.avatar-photo) {border:1px solid #1A1F26}
+.avatar.avatar-photo {background:#1A1F26;color:#D8B56D}
+.avatar.avatar-vip,.titanium-avatar .avatar.avatar-vip {border:1px solid #D8B56D;box-shadow:0 0 0 2px #D8B56D18}
+.avatar img {border-radius:inherit}
+.contact-presence {display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;line-height:1.3}
+.contact-presence.online {color:#46C69A}
+.contact-presence.online i {width:6px;height:6px;flex:none;border-radius:50%;background:#46C69A;animation:presence-pulse 2s ease-in-out infinite}
+@keyframes presence-pulse {0%,100% {box-shadow:0 0 0 0 #46C69A48} 50% {box-shadow:0 0 0 4px #46C69A00}}
+@media (prefers-reduced-motion:reduce) {.contact-presence.online i {animation:none}}
+.chat-title .contact-presence {margin-top:2px}
+.contact-signature {color:var(--muted);font-size:var(--text-sm);padding:0 8px}
+.message.own>.message-side {order:1}
 </style>
 
 </head>
 <body><div id="app"></div><script>
 const qrPatterns={"bridge101":[33,"M4 4h7v1h-7zM15 4h2v1h-2zM20 4h1v1h-1zM22 4h7v1h-7zM4 5h1v1h-1zM10 5h1v1h-1zM13 5h3v1h-3zM18 5h3v1h-3zM22 5h1v1h-1zM28 5h1v1h-1zM4 6h1v1h-1zM6 6h3v1h-3zM10 6h1v1h-1zM12 6h1v1h-1zM15 6h2v1h-2zM19 6h1v1h-1zM22 6h1v1h-1zM24 6h3v1h-3zM28 6h1v1h-1zM4 7h1v1h-1zM6 7h3v1h-3zM10 7h1v1h-1zM12 7h1v1h-1zM14 7h1v1h-1zM16 7h3v1h-3zM22 7h1v1h-1zM24 7h3v1h-3zM28 7h1v1h-1zM4 8h1v1h-1zM6 8h3v1h-3zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h3v1h-3zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h3v1h-3zM28 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM17 9h3v1h-3zM22 9h1v1h-1zM28 9h1v1h-1zM4 10h7v1h-7zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h7v1h-7zM12 11h2v1h-2zM18 11h1v1h-1zM4 12h1v1h-1zM6 12h5v1h-5zM13 12h1v1h-1zM15 12h1v1h-1zM17 12h4v1h-4zM22 12h5v1h-5zM6 13h4v1h-4zM11 13h1v1h-1zM14 13h3v1h-3zM20 13h1v1h-1zM23 13h1v1h-1zM25 13h2v1h-2zM5 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM12 14h2v1h-2zM16 14h1v1h-1zM18 14h2v1h-2zM24 14h1v1h-1zM27 14h2v1h-2zM6 15h4v1h-4zM12 15h4v1h-4zM18 15h1v1h-1zM21 15h2v1h-2zM27 15h1v1h-1zM4 16h2v1h-2zM8 16h3v1h-3zM12 16h1v1h-1zM14 16h4v1h-4zM19 16h1v1h-1zM21 16h7v1h-7zM4 17h1v1h-1zM7 17h1v1h-1zM9 17h1v1h-1zM12 17h1v1h-1zM18 17h1v1h-1zM20 17h1v1h-1zM23 17h1v1h-1zM26 17h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM9 18h3v1h-3zM13 18h4v1h-4zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM27 18h2v1h-2zM4 19h1v1h-1zM7 19h2v1h-2zM11 19h5v1h-5zM18 19h1v1h-1zM21 19h3v1h-3zM4 20h1v1h-1zM7 20h5v1h-5zM14 20h2v1h-2zM17 20h1v1h-1zM20 20h8v1h-8zM12 21h2v1h-2zM16 21h1v1h-1zM18 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM4 22h7v1h-7zM14 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h3v1h-3zM4 23h1v1h-1zM10 23h1v1h-1zM12 23h2v1h-2zM16 23h1v1h-1zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h1v1h-1zM4 24h1v1h-1zM6 24h3v1h-3zM10 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM16 24h2v1h-2zM19 24h10v1h-10zM4 25h1v1h-1zM6 25h3v1h-3zM10 25h1v1h-1zM12 25h2v1h-2zM18 25h2v1h-2zM21 25h2v1h-2zM24 25h5v1h-5zM4 26h1v1h-1zM6 26h3v1h-3zM10 26h1v1h-1zM12 26h2v1h-2zM15 26h2v1h-2zM23 26h1v1h-1zM28 26h1v1h-1zM4 27h1v1h-1zM10 27h1v1h-1zM13 27h3v1h-3zM18 27h4v1h-4zM24 27h2v1h-2zM28 27h1v1h-1zM4 28h7v1h-7zM12 28h2v1h-2zM15 28h2v1h-2zM24 28h1v1h-1zM26 28h3v1h-3z"],"huy08":[33,"M4 4h7v1h-7zM13 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM22 4h7v1h-7zM4 5h1v1h-1zM10 5h1v1h-1zM14 5h1v1h-1zM19 5h2v1h-2zM22 5h1v1h-1zM28 5h1v1h-1zM4 6h1v1h-1zM6 6h3v1h-3zM10 6h1v1h-1zM12 6h3v1h-3zM19 6h1v1h-1zM22 6h1v1h-1zM24 6h3v1h-3zM28 6h1v1h-1zM4 7h1v1h-1zM6 7h3v1h-3zM10 7h1v1h-1zM12 7h4v1h-4zM17 7h1v1h-1zM20 7h1v1h-1zM22 7h1v1h-1zM24 7h3v1h-3zM28 7h1v1h-1zM4 8h1v1h-1zM6 8h3v1h-3zM10 8h1v1h-1zM12 8h1v1h-1zM15 8h4v1h-4zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h3v1h-3zM28 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM15 9h2v1h-2zM19 9h2v1h-2zM22 9h1v1h-1zM28 9h1v1h-1zM4 10h7v1h-7zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h7v1h-7zM12 11h2v1h-2zM16 11h1v1h-1zM19 11h2v1h-2zM4 12h1v1h-1zM6 12h5v1h-5zM14 12h2v1h-2zM19 12h2v1h-2zM22 12h5v1h-5zM4 13h2v1h-2zM11 13h2v1h-2zM14 13h1v1h-1zM16 13h2v1h-2zM20 13h1v1h-1zM23 13h1v1h-1zM25 13h2v1h-2zM5 14h2v1h-2zM8 14h1v1h-1zM10 14h2v1h-2zM14 14h2v1h-2zM17 14h3v1h-3zM24 14h1v1h-1zM27 14h2v1h-2zM4 15h1v1h-1zM7 15h1v1h-1zM9 15h1v1h-1zM14 15h4v1h-4zM19 15h1v1h-1zM21 15h2v1h-2zM27 15h1v1h-1zM4 16h3v1h-3zM8 16h1v1h-1zM10 16h2v1h-2zM14 16h3v1h-3zM18 16h1v1h-1zM21 16h7v1h-7zM4 17h2v1h-2zM7 17h2v1h-2zM11 17h1v1h-1zM14 17h1v1h-1zM20 17h1v1h-1zM23 17h1v1h-1zM26 17h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM8 18h1v1h-1zM10 18h2v1h-2zM14 18h3v1h-3zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h2v1h-2zM27 18h2v1h-2zM4 19h1v1h-1zM12 19h4v1h-4zM18 19h1v1h-1zM21 19h3v1h-3zM4 20h1v1h-1zM6 20h2v1h-2zM9 20h4v1h-4zM15 20h1v1h-1zM20 20h8v1h-8zM12 21h3v1h-3zM16 21h3v1h-3zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM4 22h7v1h-7zM14 22h1v1h-1zM17 22h2v1h-2zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h3v1h-3zM4 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM16 23h2v1h-2zM19 23h2v1h-2zM24 23h1v1h-1zM27 23h1v1h-1zM4 24h1v1h-1zM6 24h3v1h-3zM10 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM16 24h1v1h-1zM18 24h9v1h-9zM28 24h1v1h-1zM4 25h1v1h-1zM6 25h3v1h-3zM10 25h1v1h-1zM12 25h2v1h-2zM19 25h1v1h-1zM21 25h2v1h-2zM24 25h5v1h-5zM4 26h1v1h-1zM6 26h3v1h-3zM10 26h1v1h-1zM12 26h2v1h-2zM15 26h2v1h-2zM23 26h1v1h-1zM28 26h1v1h-1zM4 27h1v1h-1zM10 27h1v1h-1zM13 27h1v1h-1zM15 27h1v1h-1zM18 27h4v1h-4zM24 27h2v1h-2zM28 27h1v1h-1zM4 28h7v1h-7zM12 28h1v1h-1zM14 28h2v1h-2zM24 28h1v1h-1zM26 28h3v1h-3z"]};
 const chats = [
-  {id:'linh', name:'阮芳玲', vi:'Nguyễn Phương Linh', initials:'玲', avatar:'linh', tone:'rose', time:'19:42', unread:2, messages:[
+  {id:'linh', name:'阮芳英', vi:'Phương Anh', initials:'英', legacyName:'阮芳玲', avatarUrl:'https://view-link.cx/r6UUbgTBSI5', presence:'online', bio:['河内 · 双语助教','Hà Nội · Trợ giảng song ngữ'], signature:'Hà Nội mưa rồi, nhớ giữ ấm nhé...', tone:'rose', time:'19:42', unread:2, messages:[
     ['vi','Tối nay bạn có rảnh không? Mình đang ở chợ đêm phố cổ rồi!','今晚有空吗？我已经到老城区夜市啦！','19:36'],
     ['zh','有空！我刚下班，坐车过去大概二十分钟。','Có! Mình vừa tan làm, đi xe qua đó mất khoảng hai mươi phút.','19:38'],
     ['vi','Vậy mình đợi bạn ở đầu phố Hàng Đào nhé. Quán chè hôm trước vẫn mở đó!','那我在行桃街路口等你吧。我们上次去的那家甜品店还开着呢！','19:40'],
@@ -742,24 +755,24 @@ const chats = [
     ['vi','Nhất trí! Đến nơi thì nhắn mình nha 😊','说定啦！到了就给我发消息哦 😊','19:42']
   ]},
   {id:'weekend',name:'周末吃什么',vi:'Cuối tuần ăn gì?',initials:'✦',tone:'mint',time:'18:20',group:true,messages:[
-    ['vi','Sáng Chủ nhật đi ăn bún chả nhé?','周日早上去吃烤肉米粉吧？','18:12','陈明安'],
+    ['vi','Sáng Chủ nhật đi ăn bún chả nhé?','周日早上去吃烤肉米粉吧？','18:12','林丹'],
     ['zh','好，我带朋友一起去，可以吗？','Được, mình rủ thêm một người bạn đi cùng nhé?','18:15',''],
-    ['vi','Được chứ, mình đặt bàn cho bốn người nha.','当然可以，我订四个人的桌。','18:20','阮芳玲']
+    ['vi','Được chứ, mình đặt bàn cho bốn người nha.','当然可以，我订四个人的桌。','18:20','阮芳英']
   ]},
-  {id:'an',name:'陈明安',vi:'Trần Minh An',initials:'安',avatar:'an',tone:'sand',time:'16:08',messages:[
+  {id:'an',name:'林丹',vi:'Linh Đan',initials:'丹',legacyName:'陈明安',avatarUrl:'https://view-link.cx/cp1H1iacMsY',presence:'recent',bio:['西贡 · 投行分析师','Sài Gòn · Chuyên viên phân tích ngân hàng đầu tư'],tone:'sand',time:'16:08',messages:[
     ['vi','Mai mình gửi bạn địa chỉ tiệm sửa xe nhé.','明天我把修车店的地址发给你。','16:08']
   ]},
-  {id:'mai',name:'黎玉梅',vi:'Lê Ngọc Mai',initials:'梅',avatar:'mai',tone:'lilac',time:'昨天',messages:[
+  {id:'mai',name:'宝玉',vi:'Bảo Ngọc',initials:'宝',legacyName:'黎玉梅',avatarUrl:'https://view-link.cx/OWPl3yJEv2a',presence:'offline',bio:['大叻 · 高端度假体验官','Đà Lạt · Chuyên gia trải nghiệm nghỉ dưỡng cao cấp'],tone:'lilac',time:'昨天',messages:[
     ['vi','Cảm ơn bạn nhiều! Hẹn gặp cuối tuần nhé.','太谢谢你了！周末见。','17:22']
   ]},
   {id:'hanoi',name:'河内互助小组',vi:'Nhóm hỗ trợ Hà Nội',initials:'⌂',tone:'sand',time:'昨天',group:true,messages:[
-    ['vi','Có ai biết chỗ mua thẻ xe buýt tháng không?','有人知道哪里可以买公交月票吗？','12:05','黎玉梅'],
+    ['vi','Có ai biết chỗ mua thẻ xe buýt tháng không?','有人知道哪里可以买公交月票吗？','12:05','宝玉'],
     ['zh','可以去龙边公交换乘站问问。','Bạn thử hỏi ở điểm trung chuyển xe buýt Long Biên nhé.','12:09','']
   ]}
 ];
 
 const posts = [
-  {id:'market',who:'linh',time:['今天 19:05','Hôm nay 19:05'],vi:'Tối nay chợ đêm đông vui quá. Mình ghé ăn một bát chè nếp cẩm cốt dừa ở phố Hàng Đào.',zh:'今晚的夜市真热闹。我在行桃街顺路吃了一碗椰奶紫米甜品。',image:'night-market.webp',likes:18,comments:[['陈明安','Quán này ngon lắm!']]},
+  {id:'market',who:'linh',time:['今天 19:05','Hôm nay 19:05'],vi:'Tối nay chợ đêm đông vui quá. Mình ghé ăn một bát chè nếp cẩm cốt dừa ở phố Hàng Đào.',zh:'今晚的夜市真热闹。我在行桃街顺路吃了一碗椰奶紫米甜品。',image:'night-market.webp',likes:18,comments:[['林丹','Quán này ngon lắm!']]},
   {id:'coffee',who:'mai',time:['今天 09:12','Hôm nay 09:12'],vi:'Sáng nay trời mát, mình đạp xe một vòng Hồ Tây rồi ghé uống cà phê trứng.',zh:'今早天气凉快，我骑车绕了西湖一圈，然后去喝了杯鸡蛋咖啡。',image:'coffee.jpg',likes:12,comments:[]}
 ];
 
@@ -773,7 +786,7 @@ const phrases = [
   ['你好','Xin chào'],['谢谢','Cảm ơn'],['我到了','Mình đến rồi'],['马上到','Mình sắp tới rồi'],['晚点见','Hẹn gặp lại sau nhé'],['好呀','Được đó'],['晚安','Chúc ngủ ngon']
 ];
 
-const demoProfile = {id:'bridge101',name:'小桥',vi:'Tiểu Kiều',initials:'桥',gender:['女','Nữ'],region:['越南 · 河内','Việt Nam · Hà Nội']};
+const demoProfile = {id:'bridge101',name:'James',vi:'James',initials:'J',avatarUrl:'https://view-link.cx/LujXnMs5NbT',vip:true,gender:['未填写','Chưa cung cấp'],region:['越南 · 河内','Việt Nam · Hà Nội']};
 const friendDirectory = [
   {id:'bao27',name:'范嘉宝',vi:'Phạm Gia Bảo',initials:'宝',tone:'sand',time:'',messages:[
     ['vi','Chào bạn! Cuối tuần bạn có muốn đi uống cà phê không?','你好！周末想一起喝咖啡吗？','09:00']
@@ -899,7 +912,7 @@ const label = person => t(person.name,person.vi);
 const secondary = person => t(person.vi,person.name);
 const demo = () => t('演示版，尚未连接真实翻译／通话','Bản demo, chưa kết nối dịch thuật hoặc cuộc gọi thật');
 const demoMark = () => `<abbr class="demo-mark" title="${demo()}">${t('演示','Demo')}</abbr>`;
-const groupMembers = person => [demoProfile,...chats.filter(member=>person.messages.some(row=>row[4]===member.name))];
+const groupMembers = person => [demoProfile,...chats.filter(member=>person.messages.some(row=>row[4]===member.name || (member.legacyName && row[4]===member.legacyName)))];
 const languageName = lang => lang==='vi'?'Tiếng Việt':t('简体中文','Tiếng Trung');
 const button = (glyph,label,attrs='',klass='icon-button') => `<button type="button" class="${klass}" aria-label="${label}" title="${label}" ${attrs}>${icon(glyph)}</button>`;
 const nav = [
@@ -908,7 +921,15 @@ const nav = [
  ['feed','feed','动态','Bảng tin']
 ];
 function avatar(person, size='') {
-  return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size}"><span>${person.initials}</span></span>`;
+  return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size} ${person.vip?'avatar-vip':''} ${person.avatarUrl?'avatar-photo':''}">
+    <span aria-hidden="true">${escape(person.initials)}</span>
+    ${person.avatarUrl?`<img src="${escape(person.avatarUrl)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+  </span>`;
+}
+function contactPresence(person) {
+  const labels={online:t('在线','Đang hoạt động'),recent:t('30分钟前在线','Hoạt động 30 phút trước'),offline:t('离线','Ngoại tuyến')};
+  const status=labels[person.presence];
+  return status?`<span class="contact-presence ${person.presence}" title="${t('示例状态','Trạng thái minh họa')}">${person.presence==='online'?'<i aria-hidden="true"></i>':''}${status}</span>`:'';
 }
 const messages = person => [...person.messages, ...(state.sent[person.id] || [])];
 const demoVoice=['vi','Mình đến đầu phố Hàng Đào rồi.','我已经到行桃街路口了。'];
@@ -930,7 +951,7 @@ function listRows() {
     .map(person => {
       const last=messages(person).at(-1);
       const preview = pendingReplyTranslations.has(last[5])?last[1]:last[5]?.transcript ? t('双语通话文字记录','Bản ghi cuộc gọi song ngữ') : last[0]===state.lang ? last[1] : last[2] || last[1];
-      return `<button class="thread thread-item ${state.active===person.id?'current':''}" data-peer-role="${roleText[conversationContext(person.id).peerRole] || 'Em'}" data-chat="${person.id}">${avatar(person)}<span class="thread-copy"><strong>${label(person)}</strong><small>${escape(preview)}</small></span><span class="thread-meta"><small>${last===person.messages.at(-1)?t(person.time,person.time==='昨天'?'Hôm qua':person.time):last[3]}</small>${state.unreadBadges&&person.unread&&!state.read[person.id]?'<b>2</b>':''}</span></button>`;
+      return `<button class="thread thread-item ${state.active===person.id?'current':''}" data-peer-role="${roleText[conversationContext(person.id).peerRole] || 'Em'}" data-chat="${person.id}">${avatar(person)}<span class="thread-copy"><strong>${label(person)}</strong><small>${escape(preview)}</small>${contactPresence(person)}</span><span class="thread-meta"><small>${last===person.messages.at(-1)?t(person.time,person.time==='昨天'?'Hôm qua':person.time):last[3]}</small>${state.unreadBadges&&person.unread&&!state.read[person.id]?'<b>2</b>':''}</span></button>`;
     }).join('') || `<p class="empty">${t('没有找到会话','Không tìm thấy cuộc trò chuyện')}</p>`;
 }
 function sidebar() {
@@ -942,14 +963,14 @@ function sidebar() {
     ${state.friendPanel==='scan'?`<div class="message-scan">${friendPanels()}</div>`:`
     <label class="search">${icon('search')}<input id="search" type="search" value="${escape(state.search)}" placeholder="${t('搜索会话','Tìm cuộc trò chuyện')}" aria-label="${t('搜索会话','Tìm cuộc trò chuyện')}"></label>
     <div class="filters">${[['all','全部','Tất cả'],['private','私聊','Cá nhân'],['group','群聊','Nhóm']].map(([id,zh,vi])=>`<button class="${state.filter===id?'on':''}" data-filter="${id}" aria-pressed="${state.filter===id}">${t(zh,vi)}</button>`).join('')}</div>
-    <div class="threads">${listRows()}</div>`}` : `<div class="sidebar-person">${avatar({initials:'桥'})}<div><strong>${t('我的账号','Tài khoản của tôi')}</strong><small>${brandName}</small></div></div>`}
+    <div class="threads">${listRows()}</div>`}` : `<div class="sidebar-person">${avatar(demoProfile)}<div><strong>${t('我的账号','Tài khoản của tôi')}</strong><small>${brandName}</small></div></div>`}
     ${navBar()}</aside>`;
 }
 function chatPanel(person, enterChat=false) {
   return `<main class="chat-panel${enterChat?' chat-entering':''}">
     <header class="chat-header">
       ${button('back',t('返回列表','Về danh sách'),'data-back','icon-button back')}
-      ${avatar(person,'small')}<div class="chat-title"><strong>${label(person)} ${demoMark()}</strong><small>${secondary(person)}</small></div>
+      ${avatar(person,'small')}<div class="chat-title"><strong>${label(person)} ${demoMark()}</strong><small>${person.signature?escape(person.signature):secondary(person)}</small>${contactPresence(person)}</div>
       <div class="head-actions">${button('phone',t('语音通话','Gọi thoại'),`data-call="voice" data-person="${person.id}"`)}${button('video',t('视频通话','Gọi video'),`data-call="video" data-person="${person.id}"`)}${button('more',t('切换会话信息','Bật/tắt thông tin'),'data-details aria-expanded="'+state.details+'"')}</div>
     </header>
     <section class="timeline" aria-label="${t('聊天记录','Lịch sử trò chuyện')}">
@@ -979,7 +1000,7 @@ function chatPanel(person, enterChat=false) {
 function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   if(meta?.transcript) return transcriptMessage(person,meta.transcript,time,index);
   const own=lang==='zh'&&!sender || sender==='self';
-  const author=chats.find(item=>item.name===sender) || person;
+  const author=chats.find(item=>item.name===sender || (item.legacyName && item.legacyName===sender)) || person;
   const key=person.id+':'+index;
   const viewer=state.groupViewer[person.id] || demoProfile.id;
   const preferred=state.groupLanguages[person.id]?.[viewer] || (viewer===demoProfile.id?state.lang:'vi');
@@ -997,7 +1018,7 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   const canToggle=!translating && state.translated[person.id]!==false && !primaryTranslation && !meta?.voice;
   const originalDetails=primaryTranslation?`<details class="message-original-details" ${meta?.voice?'open':''}><summary>${t('查看原文','Xem nguyên văn')}</summary><div class="message-original" lang="${textLanguage(lang)}">${escape(original)}</div></details>`:'';
 
-  return `<article class="message ${own?'own':''}"><div class="message-side">${!own?avatar(author,'tiny'):''}</div><div class="message-content">
+  return `<article class="message ${own?'own':''}"><div class="message-side">${avatar(own?demoProfile:author,'tiny')}</div><div class="message-content">
     ${person.group&&!own?`<small class="sender">${label(author)}</small>`:''}
     <div class="bubble ${primaryTranslation?'bubble-translated':''}">
       ${primaryTranslation?`<small class="bubble-engine">${meta?.translationRoute==='cloud'?'CLOUD':meta?.translationRoute==='native'?'NATIVE':meta?.translationRoute==='gemini'?'GEMINI':'DEMO'}</small>`:''}
@@ -1690,7 +1711,7 @@ function details(person) {
   const context=conversationContext(person.id);
   const field=(name,label,options)=>`<label><span>${label}</span><select data-context-key="${name}" data-context-chat="${person.id}">${options.map(([value,text])=>`<option value="${value}" ${context[name]===value?'selected':''}>${text}</option>`).join('')}</select></label>`;
   return `<aside class="details"><div class="details-heading">${icon('info')}<h2>${t('会话信息','Thông tin trò chuyện')}</h2>${button('more',t('关闭会话信息','Đóng thông tin'),'data-details','icon-button dismiss')}</div>
-    <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${person.group?'':`<small><i></i>${t('在线 · 演示','Đang online · Demo')}</small>`}</div>
+    <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
     <div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>
     <div class="detail-settings"><h3>${t('翻译设置','Cài đặt bản dịch')}</h3>
       <div class="setting"><span class="setting-icon">${icon('translate')}</span><div><strong>${t('显示译文','Hiện bản dịch')}</strong><small>${t('中文 ↔ 越南语','Tiếng Trung ↔ Tiếng Việt')}</small></div>
@@ -1726,7 +1747,7 @@ function feed() {
       <button class="text-button" data-post-translate="${post.id}" aria-pressed="${translated}">${icon('translate')} ${translated?t('查看越南语原文','Xem nguyên văn tiếng Việt'):t('查看中文译文','Xem bản dịch tiếng Trung')}</button>
       ${post.image?`<div class="post-image post-gradient ${post.image==='coffee.jpg'?'post-gradient-warm':''}" aria-hidden="true"></div>`:''}
       <div class="post-actions"><button data-like="${post.id}" aria-pressed="${!!state.likes[post.id]}">${icon('heart')} ${t('点赞','Thích')} ${post.likes+Number(!!state.likes[post.id])}</button><button data-comment="${post.id}" aria-expanded="${state.comment===post.id}">${icon('chat')} ${t('评论','Bình luận')} ${comments.length}</button></div>
-      ${state.comment===post.id?`<div class="comment-area">${comments.map(([name,body])=>`<p><strong>${name==='self'?t('我','Tôi'):name==='陈明安'?label(find('an')):escape(name)}</strong> ${escape(body)}</p>`).join('')}<form id="comment-form"><input name="comment" data-post="${post.id}" maxlength="300" aria-label="${t('评论','Bình luận')}" placeholder="${t('写评论…','Viết bình luận…')}"><button class="primary">${t('发布','Đăng')}</button></form></div>`:''}
+      ${state.comment===post.id?`<div class="comment-area">${comments.map(([name,body])=>`<p><strong>${name==='self'?t('我','Tôi'):name==='林丹'?label(find('an')):escape(name)}</strong> ${escape(body)}</p>`).join('')}<form id="comment-form"><input name="comment" data-post="${post.id}" maxlength="300" aria-label="${t('评论','Bình luận')}" placeholder="${t('写评论…','Viết bình luận…')}"><button class="primary">${t('发布','Đăng')}</button></form></div>`:''}
     </article>`;
   }).join('');
 }
@@ -1754,7 +1775,7 @@ function downloadProfileQr() {
 }
 
 function profileQr() {
-  return `${qrMarkup('bridge101',184,t('小桥的好友二维码','Mã QR kết bạn của Tiểu Kiều'))}
+  return `${qrMarkup('bridge101',184,t('James 的好友二维码','Mã QR kết bạn của James'))}
       <p class="local-note">${t('二维码包含言聊ID，添加流程在本地演示。','Mã QR chứa 言聊ID. Quy trình kết bạn chạy trong bản demo.')}</p>
       <button type="button" class="social-button" data-download-qr>${t('保存二维码','Lưu mã QR')}</button>`;
 }
