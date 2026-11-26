@@ -582,7 +582,6 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 }
 .nav {height:auto;padding-bottom:max(10px,env(safe-area-inset-bottom, 0px));flex-shrink:0}
 .bubble-translated {position:relative;padding-right:42px}
-.bubble-engine {position:absolute;top:8px;right:8px;font-size:.5625rem;font-weight:700;letter-spacing:.07em;color:#b4a384}
 .bubble-translated>.message-original {font-size:1rem;color:var(--ink)}
 .message-original-details {margin-right:-33px}
 .message-original-details>summary {font-size:var(--text-xs);color:var(--muted)}
@@ -674,19 +673,7 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .rtc-remote-media.audio-only {display:none}
 .translation .translation-latency {flex:none;font-size:10px;color:var(--muted);white-space:nowrap}
 .call-screen.rtc-mode {background:#090B0E}
-.engine-label{display:block;margin:2px 0 8px;font-size:var(--text-sm);font-weight:650}
-.engine-key-row{display:flex;gap:8px;align-items:stretch}
-.engine-key-row input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font:inherit;font-size:15px}
-.engine-key-row input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
-.engine-key-row .text-button{flex:none;padding:0 12px}
-.engine-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-.engine-actions .primary{flex:1}
-.engine-status{margin-top:12px;font-size:var(--text-sm);line-height:1.55;color:var(--muted)}
-.engine-status.ready{color:var(--accent);font-weight:650}
-.engine-status.error{color:#e07856}
-.engine-note{margin-top:12px;font-size:var(--text-xs);line-height:1.6;color:var(--muted)}
-.engine-note a{color:var(--accent)}
-.translation-gemini>span{color:#D8B56D}
+.translation>span{color:#D8B56D}
 @media (hover:hover) {
  .icon-button:hover {background:var(--soft)}
  .filters button:hover {background:var(--choice);color:var(--strong);font-weight:700}
@@ -883,7 +870,7 @@ const state = {
   callPreferences:read('call-preferences',{captions:true,follow:true}), unreadBadges:read('unread-badges',true),
   conversationContexts:read('conversation-contexts',{}),
   titanium:read('titanium',{policy:'auto',style:'couple',cache:'keep'}),
-  translationCache:read('translation-cache',[]), signedOut:read('signed-out',false), toast:'', engineTest:null,
+  translationCache:read('translation-cache',[]), signedOut:read('signed-out',false), toast:'',
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), likes:read('likes',{}), comments:read('comments',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'', feedMode:'friends',
@@ -918,7 +905,7 @@ const escape = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({'&':
 const find = id => [...chats,...friendDirectory].find(person => person.id === id);
 const label = person => t(person.name,person.vi);
 const secondary = person => t(person.vi,person.name);
-const demo = () => t('演示版，尚未连接真实翻译／通话','Bản demo, chưa kết nối dịch thuật hoặc cuộc gọi thật');
+const demo = () => t('演示版，通话为模拟','Bản demo, cuộc gọi là mô phỏng');
 const demoMark = () => `<abbr class="demo-mark" title="${demo()}">${t('演示','Demo')}</abbr>`;
 const groupMembers = person => [demoProfile,...chats.filter(member=>person.messages.some(row=>row[4]===member.name || (member.legacyName && row[4]===member.legacyName)))];
 const languageName = lang => lang==='vi'?'Tiếng Việt':t('简体中文','Tiếng Trung');
@@ -1013,13 +1000,13 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   const key=person.id+':'+index;
   const viewer=state.groupViewer[person.id] || demoProfile.id;
   const preferred=state.groupLanguages[person.id]?.[viewer] || (viewer===demoProfile.id?state.lang:'vi');
-  const translating=pendingReplyTranslations.has(meta) || liveTranslations.has(meta);
+  const translating=pendingReplyTranslations.has(meta) || pendingTranslations.has(meta);
   const expanded=state.translated[person.id]!==false && (state.expanded[key] ?? (!meta?.voice && (meta?.demoReply || !person.group || preferred!==lang)));
   const status=meta?.status==='sending'&&!pendingMessages.has(meta)?'failed':meta?.status || (own?'read':'delivered');
   const statuses={sending:t('发送中','Đang gửi'),failed:t('发送失败','Gửi thất bại'),delivered:t('已送达','Đã nhận'),read:t('已读','Đã xem')};
   const localIndex=index-person.messages.length;
   const translated=translation&&!translating&&!state.translationErrors[key];
-  const measured=translated&&Number.isFinite(meta?.translationMs)?`<small class="translation-latency">${meta.translationRoute==='local'?`${t('本地','Cục bộ')} · `:''}⚡ ${meta.translationMs}ms</small>`:'';
+  const measured=translated&&Number.isFinite(meta?.translationMs)?`<small class="translation-latency">⚡ ${meta.translationMs}ms</small>`:'';
   const primaryTranslation=(!meta?.demoReply || person.group) && (person.group || !own) && preferred!==lang && translated && state.translated[person.id]!==false;
   const primary=primaryTranslation?translation:original;
   const primaryLang=primaryTranslation?otherLanguage(lang):lang;
@@ -1030,14 +1017,13 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   return `<article class="message ${own?'own':''}" data-mid="${key}"><div class="message-side">${avatar(own?demoProfile:author,'tiny')}</div><div class="message-content">
     ${person.group&&!own?`<small class="sender">${label(author)}</small>`:''}
     <div class="bubble ${primaryTranslation?'bubble-translated':''}">
-      ${primaryTranslation?`<small class="bubble-engine">${meta?.translationRoute==='cloud'?'CLOUD':meta?.translationRoute==='native'?'NATIVE':meta?.translationRoute==='gemini'?'GEMINI':'DEMO'}</small>`:''}
       ${meta?.voice?`<div class="voice-meta"><strong>${t('示例语音','Tin nhắn thoại mẫu')}</strong><small>${elapsedLabel(meta.duration || 3)} · ${t('示例时长','Thời lượng mẫu')}</small></div>
       <div class="voice-actions">${voiceTrackButton(person.id,index,'original',lang,true)}${voiceTrackButton(person.id,index,'translated',otherLanguage(lang),!!translated)}</div><small>${t('合成示例语音 · 转写','Giọng tổng hợp mẫu · Bản chép lời')}</small>`:''}
       <div class="message-original" lang="${textLanguage(primaryLang)}">${escape(primary)}</div>
       ${primaryTranslation?measured:''}
       ${originalDetails}
-      ${translating&&expanded?`<div class="reply-translation-status" role="status"><i></i>${liveTranslations.get(meta)?escape(liveTranslations.get(meta)):liveTranslations.has(meta)?(getGeminiKey()?t('神经翻译中…','Đang dịch bằng AI…'):t('正在翻译…','Đang dịch…')):(getGeminiKey()?t('神经翻译中…','Đang dịch bằng AI…'):t('神经同传计算中…（演示）','Đang xử lý phiên dịch… (demo)'))}</div>`:''}
-      ${showDetails?`<div class="translation${meta?.demoReply?' demo-reply-translation':''}${meta?.translationRoute==='gemini'?' translation-gemini':''}" lang="${translated?textLanguage(otherLanguage(lang)):t('zh-CN','vi')}">${translated?`<span>${escape(translation)}</span>${measured}`:`<span>${t('翻译失败，已保留原文','Dịch thất bại. Nguyên văn được giữ lại.')}</span><button class="message-translate" data-retry-translation="${index}" aria-label="${t('重试翻译','Thử dịch lại')}"><span aria-hidden="true">↻</span> ${t('重试','Thử lại')}</button>`}</div>`:''}
+      ${translating&&expanded?`<div class="reply-translation-status" role="status"><i></i>${t('正在翻译…','Đang dịch…')}</div>`:''}
+      ${showDetails?`<div class="translation${meta?.demoReply?' demo-reply-translation':''}" lang="${translated?textLanguage(otherLanguage(lang)):t('zh-CN','vi')}">${translated?`<span>${escape(translation)}</span>${measured}`:`<button class="message-translate" data-retry-translation="${index}" aria-label="${t('重试翻译','Thử dịch lại')}"><span aria-hidden="true">↻</span> ${t('重试','Thử lại')}</button>`}</div>`:''}
     </div><div class="message-footer">${canToggle?`<button class="message-translate" data-message-translate="${index}" data-message-open="${expanded}" aria-expanded="${expanded}">${icon('translate')} ${expanded?t('收起译文','Thu bản dịch'):t('展开译文','Mở bản dịch')}</button>`:''}<div class="message-status" ${own?'aria-live="polite"':''}><time>${time}</time><span>${own&&['delivered','read'].includes(status)?'<b class="delivery-checks" aria-hidden="true">✓✓</b> ':''}${statuses[status]}</span>${status==='failed'?`<button data-retry-send="${localIndex}">${t('重发','Gửi lại')}</button>`:''}</div></div>
   </div></article>`;
 }
@@ -1246,7 +1232,6 @@ function queueDemoMessage(text,lang,translation,voice=false,payload=null) {
   const person=find(state.active);
   const message=[lang,text,translation,clock(),'self',voice?{voice,duration:3,sentAtMs:performance.now()}:{voice,context:payload?.context,sentAtMs:performance.now()}];
   const sent=state.sent[person.id] ||= [];
-  if(operationOffline()) state.translationErrors[person.id+':'+(person.messages.length+sent.length)]=true;
   sent.push(message);
   if(translation && !operationOffline()) {
     const cacheKey=payload?JSON.stringify(payload.context):null;
@@ -1260,268 +1245,34 @@ function queueDemoMessage(text,lang,translation,voice=false,payload=null) {
   sendDemoMessage(person,message);
 }
 const platform=globalThis.window || globalThis;
-const nativeRequests=new Map();
-let nativeSequence=0;
-let cloudTranslationEnabled=false;
-
-function requestNativeTranslation(bridge,payload) {
-  return new Promise((resolve,reject)=>{
-    const requestId='translate-'+Date.now()+'-'+(++nativeSequence);
-    const timer=setTimeout(()=>finish(null,new Error('Native translation timed out')),2200);
-    function finish(result,error) {
-      if(!nativeRequests.delete(requestId)) return;
-      clearTimeout(timer);
-      if(error) reject(error); else resolve(result);
-    }
-    nativeRequests.set(requestId,finish);
-    try {
-      const reply=bridge.postMessage({...payload,requestId});
-      if(reply!==undefined) Promise.resolve(reply).then(result=>finish(result),error=>finish(null,error));
-    } catch(error) {finish(null,error);}
-  });
-}
-
-function translatedText(result) {
-  const text=typeof result==='string'?result:result?.translatedText;
-  return typeof text==='string'?text.trim():'';
-}
-async function requestCloudTranslation(payload,onPartial) {
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),8000);
-  try {
-    const response=await platform.fetch('/api/translate',{
-      method:'POST',credentials:'same-origin',signal:controller.signal,
-      headers:{'Content-Type':'application/json','Accept':'text/event-stream, application/x-ndjson, application/json'},
-      body:JSON.stringify(payload)
-    });
-    if(!response.ok) throw new Error('Translation API returned '+response.status);
-    const type=response.headers.get('content-type') || '';
-    if(!response.body?.getReader || !/event-stream|ndjson/i.test(type)) return translatedText(await response.json());
-    const reader=response.body.getReader();
-    const decoder=new TextDecoder();
-    let buffer='',text='',eventLines=[];
-    const sse=/event-stream/i.test(type);
-    function packet(line) {
-      if(!line || line==='[DONE]') return line==='[DONE]';
-      const item=JSON.parse(line);
-      if(item.error) throw new Error('Streaming translation failed');
-      if(typeof item.translatedText==='string') text=item.translatedText;
-      else if(typeof item.delta==='string') text+=item.delta;
-      if(text.length>16000) throw new Error('Translation response too large');
-      if(text) onPartial?.(text);
-      return item.isFinal===true;
-    }
-    function line(value) {
-      if(!sse) return packet(value.trim());
-      if(value.startsWith('data:')) {eventLines.push(value.slice(5).trimStart());return false;}
-      if(value==='' && eventLines.length) {
-        const result=packet(eventLines.join('\n'));
-        eventLines=[];
-        return result;
-      }
-      return false;
-    }
-    try {
-      while(true) {
-        const {value,done}=await reader.read();
-        buffer+=decoder.decode(value,{stream:!done});
-        if(buffer.length>64000) throw new Error('Translation stream line too large');
-        const lines=buffer.split(/\r?\n/);
-        buffer=lines.pop() || '';
-        for(const part of lines) if(line(part)) return text.trim();
-        if(done) {
-          if(buffer) line(buffer);
-          if(sse) line('');
-          return text.trim();
-        }
-      }
-    } finally {void reader.cancel().catch(()=>{});}
-  } finally {clearTimeout(timer);}
-}
-
-// 黑钛金神经引擎：Google Gemini 实时中越同传（Google AI Studio 免费 Key，只存在本机 localStorage）
-const GEMINI_API_BASE='https://generativelanguage.googleapis.com/v1beta/models/';
-const GEMINI_PRIMARY_MODEL='gemini-3.8-flash';
-const GEMINI_FALLBACK_MODEL='gemini-3.5-flash-lite';
-const GEMINI_SYSTEM_INSTRUCTION=`你是一个精通中越双语的高端私密社交同传引擎。请将用户输入的语言直接翻译为目标语言（中文转地道越南语，或越南语转自然中文）。 翻译规则：
-绝对严禁使用生硬的 'Tôi/Bạn' 机械称谓。
-默认使用社交中自然亲切的代词：男方自称/对方称 'Anh'，女方自称/对方称 'Em'。
-语气要自然、现代、有社交温度，符合西贡/河内当下年轻高知群体真实聊天习惯。
-只输出最终翻译结果纯文本，绝对严禁任何解释、拼音或额外标点。`;
-const getGeminiKey=()=>String(read('gemini-api-key','') || '').trim();
-let engineKeyToastShown=false;
-let engineTesting=false;
-const engineStatusText=()=>{
-  const test=state.engineTest;
-  if(test?.status==='testing') return t('正在测速…','Đang kiểm tra…');
-  if(test?.status==='ready') return `⚡ ${t('神经引擎就绪','Neural Engine đã sẵn sàng')} (${t('延迟','Độ trễ')} ${test.ms}ms · ${test.model || 'Gemini'})`;
-  if(test?.status==='error') return `${t('连接失败：','Kết nối thất bại: ')}${test.message}`;
-  return getGeminiKey()?t('已保存 Key，点击上方按钮测速。','Đã lưu Key, bấm nút trên để kiểm tra.'):t('还没填 Key，填好后点测速。','Chưa nhập Key, hãy nhập rồi kiểm tra.');
-};
-function geminiErrorText(error) {
-  if(error?.code==='NO_KEY') return t('请先填入 Gemini Key','Vui lòng nhập Gemini Key trước');
-  if(error?.name==='AbortError') return t('请求超时（15 秒）','Hết thời gian chờ (15 giây)');
-  if(error?.code==='FETCH_FAILED') return t('浏览器未收到 HTTP 响应。请检查 Google API 是否可达，或换用 Safari／Chrome 直接打开。','Trình duyệt không nhận được phản hồi HTTP. Kiểm tra kết nối tới API Google hoặc mở trực tiếp trong Safari/Chrome.');
-  if(error?.code==='INVALID_RESPONSE' || error?.name==='SyntaxError') return t('Gemini 返回了无法解析的响应','Không đọc được phản hồi của Gemini');
-  if(error?.code==='EMPTY_TRANSLATION') return t('Gemini 返回成功，但没有文本结果','Gemini trả về thành công nhưng không có văn bản');
-  if(error?.status) {
-    const detail={
-      400:t('请求参数或 Key 有误；请查看下方错误原因','Tham số hoặc Key không hợp lệ'),
-      401:t('身份验证失败','Xác thực thất bại'),
-      403:t('访问被拒；检查 Key 限制、项目权限或区域','Quyền truy cập bị từ chối'),
-      404:t('模型不可用或该项目无权使用','Mô hình không khả dụng cho dự án'),
-      429:t('已达到请求频率或项目配额','Đã vượt giới hạn hoặc hạn ngạch'),
-      503:t('Google 暂时无法提供服务，请稍后重试','Google tạm thời không khả dụng. Hãy thử lại sau.')
-    }[error.status] || t('Google API 请求失败','Yêu cầu API Google thất bại');
-    return `HTTP ${error.status}${error.reason?' · '+error.reason:''} · ${detail}`;
-  }
-  return t('测试未完成，请重试','Không hoàn tất kiểm tra. Hãy thử lại.');
-}
-function geminiTextFromJson(data) {
-  const parts=data?.candidates?.[0]?.content?.parts || [];
-  return parts.map(part=>part?.text || '').join('').trim();
-}
-async function requestGemini(model,key,body,stream,onPartial) {
+// 统一翻译中继：前端不存任何 Key，所有翻译走自己的后端网关。
+// 中继是 Cloudflare Worker（yeyu-translate），Key 只以机密形式存在 Worker 里。
+const BACKEND_TRANSLATE_API='https://yeyu-translate.jameswilson199079.workers.dev/';
+async function requestRelayTranslation(payload) {
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),15000);
   try {
-    const action=stream?'streamGenerateContent':'generateContent';
-    const url=GEMINI_API_BASE+model+':'+action+(stream?'?alt=sse':'');
-    let response;
-    try {
-      response=await platform.fetch(url,{
-        method:'POST',signal:controller.signal,
-        headers:{'Content-Type':'application/json','x-goog-api-key':key},
-        body:JSON.stringify(body)
-      });
-    } catch(cause) {
-      if(cause?.name==='AbortError') throw cause;
-      throw Object.assign(new Error('Gemini fetch failed'),{code:'FETCH_FAILED',cause});
-    }
-    if(!response.ok) {
-      let payload;
-      try {payload=await response.json();} catch(error) {if(error?.name==='AbortError') throw error;}
-      const reason=[...(Array.isArray(payload?.error?.details)?payload.error.details:[]).map(item=>item.reason),payload?.error?.status]
-        .find(value=>typeof value==='string' && /^[A-Z][A-Z0-9_]{1,75}$/.test(value));
-      throw Object.assign(new Error('Gemini HTTP '+response.status),{status:response.status,reason});
-    }
-    if(!stream) {
-      try {return geminiTextFromJson(await response.json());}
-      catch(error) {
-        if(error?.name==='AbortError') throw error;
-        throw Object.assign(new Error('Gemini response is not valid JSON'),{code:'INVALID_RESPONSE'});
-      }
-    }
-    if(!response.body?.getReader) throw Object.assign(new Error('Gemini stream unavailable'),{code:'STREAM_UNAVAILABLE'});
-    const reader=response.body.getReader();
-    const decoder=new TextDecoder();
-    let buffer='',text='';
-    try {
-      while(true) {
-        const {value,done}=await reader.read();
-        buffer+=decoder.decode(value,{stream:!done});
-        const lines=buffer.split(/\r?\n/);
-        buffer=lines.pop() || '';
-        for(const line of lines) {
-          const trimmed=line.trim();
-          if(!trimmed.startsWith('data:')) continue;
-          const dataText=trimmed.slice(5).trim();
-          if(!dataText || dataText==='[DONE]') continue;
-          const chunk=geminiTextFromJson(JSON.parse(dataText));
-          if(chunk) { text+=chunk; onPartial?.(text); }
-        }
-        if(done) break;
-      }
-    } finally { void reader.cancel().catch(()=>{}); }
-    return text.trim();
+    const response=await platform.fetch(BACKEND_TRANSLATE_API,{
+      method:'POST',signal:controller.signal,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:payload.sourceText,to:payload.toLang})
+    });
+    if(!response.ok) throw new Error('Relay HTTP '+response.status);
+    const data=await response.json();
+    const text=typeof data?.translation==='string'?data.translation.trim():'';
+    if(!text) throw new Error('Empty relay translation');
+    return text;
   } finally { clearTimeout(timer); }
 }
-async function callGeminiTranslate(text,fromLang,toLang,roleContext,onPartial) {
-  const key=getGeminiKey();
-  if(!key) { const error=new Error('NO_KEY'); error.code='NO_KEY'; throw error; }
-  const start=performance.now();
-  const myRole=roleText[roleContext?.myRole] || 'Anh';
-  const peerRole=roleText[roleContext?.peerRole] || 'Em';
-  const system=GEMINI_SYSTEM_INSTRUCTION+`\n当前会话人称：说话人自称 ${myRole}，对方称 ${peerRole}。`;
-  const body={
-    system_instruction:{parts:[{text:system}]},
-    contents:[{parts:[{text}]}],
-    generationConfig:{temperature:0.3,maxOutputTokens:512}
-  };
-  const models=[GEMINI_PRIMARY_MODEL,GEMINI_FALLBACK_MODEL];
-  let lastError=null;
-  for(const model of models) {
-    try {
-      let translated='';
-      try { translated=await requestGemini(model,key,body,typeof onPartial==='function',onPartial); }
-      catch(streamError) {
-        if(streamError.code!=='STREAM_UNAVAILABLE') throw streamError;
-        translated=await requestGemini(model,key,body,false);
-      }
-      if(!translated) throw Object.assign(new Error('Empty Gemini translation'),{code:'EMPTY_TRANSLATION'});
-      return {text:translated,ms:Math.round(performance.now()-start),model};
-    } catch(error) {
-      lastError=error;
-      if(error.status===404 || error.status===503) continue;
-      break; // Key 无效、限流、网络问题：不再换模型
-    }
-  }
-  throw lastError || new Error('Gemini 翻译失败');
-}
-async function requestGeminiTranslation(payload,onPartial) {
-  const result=await callGeminiTranslate(payload.sourceText,payload.fromLang,payload.toLang,payload.honorificProfile || defaultContext,onPartial);
-  return result.text;
-}
-async function testGeminiEngine() {
-  if(engineTesting) return;
-  const input=document.querySelector('#gemini-key-input');
-  if(input) save('gemini-api-key',input.value);
-  const key=getGeminiKey();
-  if(!key) { state.engineTest={status:'error',message:t('请先填入 Gemini Key','Vui lòng nhập Gemini Key trước')}; render({preserve:true}); return; }
-  engineTesting=true;
-  state.engineTest={status:'testing'}; render({preserve:true});
-  try {
-    const result=await callGeminiTranslate('你好','zh','vi',defaultContext);
-    state.engineTest={status:'ready',ms:result.ms,model:result.model};
-  } catch(error) {
-    state.engineTest={status:'error',message:geminiErrorText(error)};
-  } finally {
-    engineTesting=false;
-    if(state.tab==='me' && state.profilePage==='engine') render({preserve:true});
-  }
-}
-
-// Native bridge can return a WK reply Promise or call completeNative(requestId, {translatedText}, error).
-// Cloud contract: POST JSON, then JSON {translatedText} or SSE/NDJSON events {delta|translatedText,isFinal}.
 const TranslationEngine=platform.TranslationEngine={
-  // GitHub Pages has no translation API. A backend deployment can opt in explicitly.
-  enableCloud(enabled=true) { cloudTranslationEnabled=enabled===true; },
-  completeNative(requestId,result,error) {
-    nativeRequests.get(requestId)?.(result,error?new Error(String(error)):null);
-  },
-  async translate(payload,{fallback,onPartial,offline=false}={}) {
+  async translate(payload,{fallback,offline=false}={}) {
     const start=performance.now();
     const result=(text,route)=>({text,route,elapsedMs:Math.round(performance.now()-start)});
-    if(!offline) {
-      const bridge=platform.webkit?.messageHandlers?.nativeTranslate;
-      if(typeof bridge?.postMessage==='function') {
-        try {
-          const text=translatedText(await requestNativeTranslation(bridge,payload));
-          if(text) return result(text,'native');
-        } catch {}
-      }
-      if(getGeminiKey() && /^https?:$/.test(platform.location?.protocol || '') && typeof platform.fetch==='function') {
-        try {
-          const text=await requestGeminiTranslation(payload,onPartial);
-          if(text) return result(text,'gemini');
-        } catch {}
-      }
-      if(cloudTranslationEnabled && /^https?:$/.test(platform.location?.protocol || '') && typeof platform.fetch==='function') {
-        try {
-          const text=await requestCloudTranslation(payload,onPartial);
-          if(text) return result(text,'cloud');
-        } catch {}
-      }
+    if(!offline && /^https?:$/.test(platform.location?.protocol || '') && typeof platform.fetch==='function') {
+      try {
+        const text=await requestRelayTranslation(payload);
+        if(text) return result(text,'relay');
+      } catch {}
     }
     return result(fallback?.() || demoTranslation({
       text:payload.sourceText,sourceLanguage:payload.fromLang,context:payload.honorificProfile || defaultContext
@@ -1537,34 +1288,26 @@ const TranslationEngine=platform.TranslationEngine={
     return true;
   }
 };
-const liveTranslations=new Map();
+const pendingTranslations=new Set();
 function attachMessageTranslation(person,message,fallback,{followLatest=false}={}) {
   const [lang,text,,,,meta]=message;
   const payload={sourceText:text,fromLang:lang,toLang:otherLanguage(lang),honorificProfile:meta.context || conversationContext(person.id)};
-  const hasRemote=!operationOffline()&&(typeof platform.webkit?.messageHandlers?.nativeTranslate?.postMessage==='function'||getGeminiKey()||(cloudTranslationEnabled && /^https?:$/.test(platform.location?.protocol || '')));
-  if(!hasRemote && !meta.received) {
+  if(operationOffline()) {
     meta.translationRoute='local';
     const start=performance.now();
     message[2]=fallback || demoTranslation(translationPayload(person,text,lang));
     meta.translationMs=Math.round(performance.now()-start);
     return;
   }
-  liveTranslations.set(meta,'');
-  let nextPaint=0;
-  void TranslationEngine.translate(payload,{fallback:()=>fallback,offline:operationOffline(),onPartial:text=>{
-    liveTranslations.set(meta,text);
-    if(performance.now()>=nextPaint) {
-      nextPaint=performance.now()+80;
-      refreshDemoReply(person,followLatest);
-    }
-  }}).then(result=>{
-    liveTranslations.delete(meta);
+  pendingTranslations.add(meta);
+  void TranslationEngine.translate(payload,{fallback:()=>fallback,offline:operationOffline()}).then(result=>{
+    pendingTranslations.delete(meta);
     message[2]=result.text;
     meta.translationRoute=result.route;
     meta.translationMs=result.elapsedMs;
     refreshDemoReply(person,followLatest);
   }).catch(()=>{
-    liveTranslations.delete(meta);
+    pendingTranslations.delete(meta);
     refreshDemoReply(person,followLatest);
   });
 }
@@ -1871,12 +1614,6 @@ function profile() {
   if(state.profilePage==='cache-mode') return panel(t('通话字幕本地缓存','Lưu phụ đề trên thiết bị'),
     pick('cache',t('阅后即焚','Xóa khi kết thúc'), 'discard',t('挂断后清除本次临时字幕','Xóa phụ đề tạm khi kết thúc'))+
     pick('cache',t('保留本地记录','Lưu bản ghi cục bộ'),'keep',t('挂断后可手动保存文字','Có thể lưu bản ghi dạng văn bản sau khi kết thúc')));
-  if(state.profilePage==='engine') return panel(t('黑钛金神经引擎设置','Cài đặt Neural Engine'),`<p>${t('接 Google Gemini 3.8 Flash 实时中越同传。Key 只存在这台设备的浏览器里，刷新不会丢。','Kết nối Gemini 3.8 Flash để phiên dịch Việt–Trung theo thời gian thực. Key chỉ lưu trong trình duyệt của thiết bị này.')}</p>
-    <label class="engine-label" for="gemini-key-input">Gemini API Key</label>
-    <div class="engine-key-row"><input id="gemini-key-input" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('请输入 Google AI Studio 免费申请的 Gemini API Key','Nhập Gemini API Key miễn phí từ Google AI Studio')}" value="${escape(getGeminiKey())}"><button type="button" class="text-button" data-show-engine-key>${t('显示','Hiện')}</button></div>
-    <div class="engine-actions"><button type="button" class="primary" data-test-engine>${t('引擎状态测试','Kiểm tra trạng thái')}</button><button type="button" class="text-button" data-clear-engine-key>${t('清除 Key','Xóa Key')}</button></div>
-    <p class="engine-status ${state.engineTest?.status==='ready'?'ready':state.engineTest?.status==='error'?'error':''}" id="engine-status" role="status">${escape(engineStatusText())}</p>
-    <p class="engine-note">${t('没有 Key？去 ','Chưa có Key? Vào ')}<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>${t(' 免费申请一个，粘贴到上面就行。遇到 404 或 503 时，会自动尝试一次 3.5 Flash-Lite。',' để xin một Key miễn phí rồi dán vào đây. Khi gặp lỗi 404 hoặc 503, ứng dụng thử 3.5 Flash-Lite một lần.')}</p>`);
   if(state.profilePage==='translation' || state.profilePage==='general') return panel(t('界面语言','Ngôn ngữ giao diện'),[['zh','简体中文'],['vi','Tiếng Việt']].map(([id,text])=>`<button class="titanium-row" data-lang="${id}" aria-pressed="${id===state.lang}"><span>${text}</span>${id===state.lang?icon('check'):''}</button>`).join(''));
   if(state.profilePage==='about') return panel(t('关于夜语','Giới thiệu DạNgữ'),`<p>${brandName}<br>${brandSubtitle}</p><p>Clean-47</p><p>${demo()}</p>`);
 
@@ -1900,10 +1637,9 @@ function profile() {
       <div><dt>${t('安全级别','Bảo mật')}</dt><dd>${icon('lock')}${t('本地存储','Lưu cục bộ')}</dd></div>
     </dl>
   </article>
-  ${group('TRANSLATION & AI ENGINE',
+  ${group('TRANSLATION & CALLS',
     row('sliders',t('引擎调度策略','Điều phối công cụ'),t(selectedPolicy[1],selectedPolicy[2]),'data-profile-page="policy"',t('方案预览 · 端侧优先','Xem trước · Ưu tiên trên máy'))+
     row('chat',t('中越称谓与会话风格','Xưng hô và phong cách'),t(selectedStyle[1],selectedStyle[2]),'data-profile-page="speech-style"')+
-    row('translate',t('黑钛金神经引擎设置','Cài đặt Neural Engine'),getGeminiKey()?t('已配置 Gemini Key','Đã nhập Gemini Key'):t('未配置','Chưa cài đặt'),'data-profile-page="engine"')+
     `<button class="titanium-row" role="switch" aria-checked="${state.callPreferences.captions}" data-call-preference="captions"><i>${icon('captions')}</i><span>${t('通话实时双语 HUD','HUD song ngữ')}<small>${t('半透明双语字幕 · 不播放合成音','Phụ đề nổi · Không phát giọng tổng hợp')}</small></span><span class="titanium-switch"></span></button>`+
     row('download',t('离线语言包状态','Gói ngôn ngữ ngoại tuyến'),t('示例可用','Có mẫu'),'',t('内置中越话术 · 未安装 NPU 模型','Có mẫu câu Việt–Trung · Chưa cài mô hình NPU'))
   )}
@@ -2161,7 +1897,7 @@ root.addEventListener('click', event => {
     const person=find(state.active);
     const message=messages(person)[Number(d.retryTranslation)];
     state.translationErrors[key]=operationOffline();
-    if(message?.[5] && !state.translationErrors[key] && !liveTranslations.has(message[5])) {
+    if(message?.[5] && !state.translationErrors[key] && !pendingTranslations.has(message[5])) {
       attachMessageTranslation(person,message,message[2],{followLatest:false});
     }
     render({preserve:true});
@@ -2216,20 +1952,6 @@ root.addEventListener('click', event => {
     state.translationCache=[];
     save('translation-cache',state.translationCache);
     notify(t('翻译缓存已清空','Đã xóa bộ nhớ đệm bản dịch'));
-  }
-  if('testEngine' in d) void testGeminiEngine();
-  if('showEngineKey' in d) {
-    const input=document.querySelector('#gemini-key-input');
-    if(!input) return;
-    const show=input.type==='password';
-    input.type=show?'text':'password';
-    control.textContent=show?t('隐藏','Ẩn'):t('显示','Hiện');
-  }
-  if('clearEngineKey' in d) {
-    save('gemini-api-key','');
-    state.engineTest=null;
-    render({preserve:true});
-    notify(t('Gemini Key 已清除','Đã xóa Gemini Key'));
   }
   if('signOut' in d || 'resumeDemo' in d) {
     state.signedOut='signOut' in d;
@@ -2354,7 +2076,6 @@ root.addEventListener('change', event=>{
 });
 root.addEventListener('input', event => {
   if(event.target.id==='search') { state.search=event.target.value; document.querySelector('.threads').innerHTML=listRows(); }
-  if(event.target.id==='gemini-key-input') save('gemini-api-key',event.target.value);
 });
 root.addEventListener('submit', event => {
   event.preventDefault();
@@ -2369,10 +2090,6 @@ root.addEventListener('submit', event => {
     const match=phrases.find(pair=>pair.some(phrase=>phrase.toLowerCase()===message.replace(/[。！!?！.]+$/u,'').toLowerCase()));
     const lang=/\p{Script=Han}/u.test(message)?'zh':(match?'vi':state.lang);
     input.value='';
-    if(!getGeminiKey() && !engineKeyToastShown) {
-      engineKeyToastShown=true;
-      notify(t('请先在设置中填入免费 Gemini Key','Vui lòng nhập Gemini Key miễn phí trong phần cài đặt'));
-    }
     const payload=translationPayload(find(state.active),message,lang);
     const key=JSON.stringify(payload.context);
     const cached=state.translationCache.find(row=>row[0]===lang&&row[1]===message&&row[3]===key);
