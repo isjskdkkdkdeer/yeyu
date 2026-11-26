@@ -68,6 +68,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .filters button,.language-buttons button {padding:7px 13px;border-radius:8px;color:var(--muted);font-size:13px}
 .filters .on,.language-buttons [aria-pressed=true] {background:var(--choice);color:var(--strong);font-weight:700}
 .threads {min-height:0;overflow:auto;flex:1;padding:0 10px 10px}
+.threads,.timeline,.details,.section-page,.caption-scroll,.message-scan{-webkit-overflow-scrolling:touch}
 .thread {width:100%;display:flex;align-items:center;text-align:start;gap:11px;padding:11px 10px;margin:3px 0;border:1px solid transparent;border-radius:var(--radius-control)}
 .thread.current {background:var(--choice);border-color:var(--line);box-shadow:inset 3px 0 var(--accent)}
 .avatar {position:relative;display:grid;place-items:center;width:45px;height:45px;border-radius:50%;flex:none;font-size:18px;font-weight:750;overflow:hidden; background:#d3e9dc;color:#205d49}
@@ -85,7 +86,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .thread-meta small {font-size:var(--text-xs);white-space:nowrap;margin:2px 0 5px}
 .thread-meta b {display:inline-grid;place-items:center;background:var(--accent);color:#fff;font-size:var(--text-xs);border-radius:10px;min-width:17px;height:17px}
 .empty {padding:20px;color:var(--muted)}
-.nav {margin-top:auto;padding:8px 7px max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);background:var(--side)}
+.nav {margin-top:auto;padding:8px 7px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);background:var(--side)}
 .nav button {border-radius:9px; min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:58px;padding:5px 0;color:var(--muted);font-size:var(--text-xs);white-space:nowrap}
 .nav button.selected {background:var(--choice);color:var(--strong)}
 .nav button.selected {font-weight:750}
@@ -638,7 +639,7 @@ button.titanium-row:focus-visible {outline-offset:-2px}
   -webkit-user-select:text;
   user-select:text;
 }
-.nav {height:auto;padding-bottom:max(10px,env(safe-area-inset-bottom, 0px));flex-shrink:0}
+.nav {height:auto;padding-bottom:max(12px,env(safe-area-inset-bottom, 0px));flex-shrink:0}
 .bubble-translated {position:relative;padding-right:42px}
 .bubble-translated>.message-original {font-size:1rem;color:var(--ink)}
 .message-original-details {margin-right:-33px}
@@ -1098,7 +1099,7 @@ function listRows() {
     }).join('') || `<p class="empty">${t('没有找到会话','Không tìm thấy cuộc trò chuyện')}</p>`;
 }
 function nodeStatus() {
-  return `<div class="node-status"><i aria-hidden="true"></i><span><b>SG-01</b> 节点已连线 · E2EE 加密</span></div>`;
+  return `<div class="node-status"><i aria-hidden="true"></i><span><b>SG-01</b> 新加坡边缘网关已连接 · E2EE 加密</span></div>`;
 }
 function sidebar() {
   return `<aside class="sidebar${state.leavingChat?' sidebar-entering':''}">${brand()}${state.tab==='messages'? `
@@ -1849,7 +1850,7 @@ function callView() {
   ];
   return `<main class="call-screen active${call.rtcMode?' rtc-mode':''} ${call.kind==='video'&&call.camera?'video-live':'voice-live'}" aria-label="${call.rtcMode?t('实时通话','Cuộc gọi trực tiếp'):t('通话','Cuộc gọi')}">
     ${call.rtcMode?`<video id="remote-call-media" class="rtc-remote-media ${call.kind==='voice'?'audio-only':''}" autoplay playsinline></video>`:''}
-    <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${label(person)}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('端到端加密','Mã hóa đầu cuối')}</div></header>
+    <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${label(person)}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('E2EE 端到端加密通话就绪','Cuộc gọi mã hóa E2EE đã sẵn sàng')}</div></header>
     ${call.kind==='video'&&call.camera?'':`<div class="call-portrait">${avatar(person,'large')}<p>${call.kind==='video'?t('摄像头已关闭','Camera đã tắt'):label(person)}</p></div>`}
     ${call.kind==='voice'&&!call.rtcMode?`<div class="voice-turn"><strong id="voice-language" aria-live="polite"></strong>
       <button type="button" class="call-tool" data-hold-talk aria-pressed="false">${t('按住说话','Nhấn giữ để nói')}</button>
@@ -2111,7 +2112,7 @@ root.addEventListener('click', event => {
     save('identity', value);
     state.identity=value;
     render();
-    notify(t('SG-01 节点已连线','Đã kết nối nút SG-01'));
+    notify(t('SG-01 新加坡边缘网关已连接','Đã kết nối cổng biên Singapore SG-01'));
   }
   if(d.changeAvatar!==undefined) {
     avatarTarget = d.changeAvatar==='me' ? {kind:'me'} : {kind:'friend', id:d.changeAvatar};
