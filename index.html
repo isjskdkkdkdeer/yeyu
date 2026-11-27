@@ -1197,7 +1197,7 @@ const state = {
   callPreferences:read('call-preferences',{captions:true,follow:true}), unreadBadges:read('unread-badges',true),
   conversationContexts:read('conversation-contexts',{}),
   titanium:read('titanium',{policy:'auto',style:'couple',cache:'keep'}),
-  translationCache:read('translation-cache',[]), signedOut:read('signed-out',false), toast:'', identity:read('identity',null),
+  translationCache:read('translation-cache',[]), signedOut:read('signed-out',false), toast:'', identity:(()=>{const v=read('identity',null); return typeof v==='string'&&v.includes('@')?v:null;})(),
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
@@ -2017,7 +2017,7 @@ function profile() {
       [t('名字','Tên'),label(demoProfile)],
       [t('性别','Giới tính'),t(...demoProfile.gender)],
       [t('地区','Khu vực'),t(...demoProfile.region)],
-      [t('手机号','Số điện thoại'),t('未绑定','Chưa liên kết')],
+      [t('邮箱','Email'),state.identity?escape(state.identity):t('未绑定','Chưa liên kết')],
       ['言聊ID',demoProfile.id]
     ];
     return `${back('home')}<section class="card settings-card"><h2>${t('个人资料','Thông tin cá nhân')}</h2>
@@ -2721,7 +2721,7 @@ function render({preserve=false,enterChat=false}={}) {
   }
   root.innerHTML=`<div class="shell ${state.tab==='messages'?'message-shell':'other-shell'} ${state.mobileChat&&state.tab==='messages'?'mobile-open':''} ${state.details?'with-details':''} ${state.tab==='me'&&!['details','qr'].includes(state.profilePage)?'profile-settings-shell':''}" ${state.pendingTranscript?'inert':''}>
     ${state.identity?nodeStatus():''}${sidebar()}${state.tab==='messages'?chatPanel(person,enterChat)+(state.details?details(person):''):otherPage()}
-  </div>${!state.identity?`<div class="handshake-backdrop handshake-staged"><section class="handshake-card" role="dialog" aria-modal="true" aria-label="NOCTIS · 专属身份接入"><div class="hs-stage hs-stage-1 handshake-illust">${spotkitSVG(SPOTKIT.handshake,72,t('握手','Bắt tay'))}</div><div class="hs-stage hs-stage-2 dotword" role="img" aria-label="NOCTIS">${dotMatrixSVG()}</div><div class="hs-stage hs-stage-3"><h1>专属身份接入</h1><p>${t('输入邀请码或手机号。','Nhập mã mời hoặc số điện thoại.')}</p><input id="handshake-input" type="text" value="+84 818 728 889" placeholder="${t('输入邀请码或手机号','Nhập mã mời hoặc số điện thoại')}" autocomplete="off" aria-label="${t('输入邀请码或手机号','Nhập mã mời hoặc số điện thoại')}"><button type="button" data-handshake-connect>${t('建立安全握手 (CONNECT)','Thiết lập bắt tay an toàn (CONNECT)')}</button></div></section></div>`:''}${transcriptPrompt()}${state.toast?`<div class="titanium-toast" role="status">${escape(state.toast)}</div>`:''}`;
+  </div>${!state.identity?`<div class="handshake-backdrop handshake-staged"><section class="handshake-card" role="dialog" aria-modal="true" aria-label="NOCTIS · 专属身份接入"><div class="hs-stage hs-stage-1 handshake-illust">${spotkitSVG(SPOTKIT.handshake,72,t('握手','Bắt tay'))}</div><div class="hs-stage hs-stage-2 dotword" role="img" aria-label="NOCTIS">${dotMatrixSVG()}</div><div class="hs-stage hs-stage-3"><h1>专属身份接入</h1><p>${t('输入邮箱。','Nhập email.')}</p><input id="handshake-input" type="email" value="" placeholder="${t('输入邮箱，例如 you@example.com','Nhập email, ví dụ you@example.com')}" autocomplete="off" aria-label="${t('输入邮箱','Nhập email')}"><button type="button" data-handshake-connect>${t('建立安全握手 (CONNECT)','Thiết lập bắt tay an toàn (CONNECT)')}</button></div></section></div>`:''}${transcriptPrompt()}${state.toast?`<div class="titanium-toast" role="status">${escape(state.toast)}</div>`:''}`;
   state.leavingChat=false;
   if(state.pendingTranscript) root.querySelector('[data-transcript-action="cancel"]')?.focus();
   const timeline=document.querySelector('.timeline');
@@ -2876,7 +2876,8 @@ root.addEventListener('click', event => {
   }
   if('handshakeConnect' in d) {
     const input=document.querySelector('#handshake-input');
-    const value=(input?.value || '').trim() || '+84 818 728 889';
+    const value=(input?.value || '').trim();
+    if(!value.includes('@')) { notify(t('请输入正确的邮箱','Vui lòng nhập email hợp lệ')); return; }
     const backdrop=document.querySelector('.handshake-backdrop');
     const done=()=>{ save('identity', value); state.identity=value; render(); };
     if(backdrop) { backdrop.classList.add('handshake-leaving'); setTimeout(done,180); }
