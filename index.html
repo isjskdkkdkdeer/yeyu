@@ -144,128 +144,89 @@ input::placeholder {color:var(--muted);opacity:1}
 .quick-phrases::-webkit-scrollbar{display:none}
 .quick-phrases button{flex-shrink:0;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-pill);font-size:var(--text-xs);line-height:1;padding:8px 12px;white-space:nowrap}
 .quick-phrases button:active{border-color:var(--gold)}
-.translate-page{background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
-.translate-page .section-header{background:transparent;border-bottom:0}
-.translate-page .section-content{flex:1;min-height:0;max-width:none;margin:0;padding:0;overflow:hidden;background:var(--bg)}
-.interpret-top{position:relative;justify-content:center}
-.interpret-status{font-size:var(--text-xs);letter-spacing:4px;color:rgba(216,181,109,.5);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.interpret-clear{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--muted);opacity:.55;padding:8px;display:grid;place-items:center}
-.interpret-clear svg{width:16px;height:16px}
-.interpret-neo{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg);color:var(--text);position:relative}
-.interpret-neo .interpret-form{display:none}
-.neo-half{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;justify-content:flex-end;padding:24px 24px}
-.neo-mine{padding-bottom:112px}
-.neo-stream{display:flex;flex-direction:column;gap:32px;width:100%}
-.neo-line{overflow-wrap:anywhere;display:flex;flex-direction:column;cursor:pointer}
-.neo-line .neo-src{order:1}
-.neo-line .neo-trans{order:2}
-.neo-line .neo-pending,.neo-line .neo-retry{order:2}
-.neo-line .neo-actions{order:3;display:flex;align-items:center;gap:8px;margin-top:10px}
-.neo-line .neo-actions .neo-ms{margin-top:0}
-.neo-line .neo-actions .neo-copy{margin:0}
-/* 译文翻面：点译文行原文与译文上下互换，150–250ms 只动 transform/opacity */
-.neo-line.neo-flipped .neo-src{order:2;color:var(--gold)}
-.neo-line.neo-flipped .neo-trans{order:1;color:var(--text)}
-.neo-line.neo-flipped .neo-src,.neo-line.neo-flipped .neo-trans{animation:neo-flip .22s ease-out}
-@keyframes neo-flip{from{opacity:.4;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-/* 翻译失败就地重试：失败的译文行原地变可点重试 */
-.neo-retry{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:transparent;border:1px solid rgba(216,181,109,.4);color:var(--gold);border-radius:var(--radius-pill);padding:8px 12px;font-size:var(--text-sm)}
-.neo-src{margin:0;font-size:var(--text-md);line-height:1.6;font-weight:600}
-.neo-trans{margin:8px 0 0;font-size:var(--text-sm);line-height:1.6}
-.neo-peer .neo-src{color:var(--text);text-shadow:0 0 22px rgba(229,231,235,.14),0 2px 12px rgba(0,0,0,.6)}
-.neo-peer .neo-trans{color:var(--gold);text-shadow:0 0 14px rgba(216,181,109,.12)}
-.neo-mine .neo-src{color:var(--text);text-shadow:0 0 22px rgba(255,255,255,.14),0 2px 12px rgba(0,0,0,.6)}
-.neo-mine .neo-trans{color:var(--text-dim);text-shadow:0 0 14px rgba(156,163,175,.12)}
-.neo-peer .neo-line{transform:rotate(180deg)}
-.neo-old{opacity:.5}
-.neo-old .neo-src{font-size:var(--text-base)}
-.neo-old .neo-trans{font-size:var(--text-xs)}
-.neo-latest{animation:neo-fade-in .2s ease-out}
-.neo-latest .neo-trans{font-size:var(--text-base);color:var(--gold-light);text-shadow:0 0 18px rgba(232,201,122,.18)}
-/* 同传页时间锚：长对话按 10 分钟间隔或方向切换插一条细金时间线 */
-.neo-anchor{display:flex;align-items:center;gap:8px;margin:8px 0;color:var(--gold-dim);font-size:11px;letter-spacing:.12em;font-variant-numeric:tabular-nums}
-.neo-anchor::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(216,181,109,.35))}
-.neo-anchor::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(216,181,109,.35),transparent)}
-.neo-anchor span{white-space:nowrap}
-.neo-ms{display:inline-block;margin-top:10px;font-size:11px;line-height:1;color:var(--gold);border:1px solid rgba(216,181,109,.35);border-radius:var(--radius-pill);padding:4px 8px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
-.neo-copy{display:inline-grid;place-items:center;vertical-align:middle;width:32px;height:32px;min-width:32px;min-height:32px;margin:6px 0 0 8px;background:transparent;border:1px solid rgba(216,181,109,.3);border-radius:50%;color:var(--gold);cursor:pointer}
-.neo-copy svg{width:15px;height:15px}
-.neo-copy:active{background:rgba(216,181,109,.15)}
-/* 录音计时：录音时出现在金键上方，告诉用户已经录了几秒 */
-.neo-rec-timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 96px);z-index:5;color:var(--gold);font-size:var(--text-sm);font-weight:600;letter-spacing:.12em;background:rgba(23,19,16,.85);border:1px solid rgba(216,181,109,.4);border-radius:var(--radius-pill);padding:6px 12px;pointer-events:none;font-variant-numeric:tabular-nums}
-.neo-rec-timer[hidden]{display:none}
-/* 录音声波：录音时在金键上方跳动，听没听到一眼能看出来 */
-.neo-wave{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 140px);z-index:5;display:flex;align-items:flex-end;gap:4px;height:28px;pointer-events:none}
-.neo-wave[hidden]{display:none}
-.neo-wave i{width:3px;border-radius:2px;background:var(--gold);animation:neo-wave 0.9s ease-in-out infinite}
-.neo-wave i:nth-child(1){height:10px;animation-delay:0s}
-.neo-wave i:nth-child(2){height:20px;animation-delay:.15s}
-.neo-wave i:nth-child(3){height:26px;animation-delay:.3s}
-.neo-wave i:nth-child(4){height:16px;animation-delay:.45s}
-.neo-wave i:nth-child(5){height:10px;animation-delay:.6s}
-@keyframes neo-wave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
-.neo-type:focus-within{border-color:var(--gold)}
+
 .composer form:focus-within,.comment-area form:focus-within{border-color:var(--gold)}
 .search:focus-within{border-color:var(--gold)}
-.neo-type{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 76px);width:min(92vw,420px);z-index:6;background:rgba(23,19,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0;border-radius:var(--radius-card);padding:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
-.neo-type[hidden]{display:none}
-.neo-type-row{display:flex;gap:8px;align-items:center}
-.neo-type input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font-size:var(--text-base);padding:8px 4px}
-.neo-type input::placeholder{color:var(--muted)}
-.neo-type-send{flex:none;background:var(--gold);color:var(--bg);border:0;border-radius:var(--radius-pill);padding:8px 14px;min-height:44px;font-size:var(--text-sm);font-weight:700}
-.neo-type-close{flex:none;background:transparent;border:0;color:var(--muted);font-size:var(--text-md);padding:4px 6px;min-width:44px;min-height:44px;display:grid;place-items:center;line-height:1}
-.neo-type-preset{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
-.neo-type-preset button{background:transparent;border:1px solid rgba(216,181,109,.3);color:var(--gold);border-radius:var(--radius-pill);padding:5px 10px;min-height:44px;font-size:var(--text-xs)}
-@keyframes neo-fade-in{from{opacity:0}to{opacity:1}}
 /* 图标情境动画：切换时图标从 0.25 缩放到 1、透明度 0 到 1、模糊 4px 到 0（bounce 0） */
 @keyframes neo-icon-in{from{transform:scale(.25);opacity:0;filter:blur(4px)}to{transform:scale(1);opacity:1;filter:blur(0)}}
 .icon-swap{animation:neo-icon-in .25s ease-out}
-.neo-pending{margin:6px 0 0;font-size:var(--text-sm);color:var(--muted)}
-.neo-empty-state{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:2;transition:opacity .45s ease}
-.neo-empty-state p{margin:0;color:var(--muted);font-size:var(--text-sm);line-height:1.9;letter-spacing:.04em}
-.neo-empty-state .empty-listen{display:none}
-.neo-empty-state.is-listening .empty-guide{display:none}
-.neo-empty-state.is-listening .empty-listen{display:block}
-.neo-empty-state.is-listening p{color:var(--text-dim)}
-.neo-empty-state.is-hidden{opacity:0}
-/* Spotkit 插画：同传空态与列表空态 */
-.neo-empty-state .empty-guide svg{display:block;margin:0 auto 14px}
 .empty-illust{text-align:center;padding-top:32px}
 .empty-illust svg{display:block;margin:0 auto}
 .empty-illust p{margin-top:12px}
 .titanium-vip svg{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
-.neo-pill{position:fixed;left:50%;transform:translateX(-50%);bottom:max(24px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:5}
-.neo-dir{flex:none;background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--text);border-radius:var(--radius-pill);padding:12px 14px;min-height:44px;font-size:var(--text-xs);font-weight:500;white-space:nowrap}
-.neo-mic{position:relative;width:56px;height:56px;flex:none;border-radius:50%;border:1px solid rgba(216,181,109,.55);background:radial-gradient(circle at 50% 35%,#33291D 0%,var(--surface) 55%,var(--bg) 100%);color:var(--gold);display:grid;place-items:center;transition:transform .45s cubic-bezier(.2,1.4,.4,1),box-shadow .2s ease-out,filter .2s ease-out}
-/* 金键三层按压：90ms 压进 2px + 缩 0.96 + 填充升一档 + 触点泛光，松手弹簧回弹约 450ms 带 1% 过冲 */
-.neo-mic:active{transform:translateY(2px) scale(.96);filter:brightness(1.25);box-shadow:0 0 0 1px rgba(216,181,109,.5),0 0 28px rgba(216,181,109,.55);transition-duration:90ms}
-.neo-mic svg{width:24px;height:24px}
-.neo-mic.holding{border-color:var(--gold);color:var(--text);animation:none;box-shadow:0 0 0 1px rgba(216,181,109,.35),0 0 26px rgba(216,181,109,.45)}
-.neo-mic.tapped::after{content:'';position:absolute;inset:-7px;border:1px solid rgba(216,181,109,.65);border-radius:50%;pointer-events:none;animation:neo-ripple .65s ease-out forwards}
-@keyframes neo-ripple{from{transform:scale(.85);opacity:.9}to{transform:scale(1.5);opacity:0}}
-.neo-mic.listening{border-color:var(--gold);color:var(--text);animation:neo-listen 1.6s ease-in-out infinite}
-@keyframes neo-listen{0%,100%{box-shadow:0 0 0 1px rgba(216,181,109,.25),0 0 16px rgba(216,181,109,.3)}50%{box-shadow:0 0 0 1px rgba(216,181,109,.5),0 0 30px rgba(216,181,109,.55)}}
-.translate-mic-btn.is-speaking{animation:goldPulse 1.2s infinite ease-in-out;box-shadow:0 0 20px rgba(216,181,109,.4)}
-@keyframes goldPulse{0%,100%{border-color:rgba(216,181,109,.4);transform:scale(1)}50%{border-color:rgba(216,181,109,1);transform:scale(1.05)}}
-/* BorderBeam：播报时一道光点沿金键圆环走（只在播报时出现，平时不亮） */
-.translate-mic-btn.is-speaking::before{content:'';position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,rgba(216,181,109,.95) 50deg,rgba(216,181,109,.25) 110deg,transparent 170deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));animation:beam-spin 1.5s linear infinite;pointer-events:none}
-@keyframes beam-spin{to{transform:rotate(360deg)}}
+/* 学语页：每日一句大卡（点一下翻面，0.22s 只动 transform/opacity；翻面时一道金线扫过） */
+.learn-daily{position:relative;overflow:hidden;cursor:pointer;padding:20px}
+.learn-daily .learn-daily-kicker{margin:0 0 12px;font-size:var(--text-xs);letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase}
+.learn-daily .learn-daily-main{margin:0;font-size:var(--text-md);line-height:1.6;font-weight:600;color:var(--text)}
+.learn-daily .learn-daily-sub{margin:8px 0 0;font-size:var(--text-base);line-height:1.6;color:var(--gold-light)}
+.learn-daily.learn-flipped .learn-daily-main{color:var(--gold)}
+.learn-daily.learn-flipped .learn-daily-sub{color:var(--text)}
+.learn-daily.learn-flipped .learn-daily-main,.learn-daily.learn-flipped .learn-daily-sub{animation:learn-flip .22s ease-out}
+.learn-daily::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,rgba(216,181,109,.9),transparent);transform:translateX(-100%);pointer-events:none}
+.learn-daily.learn-flipped::after{animation:learn-sweep .45s ease-out forwards}
+@keyframes learn-flip{from{opacity:.4;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes learn-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.learn-daily-foot{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--muted);font-size:var(--text-xs)}
+.learn-daily-foot .learn-speak{margin-left:auto;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid rgba(216,181,109,.4);color:var(--gold);background:transparent}
+.learn-daily-foot .learn-speak svg{width:20px;height:20px}
+.learn-daily-foot .learn-speak:active{background:rgba(216,181,109,.15)}
+/* 学语页：词典 / 练一句输入行 + 结果卡 */
+.learn-row{display:flex;gap:8px;align-items:center}
+.learn-row input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);color:var(--text);font-size:var(--text-base);padding:12px;outline:0}
+.learn-row input:focus{border-color:var(--gold)}
+.learn-row input::placeholder{color:var(--muted)}
+.learn-go{flex:none;background:var(--gold);color:var(--bg);border:0;border-radius:var(--radius-pill);padding:12px 16px;min-height:44px;font-size:var(--text-sm);font-weight:700}
+.learn-result{margin-top:12px}
+.learn-result .learn-word{margin:0;font-size:var(--text-md);font-weight:600;color:var(--text)}
+.learn-result .learn-ipa{margin:4px 0 0;font-size:var(--text-xs);color:var(--muted);font-variant-numeric:tabular-nums}
+.learn-result .learn-zh{margin:8px 0 0;font-size:var(--text-base);line-height:1.6;color:var(--gold-light)}
+.learn-result .learn-vi{margin:8px 0 0;font-size:var(--text-sm);line-height:1.6;color:var(--text-dim)}
+.learn-result .learn-ex{margin:8px 0 0;font-size:var(--text-sm);line-height:1.6;color:var(--text)}
+.learn-result .learn-ex li{margin-top:4px}
+.learn-source{margin:8px 0 0;font-size:var(--text-xs);color:var(--muted)}
+.learn-note{margin:12px 0 0;color:var(--muted);font-size:var(--text-sm)}
+.learn-practice-result{cursor:pointer}
+.learn-ms{display:inline-block;margin-top:10px;font-size:11px;line-height:1;color:var(--gold);border:1px solid rgba(216,181,109,.35);border-radius:var(--radius-pill);padding:4px 8px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
+/* 口语陪练 D 路：每日一句下面、词典上面；只动 transform/opacity */
+.tutor-card{padding:20px}
+.tutor-kicker{margin:0 0 8px;font-size:var(--text-xs);letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase}
+.tutor-sub{margin:0;font-size:var(--text-sm);line-height:1.5;color:var(--muted)}
+.tutor-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px}
+.tutor-status{display:flex;align-items:center;gap:8px;font-size:var(--text-sm);color:var(--text)}
+.tutor-dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--gold-dim)}
+.tutor-dot.is-live{background:var(--gold);box-shadow:0 0 8px rgba(216,181,109,.55);animation:tutor-pulse 1.2s ease-in-out infinite alternate}
+@keyframes tutor-pulse{from{opacity:.45}to{opacity:1}}
+.tutor-time{font-size:var(--text-sm);color:var(--gold);font-variant-numeric:tabular-nums}
+.tutor-toggle{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:16px;background:var(--gold);color:var(--bg);border-radius:var(--radius-pill);font-size:var(--text-base);font-weight:700}
+.tutor-toggle svg{width:20px;height:20px}
+.tutor-captions{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.tutor-line{margin-top:12px}
+.tutor-line:first-child{margin-top:0}
+.tutor-who{display:block;font-size:var(--text-xs);color:var(--muted);margin-bottom:4px}
+.tutor-user{margin:0;font-size:var(--text-base);line-height:1.6;color:var(--text)}
+.tutor-tutor{margin:0;font-size:var(--text-md);line-height:1.6;color:var(--gold-light)}
+.tutor-zh{margin:4px 0 0;font-size:var(--text-sm);line-height:1.6;color:var(--text-dim);animation:tutor-fade .2s ease-out}
+.tutor-zh:empty{display:none}
+.tutor-draft{opacity:.65}
+.tutor-notice{margin:12px 0 0;font-size:var(--text-sm);line-height:1.6;color:var(--muted)}
+.tutor-notice:empty{display:none}
+@keyframes tutor-fade{from{opacity:0}to{opacity:1}}
 /* 减弱动效：只保留透明度变化，去掉位移与缩放 */
 @media (prefers-reduced-motion: reduce){
- .neo-latest,.neo-mic.tapped::after,.translate-mic-btn.is-speaking::before{animation:none}
- .translate-mic-btn.is-speaking{animation:none}
- .neo-mic.listening{animation:none}
  .icon-swap{animation:none}
  .handshake-staged .hs-stage,.handshake-staged .dot-lit{animation:none;opacity:1}
  .relay-arc{animation:none}
+ .learn-daily.learn-flipped .learn-daily-main,.learn-daily.learn-flipped .learn-daily-sub{animation:none}
+ .learn-daily.learn-flipped::after{animation:none}
+ .tutor-dot.is-live,.tutor-zh{animation:none}
 }
 .composer form,.comment-area form {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:var(--radius-card);background:var(--chat);padding:4px}
 .composer input,.comment-area input {flex:1;width:0;padding:8px 4px}
 .send,.primary {background:var(--strong);color:var(--outer);border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-weight:700}
 .send {padding:0;width:44px;height:44px;flex:none}
 /* 主按钮按压：90ms 压进 scale(0.96)，松手弹簧回弹约 450ms 带 1% 过冲 */
-.send,.quick-phrases button,.neo-type-send,.neo-dir,.prompter-item,.neo-copy{transition:transform .45s cubic-bezier(.2,1.4,.4,1)}
-.send:active,.quick-phrases button:active,.neo-type-send:active,.neo-dir:active,.prompter-item:active,.neo-copy:active{transform:scale(.96);transition-duration:90ms}
+.send,.quick-phrases button,.prompter-item,.learn-go,.learn-speak,.tutor-toggle{transition:transform .45s cubic-bezier(.2,1.4,.4,1)}
+.send:active,.quick-phrases button:active,.prompter-item:active,.learn-go:active,.learn-speak:active,.tutor-toggle:active{transform:scale(.96);transition-duration:90ms}
 /* 光学对齐：纸飞机图标视觉重心偏左下，手动向右上挪 1px */
 .send svg{transform:translate(1px,-1px)}
 .composer-note {display:flex;justify-content:space-between;gap:6px;margin:7px 4px 0;color:var(--muted);font-size:var(--text-xs)}
@@ -1048,6 +1009,7 @@ const paths = {
  plus:'<path d="M12 5v14M5 12h14"/>',
  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
  translate:'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+ book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
  send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
  smile:'<circle cx="12" cy="12" r="9"/><path d="M8 14a4 4 0 0 0 8 0M9 9h.01M15 9h.01"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
@@ -1098,7 +1060,6 @@ function spotkitPackSVG(inner,size=48,label='') {
 }
 const SPOTKIT={
  emptyMessages:'<rect x="22" y="26" width="60" height="38" rx="12"/><path d="M38 64l-6 14 18-12"/><line x1="32" y1="40" x2="72" y2="40"/><line x1="32" y1="50" x2="58" y2="50"/><rect x="68" y="70" width="32" height="24" rx="10"/><path d="M88 94l4 12-12-10"/><circle cx="98" cy="72" r="4" fill="#D8B56D" stroke="#0B0A08" stroke-width="1"/>',
- interpret:'<circle cx="60" cy="60" r="36" stroke-opacity=".3"/><path d="M40 42a26 26 0 0 0 0 36"/><path d="M80 42a26 26 0 0 1 0 36"/><line x1="60" y1="26" x2="60" y2="94" stroke-dasharray="0.5 6"/><path d="M50 52a12 12 0 0 1 0 16"/><path d="M70 52a12 12 0 0 0 0 16"/><circle cx="60" cy="60" r="5" fill="#D8B56D" stroke="none"/>',
  handshake:'<rect x="28" y="58" width="36" height="32" rx="8"/><path d="M36 58V48a10 10 0 0 1 20 0v10"/><circle cx="46" cy="72" r="3.5" fill="#D8B56D" stroke="none"/><circle cx="88" cy="36" r="8"/><path d="M82 42L64 60"/><path d="M70 54l5 5M64 60l5 5"/>',
  vip:'<path d="M26 80L22 44l20 14 18-20 18 20 20-14-4 36z"/><path d="M26 88h68"/><circle cx="60" cy="66" r="4" fill="#D8B56D" stroke="none"/>'
 };
@@ -1240,7 +1201,8 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
-  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',interpretTyping:false,savedPhrases:read('saved-phrases',[]),
+  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, lastTranslateMs:null, savedPhrases:read('saved-phrases',[]),
+  learn:{pack:'night-market',daily:null,dailyLoading:false,dailyFlipped:false,dictQuery:'',dict:null,dictLoading:false,practiceInput:'',practice:null,practiceLoading:false,tutor:{status:'idle',elapsed:0,lastSeconds:0,userText:'',userFinal:false,tutorText:'',tutorFinal:false,tutorZh:'',notice:''}},
   translated:{}, picker:false, prompter:{open:false,active:null}, prompterPack:'night-market', call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
@@ -1276,7 +1238,7 @@ const languageName = lang => lang==='vi'?'Tiếng Việt':t('简体中文','Ti�
 const button = (glyph,label,attrs='',klass='icon-button') => `<button type="button" class="${klass}" aria-label="${label}" title="${label}" ${attrs}>${icon(glyph)}</button>`;
 const nav = [
  ['messages','chat','消息','Tin nhắn'],['contacts','people','名片','Danh bạ'],
- ['translate','translate','同传','Phiên dịch'],['me','user','我的','Tôi'],
+ ['learn','book','学语','Học'],['me','user','我的','Tôi'],
 ];
 function avatar(person, size='') {
   return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size} ${person.vip?'avatar-vip':''} ${person.avatarUrl?'avatar-photo':''}">
@@ -1674,6 +1636,7 @@ function attachMessageTranslation(person,message,fallback,{followLatest=false}={
     const start=performance.now();
     message[2]=fallback || demoTranslation(translationPayload(person,text,lang));
     meta.translationMs=Math.round(performance.now()-start);
+    state.lastTranslateMs=meta.translationMs;
     return;
   }
   pendingTranslations.add(meta);
@@ -1682,6 +1645,7 @@ function attachMessageTranslation(person,message,fallback,{followLatest=false}={
     message[2]=result.text;
     meta.translationRoute=result.route;
     meta.translationMs=result.elapsedMs;
+    state.lastTranslateMs=result.elapsedMs;
     refreshDemoReply(person,followLatest);
   }).catch(()=>{
     pendingTranslations.delete(meta);
@@ -1964,10 +1928,10 @@ function savedPhrasesSection() {
     const time=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date(p.ts||Date.now()));
     return `<article class="saved-card"><p class="saved-src" lang="${p.side==='peer'?'vi':'zh-CN'}">${escape(p.src)}</p><p class="saved-trans" lang="${p.side==='peer'?'zh-CN':'vi'}">${escape(p.trans)}</p><div class="saved-meta"><span>${time}</span><button type="button" class="saved-play" data-save-phrase-replay="${i}" aria-label="${t('重播读音','Đọc lại')}">${icon('speaker')}</button><button type="button" class="saved-del" data-unsave-phrase="${i}" aria-label="${t('删除','Xóa')}">×</button></div></article>`;
   }).join('');
-  return `<section class="saved-section"><h2>${t('金句收藏','Câu hay đã lưu')}</h2>${items.length?`<div class="saved-row">${cards}</div>`:`<p class="saved-empty">${t('长按同传页的译文，就能把金句存到这里。','Nhấn giữ bản dịch ở trang phiên dịch để lưu câu hay vào đây.')}</p>`}</section>`;
+  return `<section class="saved-section"><h2>${t('金句收藏','Câu hay đã lưu')}</h2>${items.length?`<div class="saved-row">${cards}</div>`:`<p class="saved-empty">${t('在学语页的情景短语里长按一句，就能把金句存到这里。','Nhấn giữ một câu trong phần cụm từ ở trang học để lưu câu hay vào đây.')}</p>`}</section>`;
 }
 function relayLive() {
-  const lastMs=[...(state.interpret.peer||[]),...(state.interpret.mine||[])].filter(e=>e.ms!=null).at(-1)?.ms;
+  const lastMs=state.lastTranslateMs;
   const led=Array.from({length:25},(_,i)=>`<i class="${i<21?'on':''}"></i>`).join('');
   return `<div class="relay-live">
     <div class="relay-globe" role="img" aria-label="SG-01 专线：新加坡 → 河内 / 胡志明">
@@ -2126,65 +2090,389 @@ function profile() {
     relayLive()+
     row('info',t('关于夜语','Giới thiệu DạNgữ'),'Clean-47','data-profile-page="about"')
   )}</div>
-  ${savedPhrasesSection()}
   <button type="button" class="identity-share-btn" data-share-identity>${icon('share')} ${t('分享我的身份卡','Chia sẻ thẻ danh tính của tôi')}</button>
   <button class="titanium-exit" data-sign-out>${t('安全退出','Thoát an toàn')}</button>`;
 }
-function interpretStream(side) {
-  const all=(state.interpret[side] || []);
-  const items=all.slice(-3);
-  if(!items.length) return '';
-  const other=(state.interpret[side==='peer'?'mine':'peer'] || []);
-  const otherLastTs=other.length?other[other.length-1].ts:null;
-  const clockOf=ts=>new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date(ts));
-  const anchorFor=(item,prev)=>{
-    if(!item.ts) return '';
-    if(prev?.ts && item.ts-prev.ts>=600000) return `<div class="neo-anchor"><span>${clockOf(item.ts)}</span></div>`;
-    if(prev?.ts && otherLastTs && otherLastTs>prev.ts && item.ts>otherLastTs) return `<div class="neo-anchor"><span>${clockOf(item.ts)} · ${side==='peer'?t('越 → 中','Việt → Trung'):t('中 → 越','Trung → Việt')}</span></div>`;
-    return '';
+/* 学语页：每日一句（14 个日常关键词，按一年中的第几天轮换） */
+const LEARN_KEYWORDS=['xin chào','ăn cơm','cảm ơn','tạm biệt','hẹn gặp lại','chúc ngủ ngon','bạn khỏe không','đi đâu','bao nhiêu tiền','ngon quá','xin lỗi','rất vui được gặp bạn','tôi yêu bạn','chúc mừng sinh nhật'];
+/* 本地 fallback：中继取不到时也绝不空白、绝不报错 */
+const LEARN_DAILY_FALLBACK={vie:'Xin chào, rất vui được gặp bạn',cmn:'你好，很高兴认识你',audio:null};
+function learnDayOfYear(now=new Date()) {
+  const start=new Date(now.getFullYear(),0,0);
+  return Math.floor((now-start)/86400000);
+}
+async function ensureDailySentence() {
+  const day=learnDayOfYear();
+  if(state.learn.daily?.day===day || state.learn.dailyLoading) return;
+  state.learn.dailyLoading=true;
+  const keyword=LEARN_KEYWORDS[day % LEARN_KEYWORDS.length];
+  try {
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),10000);
+    try {
+      const resp=await fetch(BACKEND_TRANSLATE_API+'tatoeba?q='+encodeURIComponent(keyword),{signal:ctrl.signal});
+      const data=await resp.json().catch(()=>({}));
+      if(data?.ok && data.vie && data.cmn) state.learn.daily={vie:data.vie,cmn:data.cmn,audio:typeof data.audio==='string'?data.audio:null,day};
+      else state.learn.daily={...LEARN_DAILY_FALLBACK,day};
+    } finally { clearTimeout(timer); }
+  } catch {
+    state.learn.daily={...LEARN_DAILY_FALLBACK,day};
+  }
+  state.learn.dailyLoading=false;
+  if(state.tab==='learn') render({preserve:true});
+}
+function speakDailySentence() {
+  const d=state.learn.daily;
+  if(!d) return;
+  if(d.audio) {
+    try {
+      const audio=new Audio(d.audio);
+      audio.play().catch(()=>speakTranslation(d.vie,'vi'));
+      return;
+    } catch {}
+  }
+  speakTranslation(d.vie,'vi');
+}
+async function lookupDict(word) {
+  const q=(word||'').trim();
+  if(!q) return;
+  state.learn.dictQuery=q;
+  state.learn.dictLoading=true;
+  state.learn.dict=null;
+  render({preserve:true});
+  try {
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),10000);
+    try {
+      const resp=await fetch(BACKEND_TRANSLATE_API+'dict?word='+encodeURIComponent(q),{signal:ctrl.signal});
+      const data=await resp.json().catch(()=>({}));
+      if(!data?.ok) { state.learn.dict={notFound:true,word:q}; }
+      else {
+        const translations=Array.isArray(data.translations)?data.translations:[];
+        const defs=Array.isArray(data.definitions)?data.definitions:[];
+        const examples=(Array.isArray(data.examples)?data.examples:[]).filter(x=>typeof x==='string'&&x.trim()).slice(0,3);
+        const ipa=data.ipa||{};
+        state.learn.dict={word:data.word||q,zh:translations.find(x=>x?.lang==='zh')?.text||'',viDef:defs.find(x=>x?.lang==='vi')?.text||'',enDef:defs.find(x=>x?.lang==='en')?.text||'',examples,ipaHn:ipa.ha_noi||'',ipaSg:ipa.sai_gon||'',audio:typeof data.audio==='string'?data.audio:null};
+      }
+    } finally { clearTimeout(timer); }
+  } catch {
+    state.learn.dict={notFound:true,word:q};
+  }
+  state.learn.dictLoading=false;
+  if(state.tab==='learn') render({preserve:true});
+}
+async function practiceTranslate() {
+  const text=(state.learn.practiceInput||'').trim();
+  if(!text || state.learn.practiceLoading) return;
+  state.learn.practiceLoading=true;
+  state.learn.practice=null;
+  render({preserve:true});
+  const t0=performance.now();
+  try {
+    const trans=await requestRelayTranslation({sourceText:text,toLang:'vi'});
+    const ms=Math.round(performance.now()-t0);
+    state.lastTranslateMs=ms;
+    state.learn.practice={src:text,trans,ms};
+  } catch {
+    state.learn.practice={src:text,error:true};
+  }
+  state.learn.practiceLoading=false;
+  if(state.tab==='learn') render({preserve:true});
+}
+/* 口语陪练 D 路：前端只连中继 WebSocket，不存密钥、不直连 PolyAI。
+   中继约定：wss://yeyu-translate.jameswilson199079.workers.dev/realtime；先发 {"type":"start"}，
+   随后发 PCM16 16kHz 二进制帧（约 20ms 一帧），结束发 {"type":"stop"}；
+   中继回 transcript（user/tutor，final 才定稿；转写可能是英文，只显示、不当失败）/
+   audio（base64 PCM16 24kHz）/ error。注意：Worker 中继还没做，中继地址目前不通。 */
+const TUTOR_REALTIME_URL='wss://yeyu-translate.jameswilson199079.workers.dev/realtime';
+const TUTOR_FRAME_BYTES=640; /* 20ms PCM16 16kHz 单声道 */
+const tutor={ws:null,stream:null,micCtx:null,processor:null,source:null,playCtx:null,playPending:0,timerId:null,startedAt:0,sessionId:0,stopping:false,pcmTail:new Uint8Array(0)};
+function tutorState(){ return state.learn.tutor; }
+function tutorStatusText(status){
+  return {idle:t('未开始','Chưa bắt đầu'),connecting:t('连接中…','Đang kết nối…'),listening:t('正在听','Đang nghe'),speaking:t('老师在说','Cô giáo đang nói'),ended:t('已结束','Đã kết thúc'),error:t('连接失败','Kết nối thất bại')}[status] || status;
+}
+function tutorSection(){
+  const T=tutorState();
+  const active=T.status==='connecting'||T.status==='listening'||T.status==='speaking';
+  return `<section class="card tutor-card" aria-label="${t('口语陪练','Luyện nói')}">
+    <p class="tutor-kicker">${t('口语陪练 · AI 越南语老师','Luyện nói · Giáo viên tiếng Việt AI')}</p>
+    <p class="tutor-sub">${t('开口说越语，老师用越语回你、纠正你','Nói tiếng Việt, cô giáo trả lời bằng tiếng Việt và sửa lỗi cho bạn')}</p>
+    <div class="tutor-head"><span class="tutor-status"><i class="tutor-dot${T.status==='listening'||T.status==='speaking'?' is-live':''}" data-tutor-dot></i><span data-tutor-status>${tutorStatusText(T.status)}</span></span><span class="tutor-time" data-tutor-time>${elapsedLabel(T.elapsed)}</span></div>
+    <button type="button" class="tutor-toggle" data-tutor-toggle>${icon('mic')} ${active?t('结束对话','Kết thúc trò chuyện'):t('开始对话','Bắt đầu trò chuyện')}</button>
+    <div class="tutor-captions" aria-live="polite">
+      <div class="tutor-line"><span class="tutor-who">${t('你','Bạn')}</span><p class="tutor-user${T.userText&&!T.userFinal?' tutor-draft':''}" data-tutor-user>${T.userText?escape(T.userText):t('开始后，对着手机说越语，老师会回你。','Sau khi bắt đầu, hãy nói tiếng Việt vào điện thoại.')}</p></div>
+      <div class="tutor-line"><span class="tutor-who">${t('老师','Cô giáo')}</span><p class="tutor-tutor${T.tutorText&&!T.tutorFinal?' tutor-draft':''}" lang="vi" data-tutor-tutor>${T.tutorText?escape(T.tutorText):t('老师的话会显示在这里','Lời của cô giáo sẽ hiện ở đây')}</p><p class="tutor-zh" lang="zh-CN" data-tutor-zh>${T.tutorZh?escape(T.tutorZh):''}</p></div>
+    </div>
+    <p class="tutor-notice" data-tutor-notice>${T.notice?escape(T.notice):''}</p>
+  </section>`;
+}
+function updateTutorView(){
+  const T=tutorState();
+  const status=document.querySelector('[data-tutor-status]');
+  if(!status) return;
+  status.textContent=tutorStatusText(T.status);
+  const dot=document.querySelector('[data-tutor-dot]');
+  if(dot) dot.classList.toggle('is-live',T.status==='listening'||T.status==='speaking');
+  const time=document.querySelector('[data-tutor-time]');
+  if(time) time.textContent=elapsedLabel(T.elapsed);
+  const btn=document.querySelector('[data-tutor-toggle]');
+  if(btn){
+    const active=T.status==='connecting'||T.status==='listening'||T.status==='speaking';
+    btn.innerHTML=icon('mic')+' '+(active?t('结束对话','Kết thúc trò chuyện'):t('开始对话','Bắt đầu trò chuyện'));
+  }
+  const user=document.querySelector('[data-tutor-user]');
+  if(user){
+    user.textContent=T.userText||t('开始后，对着手机说越语，老师会回你。','Sau khi bắt đầu, hãy nói tiếng Việt vào điện thoại.');
+    user.classList.toggle('tutor-draft',!!(T.userText&&!T.userFinal));
+  }
+  const tutorEl=document.querySelector('[data-tutor-tutor]');
+  if(tutorEl){
+    tutorEl.textContent=T.tutorText||t('老师的话会显示在这里','Lời của cô giáo sẽ hiện ở đây');
+    tutorEl.classList.toggle('tutor-draft',!!(T.tutorText&&!T.tutorFinal));
+  }
+  const zh=document.querySelector('[data-tutor-zh]');
+  if(zh) zh.textContent=T.tutorZh||'';
+  const notice=document.querySelector('[data-tutor-notice]');
+  if(notice) notice.textContent=T.notice||'';
+}
+function tutorSetStatus(status){ tutorState().status=status; updateTutorView(); }
+function tutorStopMic(){
+  try{ tutor.processor?.disconnect(); }catch{}
+  try{ tutor.source?.disconnect(); }catch{}
+  tutor.processor=null; tutor.source=null;
+  for(const track of tutor.stream?.getTracks() || []) { try{ track.stop(); }catch{} }
+  tutor.stream=null;
+  if(tutor.micCtx){ const ctx=tutor.micCtx; tutor.micCtx=null; void ctx.close?.().catch(()=>{}); }
+}
+function tutorTeardown(){
+  tutor.stopping=true;
+  try{ if(tutor.ws && tutor.ws.readyState===1) tutor.ws.send(JSON.stringify({type:'stop'})); }catch{}
+  try{ tutor.ws?.close(); }catch{}
+  tutor.ws=null;
+  tutorStopMic();
+  clearInterval(tutor.timerId); tutor.timerId=null;
+}
+function stopTutor(){
+  const T=tutorState();
+  const active=T.status==='connecting'||T.status==='listening'||T.status==='speaking';
+  if(!active && !tutor.ws) return;
+  const elapsed=T.elapsed;
+  tutorTeardown();
+  T.lastSeconds=elapsed;
+  const m=Math.floor(elapsed/60), s=elapsed%60;
+  T.notice=t(`本次练习 ${m} 分 ${s} 秒`,`Buổi luyện này ${m} phút ${s} giây`);
+  tutorSetStatus('ended');
+}
+function tutorPlayAudio(base64,sessionId){
+  try{
+    const Ctx=platform.AudioContext||platform.webkitAudioContext;
+    if(!Ctx) return;
+    if(!tutor.playCtx) tutor.playCtx=new Ctx();
+    const ctx=tutor.playCtx;
+    void ctx.resume?.().catch(()=>{});
+    const bin=atob(base64);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    if(bytes.length<2) return;
+    const samples=new Int16Array(bytes.buffer);
+    const buf=ctx.createBuffer(1,samples.length,24000);
+    const ch=buf.getChannelData(0);
+    for(let i=0;i<samples.length;i++) ch[i]=samples[i]/32768;
+    const src=ctx.createBufferSource();
+    src.buffer=buf;
+    src.connect(ctx.destination);
+    tutor.playPending++;
+    tutorSetStatus('speaking');
+    src.onended=()=>{
+      tutor.playPending=Math.max(0,tutor.playPending-1);
+      if(tutor.playPending===0 && tutor.sessionId===sessionId && tutorState().status==='speaking') tutorSetStatus('listening');
+    };
+    src.start();
+  }catch{}
+}
+function tutorOnRelay(msg,sessionId){
+  const T=tutorState();
+  if(!msg || typeof msg!=='object') return;
+  if(msg.type==='transcript'){
+    const text=typeof msg.text==='string'?msg.text.trim():'';
+    if(!text) return;
+    if(msg.role==='user'){
+      T.userText=text; T.userFinal=msg.final===true;
+      updateTutorView();
+    }else if(msg.role==='tutor'){
+      T.tutorText=text; T.tutorFinal=msg.final===true;
+      updateTutorView();
+      if(msg.final===true){
+        const expect=text;
+        void requestRelayTranslation({sourceText:text,toLang:'zh'}).then(zh=>{
+          if(tutor.sessionId!==sessionId || tutorState().tutorText!==expect) return;
+          T.tutorZh=zh;
+          updateTutorView();
+        }).catch(()=>{});
+      }
+    }
+    return;
+  }
+  if(msg.type==='audio' && typeof msg.data==='string' && msg.data){
+    tutorPlayAudio(msg.data,sessionId);
+    return;
+  }
+  if(msg.type==='error'){
+    const raw=typeof msg.message==='string'?msg.message:'';
+    tutorTeardown();
+    T.notice=/402|额度|credit/i.test(raw)
+      ?t('额度已用完，请稍后再试','Đã hết lượt, hãy thử lại sau')
+      :t('口语陪练连接失败，请稍后重试','Không kết nối được với luyện nói, hãy thử lại sau');
+    tutorSetStatus('error');
+  }
+}
+function tutorStartAudio(stream,sessionId){
+  try{
+    const Ctx=platform.AudioContext||platform.webkitAudioContext;
+    if(!Ctx) throw new Error('no AudioContext');
+    const ctx=new Ctx();
+    tutor.micCtx=ctx;
+    void ctx.resume?.().catch(()=>{});
+    const source=ctx.createMediaStreamSource(stream);
+    const processor=ctx.createScriptProcessor(4096,1,1);
+    tutor.source=source; tutor.processor=processor;
+    tutor.pcmTail=new Uint8Array(0);
+    const ratio=ctx.sampleRate/16000;
+    processor.onaudioprocess=event=>{
+      if(tutor.sessionId!==sessionId || !tutor.ws || tutor.ws.readyState!==1) return;
+      const input=event.inputBuffer.getChannelData(0);
+      const outLen=Math.floor(input.length/ratio);
+      const pcm=new Int16Array(outLen);
+      for(let i=0;i<outLen;i++){
+        const s=input[Math.min(input.length-1,Math.floor(i*ratio))];
+        pcm[i]=Math.max(-32768,Math.min(32767,Math.round(s*32768)));
+      }
+      const bytes=new Uint8Array(pcm.buffer);
+      const merged=new Uint8Array(tutor.pcmTail.length+bytes.length);
+      merged.set(tutor.pcmTail); merged.set(bytes,tutor.pcmTail.length);
+      let off=0;
+      while(merged.length-off>=TUTOR_FRAME_BYTES){
+        try{ tutor.ws.send(merged.slice(off,off+TUTOR_FRAME_BYTES).buffer); }catch{ return; }
+        off+=TUTOR_FRAME_BYTES;
+      }
+      tutor.pcmTail=merged.slice(off);
+    };
+    source.connect(processor);
+    processor.connect(ctx.destination);
+  }catch{
+    tutorTeardown();
+    tutorState().notice=t('麦克风打不开，请检查后重试','Không mở được micrô, hãy kiểm tra rồi thử lại');
+    tutorSetStatus('error');
+  }
+}
+async function startTutor(){
+  const T=tutorState();
+  if(T.status==='connecting'||T.status==='listening'||T.status==='speaking') return;
+  if(!platform.navigator?.mediaDevices?.getUserMedia || typeof platform.WebSocket!=='function'){
+    T.notice=t('当前设备不支持麦克风，请用手机浏览器打开','Thiết bị này không hỗ trợ micrô, hãy mở bằng trình duyệt trên điện thoại');
+    tutorSetStatus('error'); return;
+  }
+  T.userText=''; T.userFinal=false; T.tutorText=''; T.tutorFinal=false; T.tutorZh=''; T.notice=''; T.elapsed=0; T.lastSeconds=0;
+  tutorSetStatus('connecting');
+  let stream;
+  try{
+    stream=await platform.navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+  }catch(err){
+    T.notice=err?.name==='NotAllowedError'||err?.name==='SecurityError'
+      ?t('麦克风权限被拒绝，允许后重试','Quyền micrô đã bị từ chối, hãy cho phép rồi thử lại')
+      :t('麦克风打不开，请检查后重试','Không mở được micrô, hãy kiểm tra rồi thử lại');
+    tutorSetStatus('error'); return;
+  }
+  tutor.sessionId++;
+  const sessionId=tutor.sessionId;
+  tutor.stopping=false;
+  tutor.stream=stream;
+  let ws;
+  try{ ws=new platform.WebSocket(TUTOR_REALTIME_URL); }catch{
+    tutorStopMic();
+    T.notice=t('连不上口语陪练，请检查网络后重试','Không kết nối được, hãy kiểm tra mạng rồi thử lại');
+    tutorSetStatus('error'); return;
+  }
+  tutor.ws=ws;
+  ws.binaryType='arraybuffer';
+  ws.onopen=()=>{
+    if(tutor.sessionId!==sessionId) return;
+    try{ ws.send(JSON.stringify({type:'start'})); }catch{}
+    tutorStartAudio(stream,sessionId);
+    if(tutorState().status!=='connecting') return;
+    tutor.startedAt=Date.now();
+    T.elapsed=0;
+    tutor.timerId=setInterval(()=>{
+      if(tutor.sessionId!==sessionId) return;
+      T.elapsed=Math.floor((Date.now()-tutor.startedAt)/1000);
+      const time=document.querySelector('[data-tutor-time]');
+      if(time) time.textContent=elapsedLabel(T.elapsed);
+    },1000);
+    tutorSetStatus('listening');
   };
-  return items.map((item,i)=>{
-    const latest=i===items.length-1;
-    const realIndex=all.length-items.length+i;
-    const body=item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`
-      :item.error?`<button type="button" class="neo-retry" data-retry-interpret="${side}:${realIndex}"><span aria-hidden="true">↻</span> ${t('翻译失败，点一下重试','Dịch thất bại, chạm để thử lại')}</button>`
-      :`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p><div class="neo-actions">${latest&&item.ms!=null?`<span class="neo-ms">${item.ms} ms</span>`:''}<button type="button" class="neo-copy" data-copy-side="${side}" data-copy-index="${realIndex}" aria-label="${t('复制译文','Sao chép bản dịch')}">${icon('copy')}</button></div>`;
-    return `${anchorFor(item,all[realIndex-1])}<div class="neo-line${latest?' neo-latest':' neo-old'}${item.flipped?' neo-flipped':''}" data-flip="${side}:${realIndex}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${body}</div>`;
-  }).join('');
+  ws.onmessage=event=>{
+    if(tutor.sessionId!==sessionId) return;
+    if(typeof event.data!=='string') return;
+    let msg;
+    try{ msg=JSON.parse(event.data); }catch{ return; }
+    tutorOnRelay(msg,sessionId);
+  };
+  ws.onerror=()=>{};
+  ws.onclose=()=>{
+    if(tutor.sessionId!==sessionId || tutor.stopping) return;
+    tutorStopMic();
+    clearInterval(tutor.timerId); tutor.timerId=null;
+    if(T.status==='connecting') T.notice=t('连不上口语陪练，请检查网络后重试','Không kết nối được, hãy kiểm tra mạng rồi thử lại');
+    else if(T.status==='listening'||T.status==='speaking') T.notice=t('连接已断开，请重新开始','Đã mất kết nối, hãy bắt đầu lại');
+    tutorSetStatus('error');
+  };
 }
-function scrollInterpretStreams(){
-  document.querySelectorAll('.neo-half').forEach(el=>{ el.scrollTop=el.scrollHeight; });
+function toggleTutor(){
+  const s=tutorState().status;
+  if(s==='connecting'||s==='listening'||s==='speaking') stopTutor();
+  else void startTutor();
 }
-function translatePage() {
-  const dir=state.interpretDir || 'mine';
-  const hasInterpret=(state.interpret.peer||[]).length>0||(state.interpret.mine||[]).length>0;
-  const dirLabel=dir==='mine'?t('中 ⇄ 越','Trung ⇄ Việt'):t('越 ⇄ 中','Việt ⇄ Trung');
-  const typePreset=dir==='mine'?'你好，很高兴认识你':'Xin chào, rất vui được gặp bạn';
-  return `<div class="interpret-neo">
-    <form class="interpret-form" data-interpret-form="peer" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
-    <form class="interpret-form" data-interpret-form="mine" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
-    <section class="neo-half neo-peer" aria-label="${t('对方','Đối phương')}"><div class="neo-stream">${interpretStream('peer')}</div></section>
-    <section class="neo-half neo-mine" aria-label="${t('我方','Tôi')}"><div class="neo-stream">${interpretStream('mine')}</div></section>
-    <div class="neo-empty-state${hasInterpret?' is-hidden':''}"><div class="empty-guide">${spotkitSVG(SPOTKIT.interpret,96,t('同传','Phiên dịch'))}<p>${t('轻触收音，即刻同传','Chạm để bắt đầu phiên dịch')}</p></div><div class="empty-listen"><p>${t('正在聆听…','Đang lắng nghe…')}</p></div></div>
-    <div class="neo-type"${state.interpretTyping?'':' hidden'}>
-      <div class="neo-type-row"><input type="text" data-interpret-type-input maxlength="300" autocomplete="off" placeholder="${t('输入要翻译的话…','Nhập câu cần dịch…')}"><button type="button" class="neo-type-send" data-interpret-type-send>${t('翻译','Dịch')}</button><button type="button" class="neo-type-close" data-interpret-type-close aria-label="${t('关闭','Đóng')}">×</button></div>
-      <div class="neo-type-preset"><button type="button" data-interpret-type-preset>${escape(typePreset)}</button></div>
-    </div>
-    <div class="neo-wave" hidden><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="neo-rec-timer" hidden>00:00</div>
-    <div class="neo-pill">
-      <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
-      <button type="button" class="neo-mic translate-mic-btn" data-interpret-hold="${dir}" aria-label="${t('按住说话','Giữ để nói')}">${icon('mic')}</button>
-      <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
-    </div>
-  </div>`;
+function learnPage() {
+  const L=state.learn;
+  const daily=L.daily;
+  const flipped=L.dailyFlipped;
+  const main=daily?(flipped?daily.cmn:daily.vie):t('正在加载今日一句…','Đang tải câu hôm nay…');
+  const sub=daily?(flipped?daily.vie:daily.cmn):'';
+  const pack=PACKS.find(c=>c.id===L.pack)||PACKS[0];
+  const dict=L.dict;
+  const ipa=[dict?.ipaHn?t('河内','Hà Nội')+' '+dict.ipaHn:'',dict?.ipaSg?t('西贡','Sài Gòn')+' '+dict.ipaSg:''].filter(Boolean).join(' · ');
+  const practice=L.practice;
+  return `<section class="card learn-daily${flipped?' learn-flipped':''}" data-learn-daily-flip role="button" tabindex="0" aria-label="${t('每日一句，点一下翻面','Câu mỗi ngày, chạm để lật')}">
+    <p class="learn-daily-kicker">${t('每日一句','Câu mỗi ngày')}</p>
+    <p class="learn-daily-main" lang="${flipped?'zh-CN':'vi'}">${escape(main)}</p>
+    <p class="learn-daily-sub" lang="${flipped?'vi':'zh-CN'}">${escape(sub)}</p>
+    <div class="learn-daily-foot"><span>${t('点一下翻面 · 点喇叭听读音','Chạm để lật · Chạm loa để nghe')}</span><button type="button" class="learn-speak" data-learn-daily-speak aria-label="${t('听读音','Nghe phát âm')}">${icon('speaker')}</button></div>
+  </section>
+  ${tutorSection()}
+  <section class="saved-section"><h2>${t('词典','Từ điển')}</h2>
+    <div class="learn-row"><input type="text" data-learn-dict-input maxlength="60" autocomplete="off" value="${escape(L.dictQuery)}" placeholder="${t('输入中文或越文查词…','Nhập từ tiếng Trung hoặc tiếng Việt…')}" aria-label="${t('查词','Tra từ')}"><button type="button" class="learn-go" data-learn-dict-search>${t('查词','Tra từ')}</button></div>
+    ${L.dictLoading?`<p class="learn-note">${t('正在查词…','Đang tra từ…')}</p>`:''}
+    ${dict&&!dict.notFound?`<div class="card learn-result"><p class="learn-word">${escape(dict.word)}</p>${ipa?`<p class="learn-ipa">${escape(ipa)}</p>`:''}${dict.zh?`<p class="learn-zh" lang="zh-CN">${escape(dict.zh)}</p>`:''}${dict.viDef?`<p class="learn-vi" lang="vi">${escape(dict.viDef)}</p>`:''}${dict.enDef?`<p class="learn-vi" lang="en">${escape(dict.enDef)}</p>`:''}${dict.examples.length?`<ul class="learn-ex">${dict.examples.map(e=>`<li lang="vi">${escape(e)}</li>`).join('')}</ul>`:''}<div class="learn-daily-foot"><span>${t('点喇叭听读音','Chạm loa để nghe')}</span><button type="button" class="learn-speak" data-learn-dict-speak aria-label="${t('听读音','Nghe phát âm')}">${icon('speaker')}</button></div></div>`:''}
+    ${dict?.notFound?`<p class="learn-note">${t('没找到这个词，换个词试试','Không tìm thấy từ này, thử từ khác nhé')}</p>`:''}
+    <p class="learn-source">${t('词典来源：minhqnd','Nguồn từ điển: minhqnd')}</p>
+  </section>
+  <section class="saved-section"><h2>${t('情景短语','Cụm từ theo tình huống')}</h2>
+    <div class="prompter-cats">${PACKS.map(c=>`<button type="button" class="${c.id===pack.id?'on':''}" data-learn-pack="${c.id}">${t(c.zh,c.vi)}</button>`).join('')}</div>
+    <div class="prompter-pack">${spotkitPackSVG(SPOTKIT_PACKS[pack.id],40,t(pack.zh,pack.vi))}<p>${t(...pack.opener)}</p></div>
+    <div class="prompter-list">${pack.items.map((item,i)=>`<button type="button" class="prompter-item learn-phrase" data-learn-phrase="${pack.id}:${i}"><strong>${escape(item.zh)}</strong><span>${escape(item.vi)}</span><em>${escape(item.say)}</em></button>`).join('')}</div>
+    <p class="learn-note">${t('点一下读出来，长按存为金句。','Chạm để nghe, nhấn giữ để lưu thành câu hay.')}</p>
+  </section>
+  ${savedPhrasesSection()}
+  <section class="saved-section"><h2>${t('练一句','Luyện một câu')}</h2>
+    <div class="learn-row"><input type="text" data-learn-practice-input maxlength="300" autocomplete="off" value="${escape(L.practiceInput)}" placeholder="${t('打一句中文，翻成越文…','Gõ một câu tiếng Trung, dịch sang tiếng Việt…')}" aria-label="${t('练一句','Luyện một câu')}"><button type="button" class="learn-go" data-learn-practice-send>${t('翻译','Dịch')}</button></div>
+    ${L.practiceLoading?`<p class="learn-note">${t('正在翻译…','Đang dịch…')}</p>`:''}
+    ${practice&&!practice.error?`<div class="card learn-result learn-practice-result" data-learn-practice-speak role="button" tabindex="0"><p class="learn-word" lang="zh-CN">${escape(practice.src)}</p><p class="learn-zh" lang="vi">${escape(practice.trans)}</p><span class="learn-ms">${practice.ms} ms</span><p class="learn-note">${t('点一下读出来','Chạm để nghe')}</p></div>`:''}
+    ${practice?.error?`<p class="learn-note">${t('翻译失败，换一句试试','Dịch thất bại, thử câu khác nhé')}</p>`:''}
+  </section>`;
 }
 function otherPage() {
   const [,glyph,zh,vi]=nav.find(item=>item[0]===state.tab);
-  const content = {translate:translatePage,me:profile,contacts};
-  if(state.tab==='translate') {
-    return `<main class="section-page translate-page"><header class="section-header interpret-top"><span class="interpret-status">Noctis Neural Stream · ${t('面对面双向','Đối diện hai chiều')}</span><button type="button" class="interpret-clear" data-clear-interpret aria-label="${t('清空对话','Xóa cuộc trò chuyện')}">${icon('trash')}</button></header><div class="section-content">${translatePage()}</div></main>`;
-  }
+  const content = {learn:learnPage,me:profile,contacts};
   return `<main class="section-page"><header class="section-header">${icon(glyph)}<h1>${t(zh,vi)}</h1></header><div class="section-content">${content[state.tab]()}</div></main>`;
 }
 const PACKS=[
@@ -2214,29 +2502,6 @@ const PACKS=[
   {zh:'我的航班晚点了。',vi:'Chuyến bay của tôi bị trễ.',say:'追 拜 哥 妥依 币 遮'},
   {zh:'行李有点多。',vi:'Hành lý hơi nhiều.',say:'韩 李 嘿 溜'}]}
 ];
-let audioUnlocked=false;
-function unlockIOSAudio(){
-  if(audioUnlocked) return;
-  try{
-    if('speechSynthesis' in globalThis){
-      const u=new SpeechSynthesisUtterance(' ');
-      u.volume=0.01;
-      globalThis.speechSynthesis.speak(u);
-    }
-    const AC=globalThis.AudioContext||globalThis.webkitAudioContext;
-    if(AC){
-      const ctx=new AC();
-      const osc=ctx.createOscillator();
-      const gain=ctx.createGain();
-      gain.gain.value=0.01;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(0);
-      osc.stop(0.001);
-    }
-    audioUnlocked=true;
-  }catch(e){ console.warn('Audio unlock err',e); }
-}
 function speakTranslation(text, lang) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
@@ -2248,10 +2513,6 @@ function speakTranslation(text, lang) {
   if (match) u.voice = match;
   u.lang = lang === 'vi' ? 'vi-VN' : 'zh-CN';
   u.rate = 0.92;
-  const micBtn = document.querySelector('.translate-mic-btn');
-  u.onstart = () => micBtn?.classList.add('is-speaking');
-  u.onend = () => micBtn?.classList.remove('is-speaking');
-  u.onerror = () => micBtn?.classList.remove('is-speaking');
   window.speechSynthesis.speak(u);
 }
 function speakPrompt(text){
@@ -2485,7 +2746,7 @@ function render({preserve=false,enterChat=false}={}) {
       input.setSelectionRange(previousInput.selectionStart, previousInput.selectionEnd);
     }
   }
-  if(state.tab==='translate') scrollInterpretStreams();
+  if(state.tab==='learn') ensureDailySentence();
 }
 
 let timer, toastTimer;
@@ -2515,32 +2776,26 @@ root.addEventListener('click', event => {
   if(!control) return;
   const d=control.dataset;
   if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
-  if('clearInterpret' in d) { state.interpret={peer:[],mine:[]}; save('interpret',state.interpret); render({preserve:true}); swapIcon(document.querySelector('.interpret-clear')); return; }
-  if('interpretDir' in d) { state.interpretDir=state.interpretDir==='peer'?'mine':'peer'; stopInterpretRecognition(); render({preserve:true}); document.querySelectorAll('.neo-dir').forEach(el=>swapIcon(el)); return; }
-  if('interpretTypeClose' in d) { state.interpretTyping=false; render({preserve:true}); return; }
-  if('interpretTypePreset' in d) { const side=state.interpretDir==='peer'?'peer':'mine'; const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`); if(form){ form.elements.interpret.value=control.textContent.trim(); state.interpretTyping=false; form.requestSubmit(); } return; }
-  if('interpretTypeSend' in d) { const input=document.querySelector('[data-interpret-type-input]'); const text=input?input.value.trim():''; if(!text) return; const side=state.interpretDir==='peer'?'peer':'mine'; const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`); if(form){ form.elements.interpret.value=text; state.interpretTyping=false; form.requestSubmit(); } return; }
-  if(d.retryInterpret!==undefined) {
-    const [side,idx]=d.retryInterpret.split(':');
-    const item=(state.interpret[side]||[])[Number(idx)];
-    if(!item) return;
-    item.error=false; item.pending=true; item.trans=''; item.ms=null;
-    save('interpret',state.interpret);
-    render({preserve:true});
-    const toLang=side==='peer'?'zh':'vi';
-    const t0=performance.now();
-    requestRelayTranslation({sourceText:item.src,toLang}).then(trans=>{
-      item.trans=trans; item.pending=false; item.ms=Math.round(performance.now()-t0);
-      save('interpret',state.interpret);
-      render({preserve:true});
-      if(trans && trans.trim() && state.tab==='translate') speakTranslation(trans, toLang);
-    }).catch(()=>{
-      item.pending=false; item.error=true;
-      save('interpret',state.interpret);
-      render({preserve:true});
-    });
+  if('learnDailySpeak' in d) { speakDailySentence(); return; }
+  if('tutorToggle' in d) { toggleTutor(); return; }
+  if('learnPack' in d) { state.learn.pack=d.learnPack; render({preserve:true}); return; }
+  if(d.learnPhrase!==undefined) {
+    if(learnLongPressed) { learnLongPressed=false; return; }
+    const [packId,idx]=d.learnPhrase.split(':');
+    const pack=PACKS.find(c=>c.id===packId);
+    const item=pack?.items[Number(idx)];
+    if(item) speakPrompt(item.vi);
     return;
   }
+  if('learnDictSearch' in d) { const input=document.querySelector('[data-learn-dict-input]'); void lookupDict(input?.value||state.learn.dictQuery); return; }
+  if('learnDictSpeak' in d) {
+    const dict=state.learn.dict;
+    if(!dict || dict.notFound) return;
+    if(dict.audio) { try { new Audio(dict.audio).play().catch(()=>speakTranslation(dict.viDef||dict.word,'vi')); return; } catch {} }
+    speakTranslation(dict.viDef||dict.word,'vi');
+    return;
+  }
+  if('learnPracticeSend' in d) { const input=document.querySelector('[data-learn-practice-input]'); state.learn.practiceInput=input?.value||state.learn.practiceInput; void practiceTranslate(); return; }
   if('prompterToggle' in d) { state.prompter.open=!state.prompter.open; renderPrompter(); swapIcon(document.querySelector('.prompter-collapse')||document.querySelector('.prompter-pill')); return; }
   if(d.prompterPack) { state.prompterPack=d.prompterPack; state.prompter.active=null; renderPrompter(); return; }
   if(d.prompterPhrase!==undefined) {
@@ -2785,311 +3040,54 @@ for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEv
   const control=event.target.closest('[data-hold-talk]');
   if(control) holdVoice(control,false,type==='pointerup');
 });
-let interpretRecognition=null;
-let interpretHoldButton=null;
-let interpretTapMode=false;
-let interpretDownAt=0;
-let interpretNoResultTimer=null;
-let interpretCloud=null; // 云端录音 {recorder, stream, chunks, side, cancelled}
-function stopInterpretRecognition() {
-  clearTimeout(interpretNoResultTimer);
-  stopRecTimer();
-  if(interpretRecognition) { try { interpretRecognition.stop(); } catch {} interpretRecognition=null; }
-  if(interpretCloud) {
-    interpretCloud.cancelled=true;
-    try { if(interpretCloud.recorder.state!=='inactive') interpretCloud.recorder.stop(); } catch {}
-    try { interpretCloud.stream.getTracks().forEach(t=>t.stop()); } catch {}
-    interpretCloud=null;
-  }
-  if(interpretHoldButton) { interpretHoldButton.classList.remove('holding'); interpretHoldButton.classList.remove('listening'); interpretHoldButton=null; }
-  interpretTapMode=false;
-  const empty=document.querySelector('.neo-empty-state');
-  if(empty) { empty.classList.remove('is-listening'); const p=empty.querySelector('.empty-listen p'); if(p) p.textContent=t('正在聆听…','Đang lắng nghe…'); }
-}
-// 云端认字：把录好的音频发给云函数 /stt（Groq Whisper），只认字不翻译，
-// 约 1–2 秒就回原文；拿到原话后交给打字那条提交链去翻译+朗读，
-// 这样用户 2 秒就能看到自己说的话，不用干等翻译。
-async function requestCloudSTT(blob, lang) {
-  const form=new FormData();
-  form.append('audio', blob, 'audio.mp4');
-  form.append('lang', lang);
-  const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(), 30000);
-  try {
-    const resp=await fetch(BACKEND_TRANSLATE_API+'stt', {method:'POST', body:form, signal:ctrl.signal});
-    const data=await resp.json().catch(()=>({}));
-    if(!resp.ok) throw new Error(data?.error || ('HTTP '+resp.status));
-    return data;
-  } finally { clearTimeout(timer); }
-}
-async function startCloudRecording(control, side) {
-  const empty=document.querySelector('.neo-empty-state');
-  if(empty) empty.classList.add('is-listening');
-  control.classList.add('holding');
-  interpretHoldButton=control;
-  interpretDownAt=Date.now();
-  state.interpretTyping=false;
-  const typeBox=document.querySelector('.neo-type');
-  if(typeBox) typeBox.hidden=true;
-  let stream;
-  try {
-    stream=await navigator.mediaDevices.getUserMedia({audio:true});
-  } catch (err) {
-    stopInterpretRecognition();
-    if(err && err.name==='NotAllowedError') notify(t('麦克风权限被拒绝，请在浏览器设置里允许使用麦克风','Microphone permission denied'));
-    startSpeechRecognition(control, side);
-    return;
-  }
-  let mime='';
-  if(globalThis.MediaRecorder && MediaRecorder.isTypeSupported) {
-    if(MediaRecorder.isTypeSupported('audio/mp4')) mime='audio/mp4';
-    else if(MediaRecorder.isTypeSupported('audio/webm')) mime='audio/webm';
-  }
-  let recorder;
-  try {
-    recorder=mime? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream);
-  } catch {
-    try { stream.getTracks().forEach(t=>t.stop()); } catch {}
-    stopInterpretRecognition();
-    startSpeechRecognition(control, side);
-    return;
-  }
-  const cloud={recorder, stream, chunks:[], side, cancelled:false};
-  recorder.ondataavailable=e=>{ if(e.data && e.data.size) cloud.chunks.push(e.data); };
-  recorder.onstop=async()=>{
-    if(cloud.cancelled) return;
-    const blob=new Blob(cloud.chunks, {type: recorder.mimeType || 'audio/mp4'});
-    try { stream.getTracks().forEach(t=>t.stop()); } catch {}
-    if(!blob.size) { notify(t('没录到声音','Không ghi được âm thanh')); return; }
-    const lang=side==='peer'?'vi':'zh';
-    try {
-      const data=await requestCloudSTT(blob, lang);
-      const transcript=(data.transcript||'').trim();
-      if(!transcript) { notify(t('没听清','Không nghe rõ')); return; }
-      // 原话认出来了就先上屏：走打字那条提交链（它会立刻把原话显示出来，
-      // 再调翻译、翻好自动念出来），不用等翻译回来才有反应。
-      const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
-      if(form) { form.elements.interpret.value=transcript; form.requestSubmit(); }
-    } catch (err) {
-      notify(t('转写失败，打字试试','Chuyển giọng nói thất bại, thử gõ chữ'));
-      state.interpretTyping=true; render({preserve:true});
-    }
-  };
-  recorder.onerror=()=>{ try { stream.getTracks().forEach(t=>t.stop()); } catch {} stopInterpretRecognition(); state.interpretTyping=true; render({preserve:true}); };
-  interpretCloud=cloud;
-  try { recorder.start(); startRecTimer(); } catch { stopInterpretRecognition(); startSpeechRecognition(control, side); }
-}
-function finishInterpretRecording() {
-  // 再点一下停下：云端录音 → 停录并转写；浏览器识别 → 直接停（最终结果已在 onresult 送出）
-  if(interpretCloud) {
-    const rec=interpretCloud.recorder;
-    interpretCloud=null;
-    stopRecTimer();
-    if(interpretHoldButton) { interpretHoldButton.classList.remove('holding'); interpretHoldButton.classList.remove('listening'); interpretHoldButton=null; }
-    interpretTapMode=false;
-    const empty=document.querySelector('.neo-empty-state');
-    if(empty) empty.classList.remove('is-listening');
-    try { if(rec.state!=='inactive') rec.stop(); } catch {}
-    return;
-  }
-  stopInterpretRecognition();
-}
-function startSpeechRecognition(control, side) {
-  // 备用：浏览器自带语音识别（云端录音不可用或拿不到麦克风时才走这条）
-  const SpeechRecognition=globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
-  if(!SpeechRecognition) { state.interpretTyping=true; render({preserve:true}); notify(t('当前浏览器不支持语音识别，请打字输入','Trình duyệt này không hỗ trợ nhận diện giọng nói, hãy nhập văn bản')); return; }
-  try { if(navigator.vibrate) navigator.vibrate(20); } catch {}
-  control.classList.add('tapped');
-  setTimeout(()=>{ control.classList.remove('tapped'); },650);
-  stopInterpretRecognition();
-  interpretDownAt=Date.now();
-  const empty=document.querySelector('.neo-empty-state');
-  if(empty) empty.classList.add('is-listening');
-  const recognition=new SpeechRecognition();
-  recognition.lang=side==='peer'?'vi-VN':'zh-CN';
-  recognition.interimResults=true;
-  recognition.maxAlternatives=1;
-  recognition.onresult=event=>{
-    clearTimeout(interpretNoResultTimer);
-    let interim='', final='';
-    for(const r of event.results){
-      const t=r[0]?.transcript || '';
-      if(r.isFinal) final+=t; else interim+=t;
-    }
-    if(final.trim()){
-      const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
-      if(form) { form.elements.interpret.value=final.trim(); form.requestSubmit(); }
-      return;
-    }
-    if(interim.trim()){
-      const empty=document.querySelector('.neo-empty-state');
-      if(empty){
-        const p=empty.querySelector('.empty-listen p');
-        if(p) p.textContent=interim.trim();
-      }
-    }
-  };
-  recognition.onend=()=>{ stopInterpretRecognition(); };
-  recognition.onerror=(event)=>{
-    const err=event && event.error;
-    clearTimeout(interpretNoResultTimer);
-    if(err==='aborted'){ stopInterpretRecognition(); return; }
-    const msgs={
-      'not-allowed':['麦克风权限被拒绝，请在浏览器设置里允许使用麦克风','Microphone permission denied'],
-      'not-supported':['当前浏览器不支持语音识别，请打字输入','Trình duyệt này không hỗ trợ nhận diện giọng nói, hãy nhập văn bản'],
-      'audio-capture':['没有检测到麦克风','No microphone detected'],
-      'service-not-allowed':['语音识别服务不可用','Speech recognition unavailable'],
-      'network':['网络不通，语音识别失败','Network error, speech recognition failed']
-    };
-    const m=msgs[err];
-    if(m) notify(t(m[0],m[1]));
-    else if(err==='no-speech'){ notify(t('没听到声音，打字试试','Không nghe thấy tiếng, thử gõ chữ')); }
-    else notify(t('语音识别启动失败','Speech recognition failed to start'));
-    stopInterpretRecognition();
-    state.interpretTyping=true; render({preserve:true});
-  };
-  try { recognition.start(); startRecTimer(); } catch { notify(t('语音识别启动失败','Speech recognition failed to start')); stopInterpretRecognition(); return; }
-  interpretRecognition=recognition;
-  interpretHoldButton=control;
-  control.classList.add('holding');
-  state.interpretTyping=false;
-  const typeBox=document.querySelector('.neo-type');
-  if(typeBox) typeBox.hidden=true;
-  clearTimeout(interpretNoResultTimer);
-  interpretNoResultTimer=setTimeout(()=>{
-    if(!interpretRecognition) return;
-    stopInterpretRecognition();
-    state.interpretTyping=true;
-    render({preserve:true});
-    notify(t('没听到声音，打字试试','Không nghe thấy tiếng, thử gõ chữ'));
-  },3000);
-}
-root.addEventListener('pointerdown',event=>{
-  const control=event.target.closest('[data-interpret-hold]');
-  if(!control || event.button!==0) return;
-  unlockIOSAudio();
-  if(interpretCloud || interpretRecognition) { finishInterpretRecording(); return; }
-  try { if(navigator.vibrate) navigator.vibrate(20); } catch {}
-  control.classList.add('tapped');
-  setTimeout(()=>{ control.classList.remove('tapped'); },650);
-  control.setPointerCapture(event.pointerId);
-  const side=control.dataset.interpretHold;
-  stopInterpretRecognition();
-  // 优先云端录音（MediaRecorder + Groq Whisper，快又稳）；不支持或拿不到麦克风时回落到浏览器自带识别
-  if(navigator.mediaDevices?.getUserMedia && globalThis.MediaRecorder) { startCloudRecording(control, side); return; }
-  startSpeechRecognition(control, side);
-});
-root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-hold]')) unlockIOSAudio(); });
-/* 金句收藏：长按同传页任意译文行 500ms 存为金句（长按后那一下点按不翻面） */
-let interpretLongTimer=null;
-let interpretLongPressed=false;
-let interpretLongTarget=null;
-let interpretLongStart=null;
-function clearInterpretLongTimer() {
-  if(interpretLongTimer) { clearTimeout(interpretLongTimer); interpretLongTimer=null; }
-  interpretLongTarget=null;
-  interpretLongStart=null;
-}
-root.addEventListener('pointerdown',event=>{
+/* 学语页：点每日一句大卡翻面、点练一句结果读出来（卡片本身不是按钮） */
+root.addEventListener('click',event=>{
   if(event.target.closest('button')) return;
-  const line=event.target.closest('.neo-line');
-  if(!line || line.dataset.flip===undefined) return;
-  const [side,idx]=line.dataset.flip.split(':');
-  const item=(state.interpret[side]||[])[Number(idx)];
-  if(!item || item.pending || item.error || !item.trans) return;
-  interpretLongPressed=false;
-  interpretLongTarget={side,idx:Number(idx)};
-  interpretLongStart={x:event.clientX,y:event.clientY};
-  interpretLongTimer=setTimeout(()=>{
-    interpretLongTimer=null;
-    const it=(state.interpret[interpretLongTarget.side]||[])[interpretLongTarget.idx];
-    if(!it || !it.trans) return;
-    if(state.savedPhrases.some(p=>p.src===it.src&&p.trans===it.trans)) { notify(t('已经收藏过了','Đã lưu rồi')); return; }
-    state.savedPhrases.unshift({src:it.src,trans:it.trans,side:interpretLongTarget.side,ts:Date.now()});
+  const daily=event.target.closest('[data-learn-daily-flip]');
+  if(daily) { state.learn.dailyFlipped=!state.learn.dailyFlipped; render({preserve:true}); return; }
+  const practice=event.target.closest('[data-learn-practice-speak]');
+  if(practice && state.learn.practice?.trans) speakTranslation(state.learn.practice.trans,'vi');
+});
+/* 金句收藏：长按学语页情景短语 500ms 存为金句（长按后那一下点按不读出来） */
+let learnLongTimer=null;
+let learnLongPressed=false;
+let learnLongTarget=null;
+let learnLongStart=null;
+function clearLearnLongTimer() {
+  if(learnLongTimer) { clearTimeout(learnLongTimer); learnLongTimer=null; }
+  learnLongTarget=null;
+  learnLongStart=null;
+}
+root.addEventListener('pointerdown',event=>{
+  if(event.target.closest('button') && !event.target.closest('.learn-phrase')) return;
+  const row=event.target.closest('.learn-phrase');
+  if(!row || row.dataset.learnPhrase===undefined) return;
+  const [packId,idx]=row.dataset.learnPhrase.split(':');
+  const pack=PACKS.find(c=>c.id===packId);
+  const item=pack?.items[Number(idx)];
+  if(!item) return;
+  learnLongPressed=false;
+  learnLongTarget={packId,idx:Number(idx)};
+  learnLongStart={x:event.clientX,y:event.clientY};
+  learnLongTimer=setTimeout(()=>{
+    learnLongTimer=null;
+    const p=PACKS.find(c=>c.id===learnLongTarget.packId);
+    const it=p?.items[learnLongTarget.idx];
+    if(!it) return;
+    if(state.savedPhrases.some(p=>p.src===it.vi&&p.trans===it.zh)) { notify(t('已经收藏过了','Đã lưu rồi')); return; }
+    state.savedPhrases.unshift({src:it.vi,trans:it.zh,side:'peer',ts:Date.now()});
     state.savedPhrases=state.savedPhrases.slice(0,50);
     save('saved-phrases',state.savedPhrases);
-    interpretLongPressed=true;
+    learnLongPressed=true;
     try { if(navigator.vibrate) navigator.vibrate(20); } catch {}
     notify(t('已收藏金句','Đã lưu câu hay'));
   },500);
 });
-for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,clearInterpretLongTimer);
+for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,clearLearnLongTimer);
 root.addEventListener('pointermove',event=>{
-  if(!interpretLongTimer || !interpretLongStart) return;
-  const dx=event.clientX-interpretLongStart.x, dy=event.clientY-interpretLongStart.y;
-  if(dx*dx+dy*dy>100) clearInterpretLongTimer();
-});
-root.addEventListener('click',event=>{
-  const btn=event.target.closest('[data-copy-side]');
-  if(!btn) return;
-  const side=btn.dataset.copySide;
-  const idx=parseInt(btn.dataset.copyIndex,10);
-  const item=(state.interpret[side]||[])[idx];
-  const text=item && item.trans ? item.trans.trim() : '';
-  if(!text) return;
-  const done=()=>notify(t('已复制译文','Đã sao chép bản dịch'));
-  if(navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(done).catch(()=>{ fallbackCopy(text); done(); });
-  } else { fallbackCopy(text); done(); }
-});
-/* 译文翻面：点一下译文行，原文与译文上下互换，再点翻回来（按钮点按不触发） */
-root.addEventListener('click',event=>{
-  const btn=event.target.closest('button');
-  if(btn) return;
-  const line=event.target.closest('.neo-line');
-  if(!line || line.dataset.flip===undefined) return;
-  if(interpretLongPressed) { interpretLongPressed=false; return; }
-  const [side,idx]=line.dataset.flip.split(':');
-  const item=(state.interpret[side]||[])[Number(idx)];
-  if(!item || item.pending || item.error || !item.trans) return;
-  item.flipped=!item.flipped;
-  save('interpret',state.interpret);
-  render({preserve:true});
-});
-function fallbackCopy(text) {
-  const ta=document.createElement('textarea');
-  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-  document.body.appendChild(ta); ta.select();
-  try { document.execCommand('copy'); } catch {}
-  ta.remove();
-}
-// 录音计时：录音时每秒刷新金键上方的秒数，停下就藏起来
-let interpretRecTimer=null;
-let interpretRecStartedAt=0;
-function startRecTimer() {
-  stopRecTimer();
-  interpretRecStartedAt=Date.now();
-  const el=document.querySelector('.neo-rec-timer');
-  const wave=document.querySelector('.neo-wave');
-  if(el) { el.hidden=false; el.textContent='00:00'; }
-  if(wave) wave.hidden=false;
-  interpretRecTimer=setInterval(()=>{
-    const s=Math.floor((Date.now()-interpretRecStartedAt)/1000);
-    const el2=document.querySelector('.neo-rec-timer');
-    if(el2) el2.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-  },1000);
-}
-function stopRecTimer() {
-  if(interpretRecTimer) { clearInterval(interpretRecTimer); interpretRecTimer=null; }
-  const el=document.querySelector('.neo-rec-timer');
-  if(el) el.hidden=true;
-  const wave=document.querySelector('.neo-wave');
-  if(wave) wave.hidden=true;
-}
-for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,event=>{
-  const control=event.target.closest('[data-interpret-hold]');
-  if(!control) return;
-  const active=(interpretCloud || interpretRecognition) && control===interpretHoldButton;
-  if(!active) return;
-  if(type==='pointerup' && Date.now()-(interpretDownAt||0)<300){
-    interpretTapMode=true;
-    control.classList.remove('holding');
-    control.classList.add('listening');
-    return;
-  }
-  // 按住松开（≥300ms）= 停下并送出（云端录音去转写）；取消/丢捕获 = 直接取消
-  if(type==='pointerup') finishInterpretRecording();
-  else stopInterpretRecognition();
+  if(!learnLongTimer || !learnLongStart) return;
+  const dx=event.clientX-learnLongStart.x, dy=event.clientY-learnLongStart.y;
+  if(dx*dx+dy*dy>100) clearLearnLongTimer();
 });
 root.addEventListener('keydown',event=>{
   if(event.code!=='Space' || !event.target.matches('[data-hold-talk]')) return;
@@ -3101,15 +3099,18 @@ root.addEventListener('keyup',event=>{
   event.preventDefault();
   holdVoice(event.target,false,true);
 });
+/* 学语页：输入框回车查词 / 翻译；输入内容先记进 state，刷新不丢 */
+root.addEventListener('input',event=>{
+  if(event.target.matches('[data-learn-dict-input]')) state.learn.dictQuery=event.target.value;
+  if(event.target.matches('[data-learn-practice-input]')) state.learn.practiceInput=event.target.value;
+});
 root.addEventListener('keydown',event=>{
+  if(event.key==='Enter' && event.target.matches('[data-learn-daily-flip]')) {
+    state.learn.dailyFlipped=!state.learn.dailyFlipped; render({preserve:true}); return;
+  }
   if(event.key!=='Enter') return;
-  const input=event.target.closest('[data-interpret-type-input]');
-  if(!input) return;
-  const text=input.value.trim();
-  if(!text) return;
-  const side=state.interpretDir==='peer'?'peer':'mine';
-  const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
-  if(form){ form.elements.interpret.value=text; state.interpretTyping=false; form.requestSubmit(); }
+  if(event.target.matches('[data-learn-dict-input]')) { void lookupDict(event.target.value); return; }
+  if(event.target.matches('[data-learn-practice-input]')) { state.learn.practiceInput=event.target.value; void practiceTranslate(); }
 });
 root.addEventListener('change', event=>{
   const {contextKey,contextChat}=event.target.dataset;
@@ -3154,35 +3155,6 @@ root.addEventListener('submit', event => {
     const key=JSON.stringify(payload.context);
     const cached=state.translationCache.find(row=>row[0]===lang&&row[1]===message&&row[3]===key);
     queueDemoMessage(message,lang,cached?.[2]||demoTranslation(payload),false,payload);
-  }
-  if(event.target.dataset.interpretForm) {
-    const side=event.target.dataset.interpretForm;
-    const input=event.target.elements.interpret;
-    const text=input.value.trim();
-    if(!text) return;
-    const drafts=[...document.querySelectorAll('.interpret-form input')].map(el=>el===input?'':el.value);
-    input.value='';
-    const toLang=side==='peer'?'zh':'vi';
-    const entry={src:text,trans:'',pending:true,time:clock(),ts:Date.now()};
-    (state.interpret[side] ||= []).push(entry);
-    state.interpret[side]=state.interpret[side].slice(-20);
-    save('interpret',state.interpret);
-    render({preserve:true});
-    document.querySelectorAll('.interpret-form input').forEach((el,i)=>{ el.value=drafts[i]||''; });
-    const t0=performance.now();
-    requestRelayTranslation({sourceText:text,toLang}).then(trans=>{
-      entry.trans=trans; entry.pending=false; entry.ms=Math.round(performance.now()-t0);
-      save('interpret',state.interpret);
-      const now=[...document.querySelectorAll('.interpret-form input')].map(el=>el.value);
-      render({preserve:true});
-      document.querySelectorAll('.interpret-form input').forEach((el,i)=>{ el.value=now[i]||''; });
-      if(trans && trans.trim() && state.tab==='translate') speakTranslation(trans, toLang);
-    }).catch(()=>{
-      entry.pending=false; entry.error=true;
-      save('interpret',state.interpret);
-      render({preserve:true});
-      notify(t('翻译失败，点 ↻ 重试','Dịch thất bại, chạm ↻ để thử lại'));
-    });
   }
 });
 function installManifest() {
