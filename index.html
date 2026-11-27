@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#090B0E">
+<meta name="theme-color" content="#0B0A08">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="夜语">
@@ -18,11 +18,11 @@
   --radius-sm:8px; --radius-control:12px; --radius-card:16px; --radius-pill:999px;
   --shadow-card:none; --shadow-float:0 12px 32px #0008;
   --ink:#F5F6F8; --warm:#D8B56D; --muted:#A4A6A5; --accent:#D8B56D; --strong:#D8B56D;
-  --outer:#090B0E; --side:#090B0E; --chat:#090B0E; --paper:#101317; --line:#1A1F26;
-  --soft:#181C22; --choice:#252019; --sent:#211C15; --received:#14181F;
+  --outer:#0B0A08; --side:#0B0A08; --chat:#0B0A08; --paper:#171310; --line:rgba(216,181,109,.14);
+  --soft:#211B16; --choice:#252019; --sent:#211C15; --received:#1A1512;
   --arrow:#4E535C; --online:#46C69A;
   /* DESIGN.md 语义别名（新代码用这一组，旧变量保留做兼容） */
-  --bg:#090B0E; --surface:#101317; --border:#1A1F26;
+  --bg:#0B0A08; --surface:#171310; --border:rgba(216,181,109,.14);
   --gold:#D8B56D; --gold-light:#E8C97A; --gold-dim:rgba(216,181,109,.5);
   --text:#F5F6F8; --text-dim:#9CA3AF;
 }
@@ -41,14 +41,29 @@ small {color:var(--muted)}
 .node-status i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(216,181,109,.55);animation:node-pulse 2s ease-in-out infinite alternate}
 .node-status b{color:var(--gold);font-weight:650}
 @keyframes node-pulse{from{opacity:.55}to{opacity:1}}
-.handshake-backdrop{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(9,11,14,.86);backdrop-filter:blur(8px)}
-.handshake-card{width:min(420px,100%);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:28px 24px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.handshake-backdrop{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(11,10,8,.86);backdrop-filter:blur(8px);transition:opacity .2s ease-out}
+.handshake-card{width:min(420px,100%);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:28px 24px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);transition:transform .2s ease-out,opacity .2s ease-out}
 .handshake-card h1{font-size:var(--text-md);letter-spacing:.14em;margin:0 0 6px;color:var(--ink)}
 .handshake-card p{margin:0 0 18px;color:var(--muted);font-size:var(--text-sm)}
 .handshake-card input{width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius-control);background:var(--bg);color:var(--ink);font:inherit;text-align:center}
 .handshake-card input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .handshake-card button{width:100%;min-height:48px;margin-top:14px;border:1px solid var(--gold);border-radius:var(--radius-control);background:var(--gold);color:var(--bg);font:inherit;font-weight:700;letter-spacing:.06em}
 .handshake-card button:active{opacity:.85}
+/* 退出轻于进入：握手完成时整层淡出、卡片小幅下沉 */
+.handshake-backdrop.handshake-leaving{opacity:0}
+.handshake-backdrop.handshake-leaving .handshake-card{transform:translateY(8px);opacity:0}
+/* 点阵金字：握手页 NOCTIS，点按列从左到右逐个点亮（只在握手入场时播） */
+.dotword{width:min(240px,72%);margin:0 auto 12px}
+.dotword svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 6px rgba(216,181,109,.35))}
+@keyframes dot-light{from{opacity:.15}to{opacity:1}}
+.handshake-staged .dot-lit{animation:dot-light .3s ease-out both}
+/* 握手仪式三段入场：插画 → 点阵金字 → 表单，每段 150–250ms ease-out，只在首次出现 */
+.handshake-staged .hs-stage{opacity:0;animation:hs-in .22s ease-out forwards}
+.handshake-staged .hs-stage-1{animation-delay:.05s}
+.handshake-staged .hs-stage-2{animation-delay:.18s}
+.handshake-staged .hs-stage-3{animation-delay:.31s}
+@keyframes hs-in{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.handshake-illust{display:grid;place-items:center;margin-bottom:4px}
 .message-shell.with-details {grid-template-columns:304px minmax(0,1fr) 272px}
 .sidebar {display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--side);border-right:1px solid var(--line)}
 .brand {display:flex;align-items:center;gap:12px;padding:24px 24px}
@@ -75,6 +90,11 @@ input::placeholder {color:var(--muted);opacity:1}
 .threads,.timeline,.details,.section-page,.caption-scroll,.message-scan{-webkit-overflow-scrolling:touch}
 .thread {width:100%;display:flex;align-items:center;text-align:start;gap:12px;padding:11px 10px;margin:3px 0;border:1px solid transparent;border-radius:var(--radius-control)}
 .thread.current {background:var(--choice);border-color:var(--line);box-shadow:inset 3px 0 var(--accent)}
+/* 消息页时间锚：未读优先后，按今天 / 更早分组 */
+.thread-anchor{display:flex;align-items:center;gap:8px;margin:10px 4px 6px;color:var(--gold-dim);font-size:11px;letter-spacing:.12em}
+.thread-anchor::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(216,181,109,.3))}
+.thread-anchor::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(216,181,109,.3),transparent)}
+.thread-anchor span{white-space:nowrap}
 .avatar {position:relative;display:grid;place-items:center;width:45px;height:45px;border-radius:50%;flex:none;font-size:var(--text-md);font-weight:750;overflow:hidden; background:#d3e9dc;color:#205d49}
 .avatar.rose {background:#edddd4;color:#794431}
 .avatar.sand {background:#f0e3c8;color:#6a5324}
@@ -107,6 +127,8 @@ input::placeholder {color:var(--muted);opacity:1}
 .date-divider {display:flex;align-items:center;gap:12px;justify-content:center;margin:3px auto 16px;color:var(--muted);font-size:var(--text-xs)}
 .date-divider span {background:var(--soft);border-radius:var(--radius-card);padding:5px 10px}
 .message {display:flex;align-items:flex-start;gap:8px;margin:0 0 12px}
+/* 密度交替：换人说话的一组消息前留 24px 呼吸 */
+.message-break{margin-top:24px}
 .message.own {justify-content:flex-end}
 .message-content {max-width:min(87%,530px);min-width:0}
 .sender {display:block;font-size:var(--text-xs);margin:0 0 4px 3px}
@@ -134,7 +156,20 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-half{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;justify-content:flex-end;padding:24px 24px}
 .neo-mine{padding-bottom:112px}
 .neo-stream{display:flex;flex-direction:column;gap:32px;width:100%}
-.neo-line{overflow-wrap:anywhere}
+.neo-line{overflow-wrap:anywhere;display:flex;flex-direction:column;cursor:pointer}
+.neo-line .neo-src{order:1}
+.neo-line .neo-trans{order:2}
+.neo-line .neo-pending,.neo-line .neo-retry{order:2}
+.neo-line .neo-actions{order:3;display:flex;align-items:center;gap:8px;margin-top:10px}
+.neo-line .neo-actions .neo-ms{margin-top:0}
+.neo-line .neo-actions .neo-copy{margin:0}
+/* 译文翻面：点译文行原文与译文上下互换，150–250ms 只动 transform/opacity */
+.neo-line.neo-flipped .neo-src{order:2;color:var(--gold)}
+.neo-line.neo-flipped .neo-trans{order:1;color:var(--text)}
+.neo-line.neo-flipped .neo-src,.neo-line.neo-flipped .neo-trans{animation:neo-flip .22s ease-out}
+@keyframes neo-flip{from{opacity:.4;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+/* 翻译失败就地重试：失败的译文行原地变可点重试 */
+.neo-retry{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:transparent;border:1px solid rgba(216,181,109,.4);color:var(--gold);border-radius:var(--radius-pill);padding:8px 12px;font-size:var(--text-sm)}
 .neo-src{margin:0;font-size:var(--text-md);line-height:1.6;font-weight:600}
 .neo-trans{margin:8px 0 0;font-size:var(--text-sm);line-height:1.6}
 .neo-peer .neo-src{color:var(--text);text-shadow:0 0 22px rgba(229,231,235,.14),0 2px 12px rgba(0,0,0,.6)}
@@ -147,12 +182,17 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-old .neo-trans{font-size:var(--text-xs)}
 .neo-latest{animation:neo-fade-in .2s ease-out}
 .neo-latest .neo-trans{font-size:var(--text-base);color:var(--gold-light);text-shadow:0 0 18px rgba(232,201,122,.18)}
-.neo-ms{display:inline-block;margin-top:10px;font-size:11px;line-height:1;color:var(--gold);border:1px solid rgba(216,181,109,.35);border-radius:var(--radius-pill);padding:4px 8px;letter-spacing:.1em}
+/* 同传页时间锚：长对话按 10 分钟间隔或方向切换插一条细金时间线 */
+.neo-anchor{display:flex;align-items:center;gap:8px;margin:8px 0;color:var(--gold-dim);font-size:11px;letter-spacing:.12em;font-variant-numeric:tabular-nums}
+.neo-anchor::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(216,181,109,.35))}
+.neo-anchor::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(216,181,109,.35),transparent)}
+.neo-anchor span{white-space:nowrap}
+.neo-ms{display:inline-block;margin-top:10px;font-size:11px;line-height:1;color:var(--gold);border:1px solid rgba(216,181,109,.35);border-radius:var(--radius-pill);padding:4px 8px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
 .neo-copy{display:inline-grid;place-items:center;vertical-align:middle;width:32px;height:32px;min-width:32px;min-height:32px;margin:6px 0 0 8px;background:transparent;border:1px solid rgba(216,181,109,.3);border-radius:50%;color:var(--gold);cursor:pointer}
 .neo-copy svg{width:15px;height:15px}
 .neo-copy:active{background:rgba(216,181,109,.15)}
 /* 录音计时：录音时出现在金键上方，告诉用户已经录了几秒 */
-.neo-rec-timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 96px);z-index:5;color:var(--gold);font-size:var(--text-sm);font-weight:600;letter-spacing:.12em;background:rgba(16,19,23,.85);border:1px solid rgba(216,181,109,.4);border-radius:var(--radius-pill);padding:6px 12px;pointer-events:none}
+.neo-rec-timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 96px);z-index:5;color:var(--gold);font-size:var(--text-sm);font-weight:600;letter-spacing:.12em;background:rgba(23,19,16,.85);border:1px solid rgba(216,181,109,.4);border-radius:var(--radius-pill);padding:6px 12px;pointer-events:none;font-variant-numeric:tabular-nums}
 .neo-rec-timer[hidden]{display:none}
 /* 录音声波：录音时在金键上方跳动，听没听到一眼能看出来 */
 .neo-wave{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 140px);z-index:5;display:flex;align-items:flex-end;gap:4px;height:28px;pointer-events:none}
@@ -167,7 +207,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-type:focus-within{border-color:var(--gold)}
 .composer form:focus-within,.comment-area form:focus-within{border-color:var(--gold)}
 .search:focus-within{border-color:var(--gold)}
-.neo-type{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 76px);width:min(92vw,420px);z-index:6;background:rgba(16,19,23,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0;border-radius:var(--radius-card);padding:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.neo-type{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 76px);width:min(92vw,420px);z-index:6;background:rgba(23,19,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0;border-radius:var(--radius-card);padding:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .neo-type[hidden]{display:none}
 .neo-type-row{display:flex;gap:8px;align-items:center}
 .neo-type input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font-size:var(--text-base);padding:8px 4px}
@@ -177,6 +217,9 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-type-preset{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
 .neo-type-preset button{background:transparent;border:1px solid rgba(216,181,109,.3);color:var(--gold);border-radius:var(--radius-pill);padding:5px 10px;min-height:44px;font-size:var(--text-xs)}
 @keyframes neo-fade-in{from{opacity:0}to{opacity:1}}
+/* 图标情境动画：切换时图标从 0.25 缩放到 1、透明度 0 到 1、模糊 4px 到 0（bounce 0） */
+@keyframes neo-icon-in{from{transform:scale(.25);opacity:0;filter:blur(4px)}to{transform:scale(1);opacity:1;filter:blur(0)}}
+.icon-swap{animation:neo-icon-in .25s ease-out}
 .neo-pending{margin:6px 0 0;font-size:var(--text-sm);color:var(--muted)}
 .neo-empty-state{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:2;transition:opacity .45s ease}
 .neo-empty-state p{margin:0;color:var(--muted);font-size:var(--text-sm);line-height:1.9;letter-spacing:.04em}
@@ -185,9 +228,17 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-empty-state.is-listening .empty-listen{display:block}
 .neo-empty-state.is-listening p{color:var(--text-dim)}
 .neo-empty-state.is-hidden{opacity:0}
+/* Spotkit 插画：同传空态与列表空态 */
+.neo-empty-state .empty-guide svg{display:block;margin:0 auto 14px}
+.empty-illust{text-align:center;padding-top:32px}
+.empty-illust svg{display:block;margin:0 auto}
+.empty-illust p{margin-top:12px}
+.titanium-vip svg{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
 .neo-pill{position:fixed;left:50%;transform:translateX(-50%);bottom:max(24px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;z-index:5}
 .neo-dir{flex:none;background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--text);border-radius:var(--radius-pill);padding:12px 14px;min-height:44px;font-size:var(--text-xs);font-weight:500;white-space:nowrap}
-.neo-mic{position:relative;width:56px;height:56px;flex:none;border-radius:50%;border:1px solid rgba(216,181,109,.55);background:radial-gradient(circle at 50% 35%,#2A2F36 0%,var(--surface) 55%,var(--bg) 100%);color:var(--gold);display:grid;place-items:center}
+.neo-mic{position:relative;width:56px;height:56px;flex:none;border-radius:50%;border:1px solid rgba(216,181,109,.55);background:radial-gradient(circle at 50% 35%,#33291D 0%,var(--surface) 55%,var(--bg) 100%);color:var(--gold);display:grid;place-items:center;transition:transform .45s cubic-bezier(.2,1.4,.4,1),box-shadow .2s ease-out,filter .2s ease-out}
+/* 金键三层按压：90ms 压进 2px + 缩 0.96 + 填充升一档 + 触点泛光，松手弹簧回弹约 450ms 带 1% 过冲 */
+.neo-mic:active{transform:translateY(2px) scale(.96);filter:brightness(1.25);box-shadow:0 0 0 1px rgba(216,181,109,.5),0 0 28px rgba(216,181,109,.55);transition-duration:90ms}
 .neo-mic svg{width:24px;height:24px}
 .neo-mic.holding{border-color:var(--gold);color:var(--text);animation:none;box-shadow:0 0 0 1px rgba(216,181,109,.35),0 0 26px rgba(216,181,109,.45)}
 .neo-mic.tapped::after{content:'';position:absolute;inset:-7px;border:1px solid rgba(216,181,109,.65);border-radius:50%;pointer-events:none;animation:neo-ripple .65s ease-out forwards}
@@ -204,11 +255,19 @@ input::placeholder {color:var(--muted);opacity:1}
  .neo-latest,.neo-mic.tapped::after,.translate-mic-btn.is-speaking::before{animation:none}
  .translate-mic-btn.is-speaking{animation:none}
  .neo-mic.listening{animation:none}
+ .icon-swap{animation:none}
+ .handshake-staged .hs-stage,.handshake-staged .dot-lit{animation:none;opacity:1}
+ .relay-arc{animation:none}
 }
 .composer form,.comment-area form {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:var(--radius-card);background:var(--chat);padding:4px}
 .composer input,.comment-area input {flex:1;width:0;padding:8px 4px}
 .send,.primary {background:var(--strong);color:var(--outer);border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-weight:700}
 .send {padding:0;width:44px;height:44px;flex:none}
+/* 主按钮按压：90ms 压进 scale(0.96)，松手弹簧回弹约 450ms 带 1% 过冲 */
+.send,.quick-phrases button,.neo-type-send,.neo-dir,.prompter-item,.neo-copy{transition:transform .45s cubic-bezier(.2,1.4,.4,1)}
+.send:active,.quick-phrases button:active,.neo-type-send:active,.neo-dir:active,.prompter-item:active,.neo-copy:active{transform:scale(.96);transition-duration:90ms}
+/* 光学对齐：纸飞机图标视觉重心偏左下，手动向右上挪 1px */
+.send svg{transform:translate(1px,-1px)}
 .composer-note {display:flex;justify-content:space-between;gap:6px;margin:7px 4px 0;color:var(--muted);font-size:var(--text-xs)}
 .composer-note span,.detail-foot {display:flex;align-items:center;gap:5px}
 .composer-note b {color:var(--accent)}
@@ -247,7 +306,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .card {background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-card);margin-bottom:var(--space-4);box-shadow:var(--shadow-card)}
 .person-row,.profile-card,.post-author {display:flex;align-items:center;gap:12px;padding:12px}
 .people-cards{display:grid;gap:14px}
-@media (min-width:700px){.people-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:700px){.people-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.people-card.people-featured{grid-column:1/-1;border-color:rgba(216,181,109,.35)}.people-card.people-featured .people-card-chat{width:auto;padding-inline:20px}}
 .people-card{padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card)}
 .people-card-head{display:flex;align-items:center;gap:12px}
 .people-card-head>div{flex:1;min-width:0}
@@ -309,10 +368,10 @@ input::placeholder {color:var(--muted);opacity:1}
 .call-control:focus-visible {outline-color:var(--text)}
 .call-control[data-control=captions].enabled {background:#dff3e6;color:#15392c}
 .prompter{position:absolute;left:clamp(14px,7vw,100px);right:clamp(14px,7vw,100px);bottom:calc(204px + env(safe-area-inset-bottom) + clamp(80px,23dvh,230px));z-index:6}
-.prompter-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(16,19,23,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.4);color:var(--gold);border-radius:var(--radius-pill);padding:7px 12px;font-size:var(--text-xs);font-weight:650}
+.prompter-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(23,19,16,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.4);color:var(--gold);border-radius:var(--radius-pill);padding:7px 12px;font-size:var(--text-xs);font-weight:650}
 .prompter-pill svg{width:14px;height:14px}
 .prompter.open .prompter-pill{display:none}
-.prompter-card{display:none;background:rgba(16,19,23,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.3);border-radius:var(--radius-card);padding:12px 14px;color:var(--text)}
+.prompter-card{display:none;background:rgba(23,19,16,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.3);border-radius:var(--radius-card);padding:12px 14px;color:var(--text)}
 .prompter.open .prompter-card{display:block}
 .prompter-card>header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .prompter-card>header strong{display:flex;align-items:center;gap:6px;font-size:var(--text-sm);color:var(--gold)}
@@ -322,6 +381,10 @@ input::placeholder {color:var(--muted);opacity:1}
 .prompter-cats::-webkit-scrollbar{display:none}
 .prompter-cats button{flex-shrink:0;white-space:nowrap;background:transparent;border:1px solid rgba(255,255,255,.25);color:#e8e8e8;border-radius:var(--radius-pill);padding:6px 12px;font-size:var(--text-xs)}
 .prompter-cats button.on{border-color:var(--gold);color:var(--gold);background:rgba(216,181,109,.12)}
+/* 提词器情景包：包切换 + 场景小插画 + 一句开场白 */
+.prompter-pack{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 10px;background:rgba(216,181,109,.07);border:1px solid rgba(216,181,109,.18);border-radius:var(--radius-control)}
+.prompter-pack svg{flex:none}
+.prompter-pack p{margin:0;font-size:var(--text-xs);color:var(--gold);line-height:1.5}
 .prompter-list{display:grid;gap:8px;max-height:150px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .prompter-item{display:grid;gap:2px;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-control);padding:10px 12px;color:var(--text);width:100%}
 .prompter-item strong{font-size:var(--text-sm)}
@@ -663,7 +726,7 @@ body {overflow:hidden}
 .titanium-card {background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-card);overflow:hidden}
 .titanium-profile {
   padding:16px;
-  background:radial-gradient(ellipse at 100% 0%,var(--gold)16,transparent 52%),linear-gradient(155deg,#171a1f,var(--paper) 54%);
+  background:radial-gradient(ellipse at 100% 0%,var(--gold)16,transparent 52%),linear-gradient(155deg,#1E1712,var(--paper) 54%);
 }
 .titanium-identity {display:grid;grid-template-columns:64px minmax(0,1fr) 44px;gap:12px;align-items:center}
 .titanium-identity h2 {font-size:var(--text-md);font-weight:750;line-height:1.24;overflow-wrap:anywhere}
@@ -677,11 +740,46 @@ body {overflow:hidden}
 .titanium-metrics>div:first-child {padding-inline-start:0}
 .titanium-metrics>div+div {border-inline-start:1px solid var(--line)}
 .titanium-metrics dt {font-size:.6875rem;color:var(--muted);margin-bottom:4px}
-.titanium-metrics dd {margin:0;font-size:var(--text-xs);display:flex;align-items:center;gap:5px}
+.titanium-metrics dd {margin:0;font-size:var(--text-xs);display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
 .titanium-metrics b {width:5px;height:5px;border-radius:50%;background:var(--accent);flex:none}
 .titanium-metrics>div:first-child b {background:var(--online)}
 .titanium-metrics svg {width:13px;height:13px;color:var(--accent);flex:none}
 .titanium-group {margin-top:18px}
+/* 我的页 Bento：身份宽卡在上，三组状态 2×2（首组通栏），组间距 18px */
+.me-bento{display:grid;gap:18px}
+.me-bento .titanium-group{margin-top:0}
+@media (min-width:700px){.me-bento{grid-template-columns:repeat(2,minmax(0,1fr))}.me-bento .titanium-group:first-child{grid-column:1/-1}}
+/* 金句收藏：我的页横向滚动迷你卡，点一下重播读音 */
+.saved-section{margin-top:24px}
+.saved-section h2{font-size:.6875rem;font-weight:700;letter-spacing:.105em;color:var(--muted);margin:0 0 8px 3px}
+.saved-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.saved-row::-webkit-scrollbar{display:none}
+.saved-card{flex:none;width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:12px}
+.saved-src{margin:0;font-size:var(--text-sm);line-height:1.5;color:var(--text)}
+.saved-trans{margin:6px 0 0;font-size:var(--text-sm);line-height:1.5;color:var(--gold)}
+.saved-meta{display:flex;align-items:center;gap:4px;margin-top:10px;color:var(--muted);font-size:11px}
+.saved-meta span{flex:1}
+.saved-play,.saved-del{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--gold)}
+.saved-play svg{width:15px;height:15px}
+.saved-del{color:var(--muted);font-size:var(--text-base)}
+.saved-empty{margin:0;color:var(--muted);font-size:var(--text-sm)}
+/* 身份卡分享：我的页金色描边大按钮 */
+.identity-share-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:20px;background:rgba(216,181,109,.08);border:1px solid rgba(216,181,109,.45);border-radius:var(--radius-control);color:var(--gold);font-size:var(--text-sm);font-weight:700}
+.identity-share-btn svg{width:18px;height:18px}
+/* 专线实况：点地球路线图 + 实时延迟 + 5×5 LED 状态 + 最近一次翻译耗时 */
+.relay-live{display:flex;gap:12px;align-items:center;padding:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.relay-globe{flex:none;width:84px;height:84px}
+.relay-globe svg{width:100%;height:100%;display:block}
+.relay-arc{stroke-dasharray:3 4;animation:relay-flow 1.6s linear infinite}
+@keyframes relay-flow{to{stroke-dashoffset:-14}}
+.relay-info{flex:1;min-width:0}
+.relay-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--text-sm);font-weight:700;color:var(--ink)}
+.relay-led{display:inline-grid;grid-template-columns:repeat(5,4px);gap:2px}
+.relay-led i{width:4px;height:4px;border-radius:1px;background:rgba(216,181,109,.18)}
+.relay-led i.on{background:var(--gold);box-shadow:0 0 4px rgba(216,181,109,.5)}
+.relay-stats{display:flex;gap:14px;margin-top:6px;font-size:var(--text-xs);color:var(--muted)}
+.relay-stats b{color:var(--gold);font-variant-numeric:tabular-nums}
+.relay-route{margin-top:4px;font-size:var(--text-xs);color:var(--muted)}
 .titanium-group h2 {font-size:.6875rem;font-weight:700;letter-spacing:.105em;color:var(--muted);margin:0 0 8px 3px}
 .titanium-row {display:flex;align-items:center;text-align:start;width:100%;gap:8px;min-height:56px;padding:8px 12px;color:var(--ink);font-size:var(--text-base);line-height:1.42}
 .titanium-row + .titanium-row {border-top:1px solid var(--line)}
@@ -694,8 +792,8 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .titanium-row>span>small {display:block;margin-top:3px;color:var(--muted);font-size:.6875rem;font-weight:400}
 .titanium-row>svg {width:15px;height:15px;color:var(--arrow)}
 .titanium-row[aria-pressed=true]>svg {color:var(--accent)}
-.titanium-value {max-width:36%;text-align:end;font-size:var(--text-xs);overflow-wrap:anywhere}
-.titanium-switch {width:40px;height:24px;flex:none;display:flex;align-items:center;padding:3px;background:#292E36;border:1px solid var(--arrow);border-radius:var(--radius-pill)}
+.titanium-value {max-width:36%;text-align:end;font-size:var(--text-xs);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.titanium-switch {width:40px;height:24px;flex:none;display:flex;align-items:center;padding:3px;background:#33291D;border:1px solid var(--arrow);border-radius:var(--radius-pill)}
 .titanium-switch::before {content:"";width:16px;height:16px;border-radius:50%;background:var(--muted)}
 [aria-checked=true]>.titanium-switch {background:var(--gold);border-color:var(--gold);justify-content:flex-end}
 [aria-checked=true]>.titanium-switch::before {background:var(--surface)}
@@ -703,7 +801,7 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .titanium-selection h2,.titanium-selection p {padding:12px;margin:0}
 .titanium-selection p {color:var(--muted);font-size:var(--text-sm)}
 .titanium-selection ul {padding:0 12px}
-.titanium-exit {width:100%;min-height:48px;margin-top:20px;border:1px solid #612F37;background:#5a242622;color:#F1A1A8;border-radius:var(--radius-control);font-size:var(--text-sm)}
+.titanium-exit {width:100%;min-height:48px;margin-top:28px;border:1px solid #612F37;background:#5a242622;color:#F1A1A8;border-radius:var(--radius-control);font-size:var(--text-sm)}
 .titanium-toast {position:fixed;z-index:15;bottom:calc(78px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);max-width:calc(100% - 32px);padding:9px 16px;background:var(--soft);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-control);text-align:center}
 .titanium-session {height:100dvh;display:grid;place-items:center;padding:20px}
 .titanium-session section {width:min(100%,360px);padding:20px}
@@ -749,7 +847,7 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .call-hud-subtitles {
   position:absolute;bottom:120px;bottom:max(120px,calc(var(--call-bottom) + var(--controls-offset) + 6px));
   left:50%;right:auto;transform:translateX(-50%);width:min(90%,340px);z-index:10;
-  background:rgba(16,19,23,.85);
+  background:rgba(23,19,16,.85);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border:1px solid rgba(216,181,109,.3);border-radius:var(--radius-control);padding:10px 14px;text-align:center;
 }
@@ -960,11 +1058,57 @@ const paths = {
  end:'<path d="M3 15v-3a12 12 0 0 1 18 0v3h-5v-3a8 8 0 0 0-8 0v3z"/>',
  heart:'<path d="M20 8a4 4 0 0 0-8-1 4 4 0 0 0-8 1c0 5 8 10 8 10s8-5 8-10Z"/>',
  check:'<path d="m5 12 4 4L19 6"/>',
- globe:'<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>'
+ globe:'<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
+ share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'
 };
 function icon(name) {
  return `<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.info}</svg>`;
 }
+
+/* ---------- 点阵金字 + Spotkit 黑金插画家族（第二批 V5/V7） ---------- */
+/* 插画规格：金色细线描边、黑底、一个金点缀；源文件在 assets/spotkit/ */
+const DOT_FONT={
+ N:['10001','11001','10101','10011','10001','10001','10001'],
+ O:['01110','10001','10001','10001','10001','10001','01110'],
+ C:['01110','10001','10000','10000','10000','10001','01110'],
+ T:['11111','00100','00100','00100','00100','00100','00100'],
+ I:['01110','00100','00100','00100','00100','00100','01110'],
+ S:['01111','10000','10000','01110','00001','00001','11110']
+};
+function dotMatrixInner(word) {
+  let out='';
+  [...word].forEach((ch,li)=>{
+    (DOT_FONT[ch]||[]).forEach((row,ri)=>{
+      [...row].forEach((bit,ci)=>{
+        if(bit!=='1') return;
+        out+=`<circle class="dot-lit" cx="${li*42+ci*7+3.5}" cy="${ri*7+3.5}" r="2.2" fill="#D8B56D" style="animation-delay:${(li*6+ci)*14}ms"/>`;
+      });
+    });
+  });
+  return out;
+}
+function dotMatrixSVG(word='NOCTIS') {
+  return `<svg class="dotword-svg" viewBox="0 0 245 49" role="img" aria-label="${word}" xmlns="http://www.w3.org/2000/svg">${dotMatrixInner(word)}</svg>`;
+}
+function spotkitSVG(inner,size=120,label='',sw=0.75) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 120" fill="none" stroke="#D8B56D" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${label}">${inner}</svg>`;
+}
+function spotkitPackSVG(inner,size=48,label='') {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" fill="none" stroke="#D8B56D" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${label}">${inner}</svg>`;
+}
+const SPOTKIT={
+ emptyMessages:'<rect x="22" y="26" width="60" height="38" rx="12"/><path d="M38 64l-6 14 18-12"/><line x1="32" y1="40" x2="72" y2="40"/><line x1="32" y1="50" x2="58" y2="50"/><rect x="68" y="70" width="32" height="24" rx="10"/><path d="M88 94l4 12-12-10"/><circle cx="98" cy="72" r="4" fill="#D8B56D" stroke="#0B0A08" stroke-width="1"/>',
+ interpret:'<circle cx="60" cy="60" r="36" stroke-opacity=".3"/><path d="M40 42a26 26 0 0 0 0 36"/><path d="M80 42a26 26 0 0 1 0 36"/><line x1="60" y1="26" x2="60" y2="94" stroke-dasharray="0.5 6"/><path d="M50 52a12 12 0 0 1 0 16"/><path d="M70 52a12 12 0 0 0 0 16"/><circle cx="60" cy="60" r="5" fill="#D8B56D" stroke="none"/>',
+ handshake:'<rect x="28" y="58" width="36" height="32" rx="8"/><path d="M36 58V48a10 10 0 0 1 20 0v10"/><circle cx="46" cy="72" r="3.5" fill="#D8B56D" stroke="none"/><circle cx="88" cy="36" r="8"/><path d="M82 42L64 60"/><path d="M70 54l5 5M64 60l5 5"/>',
+ vip:'<path d="M26 80L22 44l20 14 18-20 18 20 20-14-4 36z"/><path d="M26 88h68"/><circle cx="60" cy="66" r="4" fill="#D8B56D" stroke="none"/>'
+};
+const SPOTKIT_PACKS={
+ 'night-market':'<ellipse cx="24" cy="22" rx="11" ry="13"/><path d="M17 9h14M17 35h14M24 9v26M24 35v5M21 40h6"/><circle cx="24" cy="22" r="2.5" fill="#D8B56D" stroke="none"/>',
+ biz:'<rect x="9" y="16" width="30" height="20" rx="4"/><path d="M18 16v-3a6 6 0 0 1 12 0v3M9 26h30"/><rect x="21" y="24" width="6" height="5" rx="1" fill="#D8B56D" stroke="none"/>',
+ date:'<path d="M24 38S12 30 12 21a6.5 6.5 0 0 1 12-3.5A6.5 6.5 0 0 1 36 21c0 9-12 17-12 17z"/><circle cx="24" cy="22" r="2.5" fill="#D8B56D" stroke="none"/>',
+ travel:'<path d="M24 6a12 12 0 0 1 12 12c0 9-12 22-12 22S12 27 12 18A12 12 0 0 1 24 6z"/><circle cx="24" cy="18" r="4.5"/><circle cx="24" cy="18" r="2" fill="#D8B56D" stroke="none"/>',
+ pickup:'<path d="M6 26L42 12 30 38 24 30z"/><path d="M24 30L42 12"/><circle cx="42" cy="12" r="2.5" fill="#D8B56D" stroke="none"/>'
+};
 
 
 const root = document.querySelector('#app');
@@ -1096,8 +1240,8 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
-  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',interpretTyping:false,
-  translated:{}, picker:false, prompter:{open:false,cat:'ice',active:null}, call:null, voiceDraft:null, pendingTranscript:null
+  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',interpretTyping:false,savedPhrases:read('saved-phrases',[]),
+  translated:{}, picker:false, prompter:{open:false,active:null}, prompterPack:'night-market', call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
 const conversationContext=id=>({...defaultContext,...state.conversationContexts[id]});
@@ -1160,13 +1304,24 @@ function brand() {
 function listRows() {
   const query = state.search.trim().toLowerCase();
   const threads=[...chats,...friendDirectory.filter(person=>state.friends[person.id]==='friend')];
-  return threads.filter(person => (state.filter==='all' || Boolean(person.group)===(state.filter==='group')) &&
-    (!query || [person.name,person.vi,...messages(person).at(-1).slice(1,3)].join(' ').toLowerCase().includes(query)))
-    .map(person => {
-      const last=messages(person).at(-1);
-      const preview = pendingReplyTranslations.has(last[5])?last[1]:last[5]?.transcript ? t('双语通话文字记录','Bản ghi cuộc gọi song ngữ') : last[0]===state.lang ? last[1] : last[2] || last[1];
-      return `<button class="thread thread-item ${state.active===person.id?'current':''}" data-peer-role="${roleText[conversationContext(person.id).peerRole] || 'Em'}" data-chat="${person.id}">${avatar(person)}<span class="thread-copy"><strong>${label(person)}</strong><small>${escape(preview)}</small>${contactPresence(person)}</span><span class="thread-meta"><small>${last===person.messages.at(-1)?t(person.time,person.time==='昨天'?'Hôm qua':person.time):last[3]}</small>${state.unreadBadges&&person.unread&&!state.read[person.id]?'<b>2</b>':''}</span></button>`;
-    }).join('') || `<p class="empty">${t('没有找到会话','Không tìm thấy cuộc trò chuyện')}</p>`;
+  const filtered=threads.filter(person => (state.filter==='all' || Boolean(person.group)===(state.filter==='group')) &&
+    (!query || [person.name,person.vi,...messages(person).at(-1).slice(1,3)].join(' ').toLowerCase().includes(query)));
+  const isUnread=person=>state.unreadBadges&&person.unread&&!state.read[person.id];
+  const rows=filtered.map((person,idx)=>({person,idx,unread:isUnread(person)}));
+  rows.sort((a,b)=>(b.unread-a.unread)||(a.idx-b.idx));
+  const rowHTML=person=>{
+    const last=messages(person).at(-1);
+    const preview = pendingReplyTranslations.has(last[5])?last[1]:last[5]?.transcript ? t('双语通话文字记录','Bản ghi cuộc gọi song ngữ') : last[0]===state.lang ? last[1] : last[2] || last[1];
+    return `<button class="thread thread-item ${state.active===person.id?'current':''}" data-peer-role="${roleText[conversationContext(person.id).peerRole] || 'Em'}" data-chat="${person.id}">${avatar(person)}<span class="thread-copy"><strong>${label(person)}</strong><small>${escape(preview)}</small>${contactPresence(person)}</span><span class="thread-meta"><small>${last===person.messages.at(-1)?t(person.time,person.time==='昨天'?'Hôm qua':person.time):last[3]}</small>${isUnread(person)?'<b>2</b>':''}</span></button>`;
+  };
+  const isToday=person=>/:/.test(person.time||'');
+  const today=rows.filter(r=>isToday(r.person));
+  const earlier=rows.filter(r=>!isToday(r.person));
+  const anchor=labelText=>`<div class="thread-anchor"><span>${labelText}</span></div>`;
+  const out=[];
+  if(today.length) out.push(anchor(t('今天','Hôm nay')),...today.map(r=>rowHTML(r.person)));
+  if(earlier.length) out.push(anchor(t('更早','Trước đó')),...earlier.map(r=>rowHTML(r.person)));
+  return out.join('') || `<div class="empty empty-illust">${spotkitSVG(SPOTKIT.emptyMessages,96,t('没有找到会话','Không tìm thấy cuộc trò chuyện'))}<p>${t('没有找到会话','Không tìm thấy cuộc trò chuyện')}</p></div>`;
 }
 function nodeStatus() {
   return `<div class="node-status"><i aria-hidden="true"></i><span><b>SG-01</b> 新加坡边缘网关已连接 · E2EE 加密</span></div>`;
@@ -1196,7 +1351,7 @@ function chatPanel(person, enterChat=false) {
         const selected=state.groupLanguages[person.id]?.[member.id] || (member===demoProfile?state.lang:'vi');
         return `<label>${member===demoProfile?t('我的显示语言','Ngôn ngữ của tôi'):label(member)}<select data-member-language="${member.id}" aria-label="${label(member)}"><option value="zh" ${selected==='zh'?'selected':''}>简体中文</option><option value="vi" ${selected==='vi'?'selected':''}>Tiếng Việt</option></select></label>`;
       }).join('')}<label>${t('预览成员视角','Xem theo thành viên')}<select data-group-viewer>${groupMembers(person).map(member=>`<option value="${member.id}" ${(state.groupViewer[person.id] || demoProfile.id)===member.id?'selected':''}>${label(member)}</option>`).join('')}</select></label></div>`:''}
-      ${messages(person).map((message,index)=>messageRow(person,message,index)).join('')}
+      ${messages(person).map((message,index,arr)=>{const row=messageRow(person,message,index);if(index===0) return row;const sideOf=m=>(m[0]==='zh'&&!m[4])||m[4]==='self'?'me':(m[4]||'peer');return sideOf(message)!==sideOf(arr[index-1])?row.replace('class="message ','class="message message-break '):row;}).join('')}
       <div class="scroll-to-bottom-wrap"><button type="button" class="scroll-to-bottom" data-scroll-bottom aria-label="回到底部">↓ <span>回到底部</span><b class="scroll-to-bottom-count" hidden></b></button></div>
     </section>
     <footer class="composer">
@@ -1680,7 +1835,7 @@ function openCall(person,kind) {
   state.call={person,kind,start:Date.now(),mic:true,speaker:true,captions:state.callPreferences.captions,
     followPaused:!state.callPreferences.follow,camera:kind==='video',voiceCount:1,voiceTimes:[0],nextTurn:4,
     rtcMode:!!rtcAdapter,captionRevision:0,finalCaptions:new Map(),captionDrafts:new Map()};
-  state.prompter={open:false,cat:'ice',active:null};
+  state.prompter={open:false,active:null};
   state.history.unshift({id:person,kind,time:clock()});
   state.history=state.history.slice(0,20);
   save('history',state.history);
@@ -1701,7 +1856,7 @@ function closeCall() {
   }):times.map((time,index)=>[time,...lines[index%lines.length]]);
   state.pendingTranscript=state.titanium.cache==='discard' || !turns.length?null:{person:call.person,kind:call.kind,turns,live:call.rtcMode};
   state.call=null;
-  state.prompter={open:false,cat:'ice',active:null};
+  state.prompter={open:false,active:null};
   releaseRtc(call);
   render({preserve:true});
 }
@@ -1752,7 +1907,7 @@ function friendRow(person) {
 }
 function qrMarkup(name,size,label) {
   const [grid,path]=qrPatterns[name];
-  return `<svg class="qr-vector" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${grid} ${grid}" role="img" aria-label="${escape(label)}" shape-rendering="crispEdges"><rect width="${grid}" height="${grid}" fill="#fff"/><path d="${path}" fill="#090B0E"/></svg>`;
+  return `<svg class="qr-vector" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${grid} ${grid}" role="img" aria-label="${escape(label)}" shape-rendering="crispEdges"><rect width="${grid}" height="${grid}" fill="#fff"/><path d="${path}" fill="#0B0A08"/></svg>`;
 }
 function downloadProfileQr() {
   const markup=qrMarkup('bridge101',264,'QR bridge101');
@@ -1801,7 +1956,90 @@ function contacts() {
     <button data-friend-panel="requests">${t('好友申请','Lời mời kết bạn')}${incoming?` (${incoming})`:''}</button>
     <button data-friend-panel="card">${t('个人名片','Danh thiếp')}</button>
     </div>
-    ${friendPanels()}<div class="people-cards">${chats.filter(person=>!person.group).map(person=>`<article class="card people-card"><div class="people-card-head">${avatar(person,'large')}<div><strong>${label(person)}</strong><small>${secondary(person)}</small></div>${contactPresence(person)}</div>${person.bio?`<p class="people-card-role">${t(...person.bio)}</p>`:''}${person.signature?`<p class="people-card-signature" lang="vi">${escape(person.signature)}</p>`:''}<div class="people-card-tags"><span>中文</span><span>Tiếng Việt</span></div><button type="button" class="social-button people-card-chat" data-chat="${person.id}">${icon('chat')} ${t('私密会话','Trò chuyện riêng tư')}</button></article>`).join('')}</div>`;
+    ${friendPanels()}<div class="people-cards">${chats.filter(person=>!person.group).map((person,i)=>`<article class="card people-card${i===0?' people-featured':''}"><div class="people-card-head">${avatar(person,'large')}<div><strong>${label(person)}</strong><small>${secondary(person)}</small></div>${contactPresence(person)}</div>${person.bio?`<p class="people-card-role">${t(...person.bio)}</p>`:''}${person.signature?`<p class="people-card-signature" lang="vi">${escape(person.signature)}</p>`:''}<div class="people-card-tags"><span>中文</span><span>Tiếng Việt</span></div><button type="button" class="social-button people-card-chat" data-chat="${person.id}">${icon('chat')} ${t('私密会话','Trò chuyện riêng tư')}</button></article>`).join('')}</div>`;
+}
+function savedPhrasesSection() {
+  const items=state.savedPhrases||[];
+  const cards=items.map((p,i)=>{
+    const time=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date(p.ts||Date.now()));
+    return `<article class="saved-card"><p class="saved-src" lang="${p.side==='peer'?'vi':'zh-CN'}">${escape(p.src)}</p><p class="saved-trans" lang="${p.side==='peer'?'zh-CN':'vi'}">${escape(p.trans)}</p><div class="saved-meta"><span>${time}</span><button type="button" class="saved-play" data-save-phrase-replay="${i}" aria-label="${t('重播读音','Đọc lại')}">${icon('speaker')}</button><button type="button" class="saved-del" data-unsave-phrase="${i}" aria-label="${t('删除','Xóa')}">×</button></div></article>`;
+  }).join('');
+  return `<section class="saved-section"><h2>${t('金句收藏','Câu hay đã lưu')}</h2>${items.length?`<div class="saved-row">${cards}</div>`:`<p class="saved-empty">${t('长按同传页的译文，就能把金句存到这里。','Nhấn giữ bản dịch ở trang phiên dịch để lưu câu hay vào đây.')}</p>`}</section>`;
+}
+function relayLive() {
+  const lastMs=[...(state.interpret.peer||[]),...(state.interpret.mine||[])].filter(e=>e.ms!=null).at(-1)?.ms;
+  const led=Array.from({length:25},(_,i)=>`<i class="${i<21?'on':''}"></i>`).join('');
+  return `<div class="relay-live">
+    <div class="relay-globe" role="img" aria-label="SG-01 专线：新加坡 → 河内 / 胡志明">
+      <svg viewBox="0 0 120 120" fill="none" stroke="#D8B56D" stroke-width="0.75" stroke-linecap="round">
+        <circle cx="60" cy="60" r="54" stroke-opacity=".35"/>
+        <ellipse cx="60" cy="60" rx="54" ry="20" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
+        <ellipse cx="60" cy="60" rx="54" ry="38" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
+        <ellipse cx="60" cy="60" rx="20" ry="54" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
+        <ellipse cx="60" cy="60" rx="38" ry="54" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
+        <path class="relay-arc" d="M78 82 Q92 62 88 44" stroke-width="1.25"/>
+        <path class="relay-arc" d="M78 82 Q96 74 94 60" stroke-width="1.25"/>
+        <circle cx="78" cy="82" r="3.5" fill="#D8B56D" stroke="none"/>
+        <circle cx="88" cy="44" r="3" fill="#D8B56D" stroke="none"/>
+        <circle cx="94" cy="60" r="3" fill="#D8B56D" stroke="none"/>
+        <text x="84" y="94" fill="#A4A6A5" font-size="7" stroke="none">SG</text>
+        <text x="92" y="40" fill="#A4A6A5" font-size="7" stroke="none">HN</text>
+        <text x="98" y="58" fill="#A4A6A5" font-size="7" stroke="none">HCM</text>
+      </svg>
+    </div>
+    <div class="relay-info">
+      <div class="relay-title"><span>SG-01 · ${t('专线实况','Tuyến riêng trực tiếp')}</span><span class="relay-led" aria-hidden="true">${led}</span></div>
+      <div class="relay-stats"><span>${t('延迟','Độ trễ')} <b>18 ms</b></span><span>${t('最近翻译','Dịch gần nhất')} <b>${lastMs!=null?lastMs+' ms':'—'}</b></span></div>
+      <div class="relay-route">${t('新加坡 → 河内 / 胡志明 · 已连线','Singapore → Hà Nội / TP.HCM · Đã kết nối')}</div>
+    </div>
+  </div>`;
+}
+function identityCardSVG() {
+  const name=escape(demoProfile.name||'James');
+  const id=escape(demoProfile.id||'bridge101');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+<rect width="640" height="400" rx="24" fill="#0B0A08"/>
+<rect x="1" y="1" width="638" height="398" rx="23" fill="none" stroke="#D8B56D" stroke-width="2" stroke-opacity=".6"/>
+<rect x="16" y="16" width="608" height="368" rx="16" fill="none" stroke="#D8B56D" stroke-width="0.75" stroke-opacity=".3"/>
+<svg x="36" y="40" width="245" height="49" viewBox="0 0 245 49">${dotMatrixInner('NOCTIS')}</svg>
+<text x="36" y="128" fill="#F5F6F8" font-size="30" font-weight="700">${name}</text>
+<text x="36" y="156" fill="#D8B56D" font-size="15">言聊 ID ${id}</text>
+<text x="36" y="330" fill="#9CA3AF" font-size="14">中越同传 · 夜语 · NOCTIS Private Chat</text>
+<text x="36" y="352" fill="#D8B56D" font-size="13" letter-spacing="2">TITANIUM BLACK VIP</text>
+<g transform="translate(500,252)"><rect x="-8" y="-8" width="100" height="100" rx="12" fill="#FFFFFF"/>${qrMarkup('bridge101',84,'')}</g>
+<text x="542" y="372" fill="#9CA3AF" font-size="11" text-anchor="middle">扫码加我</text>
+</svg>`;
+}
+async function downloadIdentityCard() {
+  const svg=identityCardSVG();
+  try {
+    const img=new Image();
+    await new Promise((resolve,reject)=>{ img.onload=resolve; img.onerror=reject; img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); });
+    const canvas=document.createElement('canvas');
+    canvas.width=1280; canvas.height=800;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0,1280,800);
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+    if(!blob) throw new Error('empty');
+    const file=new File([blob],'noctis-identity-card.png',{type:'image/png'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      await navigator.share({files:[file],title:'NOCTIS · 身份卡'});
+      return;
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='noctis-identity-card.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  } catch {
+    const blob=new Blob([svg],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='noctis-identity-card.svg';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  }
+  notify(t('身份卡已保存','Đã lưu thẻ danh tính'));
 }
 function profile() {
   const identity=`<div class="profile-identity">${avatar(demoProfile,'large')}<div><strong>${label(demoProfile)}</strong><small>言聊ID ${demoProfile.id}</small></div></div>`;
@@ -1861,7 +2099,7 @@ function profile() {
   const group=(name,content)=>`<section class="titanium-group"><h2>${name}</h2><div class="titanium-card">${content}</div></section>`;
   return `<article class="titanium-card titanium-profile">
     <div class="titanium-identity"><button class="titanium-avatar" data-profile-page="details" aria-label="${t('个人资料','Hồ sơ')}">${avatar(demoProfile,'large')}</button>
-      <div><small class="titanium-vip">TITANIUM BLACK VIP · 终身特权</small><h2>${label(demoProfile)}</h2>
+      <div><small class="titanium-vip">${spotkitSVG(SPOTKIT.vip,16,'VIP',6)}TITANIUM BLACK VIP · 终身特权</small><h2>${label(demoProfile)}</h2>
       <button class="titanium-id" data-copy-id>ID: ${demoProfile.id} ${icon('copy')}</button></div>
       ${button('qr',t('我的二维码','Mã QR của tôi'),'data-profile-page="qr"')}
     </div>
@@ -1871,7 +2109,7 @@ function profile() {
       <div><dt>${t('密钥','Khóa')}</dt><dd>${icon('lock')}${t('端到端动态密钥','Khóa động đầu cuối')}</dd></div>
     </dl>
   </article>
-  ${group('TRANSLATION & CALLS',
+  <div class="me-bento">${group('TRANSLATION & CALLS',
     row('sliders',t('引擎调度策略','Điều phối công cụ'),t(selectedPolicy[1],selectedPolicy[2]),'data-profile-page="policy"',t('方案预览 · 端侧优先','Xem trước · Ưu tiên trên máy'))+
     row('chat',t('中越称谓与会话风格','Xưng hô và phong cách'),t(selectedStyle[1],selectedStyle[2]),'data-profile-page="speech-style"')+
     `<button class="titanium-row" role="switch" aria-checked="${state.callPreferences.captions}" data-call-preference="captions"><i>${icon('captions')}</i><span>${t('通话实时双语 HUD','HUD song ngữ')}<small>${t('半透明双语字幕 · 不播放合成音','Phụ đề nổi · Không phát giọng tổng hợp')}</small></span><span class="titanium-switch"></span></button>`+
@@ -1885,19 +2123,33 @@ function profile() {
   )}
   ${group('PREFERENCES',
     row('globe',t('界面语言','Ngôn ngữ giao diện'),languageName(state.lang),'data-profile-page="general"')+
-    row('feed',t('网络与中继节点','Mạng và điểm chuyển tiếp'),'SG-01 · 18 ms','',t('新加坡专线 · 已连线','Tuyến Singapore · Đã kết nối'))+
+    relayLive()+
     row('info',t('关于夜语','Giới thiệu DạNgữ'),'Clean-47','data-profile-page="about"')
-  )}
+  )}</div>
+  ${savedPhrasesSection()}
+  <button type="button" class="identity-share-btn" data-share-identity>${icon('share')} ${t('分享我的身份卡','Chia sẻ thẻ danh tính của tôi')}</button>
   <button class="titanium-exit" data-sign-out>${t('安全退出','Thoát an toàn')}</button>`;
 }
 function interpretStream(side) {
   const all=(state.interpret[side] || []);
   const items=all.slice(-3);
   if(!items.length) return '';
+  const other=(state.interpret[side==='peer'?'mine':'peer'] || []);
+  const otherLastTs=other.length?other[other.length-1].ts:null;
+  const clockOf=ts=>new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date(ts));
+  const anchorFor=(item,prev)=>{
+    if(!item.ts) return '';
+    if(prev?.ts && item.ts-prev.ts>=600000) return `<div class="neo-anchor"><span>${clockOf(item.ts)}</span></div>`;
+    if(prev?.ts && otherLastTs && otherLastTs>prev.ts && item.ts>otherLastTs) return `<div class="neo-anchor"><span>${clockOf(item.ts)} · ${side==='peer'?t('越 → 中','Việt → Trung'):t('中 → 越','Trung → Việt')}</span></div>`;
+    return '';
+  };
   return items.map((item,i)=>{
     const latest=i===items.length-1;
     const realIndex=all.length-items.length+i;
-    return `<div class="neo-line${latest?' neo-latest':' neo-old'}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>${latest&&item.ms!=null?`<span class="neo-ms">${item.ms} ms</span>`:''}<button type="button" class="neo-copy" data-copy-side="${side}" data-copy-index="${realIndex}" aria-label="${t('复制译文','Sao chép bản dịch')}">${icon('copy')}</button>`}</div>`;
+    const body=item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`
+      :item.error?`<button type="button" class="neo-retry" data-retry-interpret="${side}:${realIndex}"><span aria-hidden="true">↻</span> ${t('翻译失败，点一下重试','Dịch thất bại, chạm để thử lại')}</button>`
+      :`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p><div class="neo-actions">${latest&&item.ms!=null?`<span class="neo-ms">${item.ms} ms</span>`:''}<button type="button" class="neo-copy" data-copy-side="${side}" data-copy-index="${realIndex}" aria-label="${t('复制译文','Sao chép bản dịch')}">${icon('copy')}</button></div>`;
+    return `${anchorFor(item,all[realIndex-1])}<div class="neo-line${latest?' neo-latest':' neo-old'}${item.flipped?' neo-flipped':''}" data-flip="${side}:${realIndex}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${body}</div>`;
   }).join('');
 }
 function scrollInterpretStreams(){
@@ -1913,7 +2165,7 @@ function translatePage() {
     <form class="interpret-form" data-interpret-form="mine" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
     <section class="neo-half neo-peer" aria-label="${t('对方','Đối phương')}"><div class="neo-stream">${interpretStream('peer')}</div></section>
     <section class="neo-half neo-mine" aria-label="${t('我方','Tôi')}"><div class="neo-stream">${interpretStream('mine')}</div></section>
-    <div class="neo-empty-state${hasInterpret?' is-hidden':''}"><div class="empty-guide"><p>轻触收音，即刻双向神经同传</p><p>Tap to stream bilingual translation</p></div><div class="empty-listen"><p>正在聆听...</p><p>Listening...</p></div></div>
+    <div class="neo-empty-state${hasInterpret?' is-hidden':''}"><div class="empty-guide">${spotkitSVG(SPOTKIT.interpret,96,t('同传','Phiên dịch'))}<p>${t('轻触收音，即刻同传','Chạm để bắt đầu phiên dịch')}</p></div><div class="empty-listen"><p>${t('正在聆听…','Đang lắng nghe…')}</p></div></div>
     <div class="neo-type"${state.interpretTyping?'':' hidden'}>
       <div class="neo-type-row"><input type="text" data-interpret-type-input maxlength="300" autocomplete="off" placeholder="${t('输入要翻译的话…','Nhập câu cần dịch…')}"><button type="button" class="neo-type-send" data-interpret-type-send>${t('翻译','Dịch')}</button><button type="button" class="neo-type-close" data-interpret-type-close aria-label="${t('关闭','Đóng')}">×</button></div>
       <div class="neo-type-preset"><button type="button" data-interpret-type-preset>${escape(typePreset)}</button></div>
@@ -1935,16 +2187,32 @@ function otherPage() {
   }
   return `<main class="section-page"><header class="section-header">${icon(glyph)}<h1>${t(zh,vi)}</h1></header><div class="section-content">${content[state.tab]()}</div></main>`;
 }
-const PROMPTS=[
- {id:'ice',zh:'破冰客套',vi:'Làm quen',items:[
-  {zh:'很高兴认识你',vi:'Rất vui được gặp bạn',say:'热特 味 得 盖普 伴'},
-  {zh:'你今天很漂亮',vi:'Hôm nay em trông rất xinh',say:'轰 内 嗯 冲 热特 星'}]},
- {id:'biz',zh:'商务询价',vi:'Thương lượng',items:[
+const PACKS=[
+ {id:'night-market',zh:'夜市',vi:'Chợ đêm',opener:['先问价，再还价，别急着买。','Hỏi giá trước, trả giá sau, đừng vội mua.'],items:[
+  {zh:'这个多少钱一斤？',vi:'Cái này bao nhiêu tiền một cân?',say:'该 内 包 优 典 莫 斤'},
+  {zh:'能便宜点吗？',vi:'Có thể rẻ hơn chút được không?',say:'哥 特 惹 哼 卒 得 空'},
+  {zh:'这个好吃吗？',vi:'Cái này có ngon không?',say:'该 内 哥 农 空'},
+  {zh:'给我来一份。',vi:'Cho tôi một phần.',say:'桌 妥依 莫 份'}]},
+ {id:'biz',zh:'商务',vi:'Thương lượng',opener:['先听对方开价，再亮底牌。','Nghe đối phương báo giá trước, rồi mới lộ bài.'],items:[
   {zh:'这个价格可以再谈谈吗？',vi:'Giá này có thể thương lượng thêm được không?',say:'亚 内 哥 特 特翁 量 添 得 空'},
-  {zh:'我们明天在办公室碰面？',vi:'Ngày mai chúng ta gặp nhau ở văn phòng nhé?',say:'耐 埋 准 塔 盖普 绕 喔 文 房 涅'}]},
- {id:'date',zh:'邀约约会',vi:'Hẹn hò',items:[
+  {zh:'我们明天在办公室碰面？',vi:'Ngày mai chúng ta gặp nhau ở văn phòng nhé?',say:'耐 埋 准 塔 盖普 绕 喔 文 房 涅'},
+  {zh:'请把报价单发我一份。',vi:'Xin gửi tôi bảng báo giá.',say:'辛 桂 妥依 榜 包 亚'},
+  {zh:'我们可以签长期合作吗？',vi:'Chúng ta có thể ký hợp tác dài hạn không?',say:'准 塔 哥 特 给 合 达 载 含 空'}]},
+ {id:'date',zh:'约会',vi:'Hẹn hò',opener:['轻松点，先聊吃的。','Thoải mái thôi, nói về đồ ăn trước.'],items:[
   {zh:'晚上一起去喝一杯吗？',vi:'Tối nay cùng đi uống một ly nhé?',say:'妥依 内 拱 滴 翁 莫 李 涅'},
-  {zh:'我叫车去接你',vi:'Anh đặt xe qua đón em nhé',say:'安 达特 些 瓜 东 嗯 涅'}]}
+  {zh:'我叫车去接你',vi:'Anh đặt xe qua đón em nhé',say:'安 达特 些 瓜 东 嗯 涅'},
+  {zh:'你喜欢吃什么？',vi:'Bạn thích ăn gì?',say:'伴 特 安 义'},
+  {zh:'周末有空吗？',vi:'Cuối tuần bạn có rảnh không?',say:'归 段 伴 哥 让 空'}]},
+ {id:'travel',zh:'旅行',vi:'Du lịch',opener:['问路先报地标，别只说名字。','Hỏi đường thì nói địa danh trước.'],items:[
+  {zh:'去还剑湖怎么走？',vi:'Đi Hồ Gươm như thế nào?',say:'滴 毫 刚 尼 特 闹'},
+  {zh:'这附近有什么好吃的？',vi:'Gần đây có món gì ngon không?',say:'近 得 哥 蒙 义 农 空'},
+  {zh:'帮我叫辆车。',vi:'Giúp tôi gọi xe.',say:'玉 妥依 告 些'},
+  {zh:'门票多少钱？',vi:'Vé vào cửa bao nhiêu tiền?',say:'喂 姚 哥 包 优 典'}]},
+ {id:'pickup',zh:'接机',vi:'Đón sân bay',opener:['先报航班号，再说出口。','Báo số chuyến bay trước, rồi nói cửa ra.'],items:[
+  {zh:'我到机场了。',vi:'Tôi đến sân bay rồi.',say:'妥依 颠 僧 排 绕'},
+  {zh:'你在哪个出口？',vi:'Bạn đang ở cửa nào?',say:'伴 党 喔 哥 闹'},
+  {zh:'我的航班晚点了。',vi:'Chuyến bay của tôi bị trễ.',say:'追 拜 哥 妥依 币 遮'},
+  {zh:'行李有点多。',vi:'Hành lý hơi nhiều.',say:'韩 李 嘿 溜'}]}
 ];
 let audioUnlocked=false;
 function unlockIOSAudio(){
@@ -1997,14 +2265,15 @@ function speakPrompt(text){
 }
 function prompterHTML(){
   const p=state.prompter;
-  const cat=PROMPTS.find(c=>c.id===p.cat)||PROMPTS[0];
+  const pack=PACKS.find(c=>c.id===state.prompterPack)||PACKS[0];
   return `<div class="prompter${p.open?' open':''}" id="prompter">
     <button type="button" class="prompter-pill" data-prompter-toggle aria-label="${t('提词器','Gợi ý')}">${icon('translate')} ${t('提词','Gợi ý')}</button>
     <div class="prompter-card" role="dialog" aria-label="${t('提词器','Gợi ý')}">
       <header><strong>${icon('translate')} ${t('提词器','Gợi ý nói')}</strong><button type="button" class="prompter-collapse" data-prompter-toggle aria-label="${t('收起','Thu gọn')}">⌄</button></header>
-      <div class="prompter-cats">${PROMPTS.map(c=>`<button type="button" class="${c.id===cat.id?'on':''}" data-prompter-cat="${c.id}">${t(c.zh,c.vi)}</button>`).join('')}</div>
-      <div class="prompter-list">${cat.items.map((item,i)=>{
-        const id=cat.id+':'+i, active=p.active===id;
+      <div class="prompter-cats">${PACKS.map(c=>`<button type="button" class="${c.id===pack.id?'on':''}" data-prompter-pack="${c.id}">${t(c.zh,c.vi)}</button>`).join('')}</div>
+      <div class="prompter-pack">${spotkitPackSVG(SPOTKIT_PACKS[pack.id],40,t(pack.zh,pack.vi))}<p>${t(...pack.opener)}</p></div>
+      <div class="prompter-list">${pack.items.map((item,i)=>{
+        const id=pack.id+':'+i, active=p.active===id;
         return `<button type="button" class="prompter-item${active?' active':''}" data-prompter-phrase="${id}">
           <strong>${escape(item.zh)}</strong><span>${escape(item.vi)}</span>
           ${active?`<em>${t('读音','Phát âm')}：${escape(item.say)}</em><b>${t('点一下重播','Chạm để đọc lại')}</b>`:''}
@@ -2192,7 +2461,7 @@ function render({preserve=false,enterChat=false}={}) {
   }
   root.innerHTML=`<div class="shell ${state.tab==='messages'?'message-shell':'other-shell'} ${state.mobileChat&&state.tab==='messages'?'mobile-open':''} ${state.details?'with-details':''} ${state.tab==='me'&&!['details','qr'].includes(state.profilePage)?'profile-settings-shell':''}" ${state.pendingTranscript?'inert':''}>
     ${state.identity?nodeStatus():''}${sidebar()}${state.tab==='messages'?chatPanel(person,enterChat)+(state.details?details(person):''):otherPage()}
-  </div>${!state.identity?`<div class="handshake-backdrop"><section class="handshake-card" role="dialog" aria-modal="true" aria-label="NOCTIS · 专属身份接入"><h1>NOCTIS · 专属身份接入</h1><p>${t('输入邀请码或手机号，建立专属加密通道。','Nhập mã mời hoặc số điện thoại để mở kênh mã hóa riêng.')}</p><input id="handshake-input" type="text" value="+84 818 728 889" placeholder="${t('输入邀请码或手机号','Nhập mã mời hoặc số điện thoại')}" autocomplete="off" aria-label="${t('输入邀请码或手机号','Nhập mã mời hoặc số điện thoại')}"><button type="button" data-handshake-connect>${t('建立安全握手 (CONNECT)','Thiết lập bắt tay an toàn (CONNECT)')}</button></section></div>`:''}${transcriptPrompt()}${state.toast?`<div class="titanium-toast" role="status">${escape(state.toast)}</div>`:''}`;
+  </div>${!state.identity?`<div class="handshake-backdrop handshake-staged"><section class="handshake-card" role="dialog" aria-modal="true" aria-label="NOCTIS · 专属身份接入"><div class="hs-stage hs-stage-1 handshake-illust">${spotkitSVG(SPOTKIT.handshake,72,t('握手','Bắt tay'))}</div><div class="hs-stage hs-stage-2 dotword" role="img" aria-label="NOCTIS">${dotMatrixSVG()}</div><div class="hs-stage hs-stage-3"><h1>专属身份接入</h1><p>${t('输入邀请码或手机号。','Nhập mã mời hoặc số điện thoại.')}</p><input id="handshake-input" type="text" value="+84 818 728 889" placeholder="${t('输入邀请码或手机号','Nhập mã mời hoặc số điện thoại')}" autocomplete="off" aria-label="${t('输入邀请码或手机号','Nhập mã mời hoặc số điện thoại')}"><button type="button" data-handshake-connect>${t('建立安全握手 (CONNECT)','Thiết lập bắt tay an toàn (CONNECT)')}</button></div></section></div>`:''}${transcriptPrompt()}${state.toast?`<div class="titanium-toast" role="status">${escape(state.toast)}</div>`:''}`;
   state.leavingChat=false;
   if(state.pendingTranscript) root.querySelector('[data-transcript-action="cancel"]')?.focus();
   const timeline=document.querySelector('.timeline');
@@ -2226,6 +2495,13 @@ function notify(text) {
   render({preserve:true});
   toastTimer=setTimeout(()=>{state.toast='';root.querySelector('.titanium-toast')?.remove();},2400);
 }
+/* 图标情境动画：给刚切换的图标播一次 neo-icon-in */
+function swapIcon(el) {
+  if(!el) return;
+  el.classList.remove('icon-swap');
+  void el.offsetWidth;
+  el.classList.add('icon-swap');
+}
 async function copyProfileId() {
   try {
     await navigator.clipboard.writeText(demoProfile.id);
@@ -2239,17 +2515,38 @@ root.addEventListener('click', event => {
   if(!control) return;
   const d=control.dataset;
   if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
-  if('clearInterpret' in d) { state.interpret={peer:[],mine:[]}; save('interpret',state.interpret); render({preserve:true}); return; }
-  if('interpretDir' in d) { state.interpretDir=state.interpretDir==='peer'?'mine':'peer'; stopInterpretRecognition(); render({preserve:true}); return; }
+  if('clearInterpret' in d) { state.interpret={peer:[],mine:[]}; save('interpret',state.interpret); render({preserve:true}); swapIcon(document.querySelector('.interpret-clear')); return; }
+  if('interpretDir' in d) { state.interpretDir=state.interpretDir==='peer'?'mine':'peer'; stopInterpretRecognition(); render({preserve:true}); document.querySelectorAll('.neo-dir').forEach(el=>swapIcon(el)); return; }
   if('interpretTypeClose' in d) { state.interpretTyping=false; render({preserve:true}); return; }
   if('interpretTypePreset' in d) { const side=state.interpretDir==='peer'?'peer':'mine'; const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`); if(form){ form.elements.interpret.value=control.textContent.trim(); state.interpretTyping=false; form.requestSubmit(); } return; }
   if('interpretTypeSend' in d) { const input=document.querySelector('[data-interpret-type-input]'); const text=input?input.value.trim():''; if(!text) return; const side=state.interpretDir==='peer'?'peer':'mine'; const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`); if(form){ form.elements.interpret.value=text; state.interpretTyping=false; form.requestSubmit(); } return; }
-  if('prompterToggle' in d) { state.prompter.open=!state.prompter.open; renderPrompter(); return; }
-  if(d.prompterCat) { state.prompter.cat=d.prompterCat; state.prompter.active=null; renderPrompter(); return; }
+  if(d.retryInterpret!==undefined) {
+    const [side,idx]=d.retryInterpret.split(':');
+    const item=(state.interpret[side]||[])[Number(idx)];
+    if(!item) return;
+    item.error=false; item.pending=true; item.trans=''; item.ms=null;
+    save('interpret',state.interpret);
+    render({preserve:true});
+    const toLang=side==='peer'?'zh':'vi';
+    const t0=performance.now();
+    requestRelayTranslation({sourceText:item.src,toLang}).then(trans=>{
+      item.trans=trans; item.pending=false; item.ms=Math.round(performance.now()-t0);
+      save('interpret',state.interpret);
+      render({preserve:true});
+      if(trans && trans.trim() && state.tab==='translate') speakTranslation(trans, toLang);
+    }).catch(()=>{
+      item.pending=false; item.error=true;
+      save('interpret',state.interpret);
+      render({preserve:true});
+    });
+    return;
+  }
+  if('prompterToggle' in d) { state.prompter.open=!state.prompter.open; renderPrompter(); swapIcon(document.querySelector('.prompter-collapse')||document.querySelector('.prompter-pill')); return; }
+  if(d.prompterPack) { state.prompterPack=d.prompterPack; state.prompter.active=null; renderPrompter(); return; }
   if(d.prompterPhrase!==undefined) {
-    const [catId,idx]=d.prompterPhrase.split(':');
-    const cat=PROMPTS.find(c=>c.id===catId);
-    const item=cat?.items[Number(idx)];
+    const [packId,idx]=d.prompterPhrase.split(':');
+    const pack=PACKS.find(c=>c.id===packId);
+    const item=pack?.items[Number(idx)];
     if(item) { state.prompter.active=d.prompterPhrase; renderPrompter(); speakPrompt(item.vi); }
     return;
   }
@@ -2326,10 +2623,10 @@ root.addEventListener('click', event => {
   if('handshakeConnect' in d) {
     const input=document.querySelector('#handshake-input');
     const value=(input?.value || '').trim() || '+84 818 728 889';
-    save('identity', value);
-    state.identity=value;
-    render();
-    notify(t('SG-01 新加坡边缘网关已连接','Đã kết nối cổng biên Singapore SG-01'));
+    const backdrop=document.querySelector('.handshake-backdrop');
+    const done=()=>{ save('identity', value); state.identity=value; render(); };
+    if(backdrop) { backdrop.classList.add('handshake-leaving'); setTimeout(done,180); }
+    else done();
   }
   if(d.changeAvatar!==undefined) {
     avatarTarget = d.changeAvatar==='me' ? {kind:'me'} : {kind:'friend', id:d.changeAvatar};
@@ -2399,6 +2696,9 @@ root.addEventListener('click', event => {
   }
   if('downloadQr' in d) downloadProfileQr();
   if('copyId' in d) void copyProfileId();
+  if('shareIdentity' in d) { void downloadIdentityCard(); return; }
+  if(d.savePhraseReplay!==undefined) { const item=state.savedPhrases[Number(d.savePhraseReplay)]; if(item) speakTranslation(item.trans, item.side==='peer'?'zh':'vi'); return; }
+  if(d.unsavePhrase!==undefined) { state.savedPhrases.splice(Number(d.unsavePhrase),1); save('saved-phrases',state.savedPhrases); render({preserve:true}); return; }
   if('clearCache' in d) {
     state.translationCache=[];
     save('translation-cache',state.translationCache);
@@ -2504,7 +2804,7 @@ function stopInterpretRecognition() {
   if(interpretHoldButton) { interpretHoldButton.classList.remove('holding'); interpretHoldButton.classList.remove('listening'); interpretHoldButton=null; }
   interpretTapMode=false;
   const empty=document.querySelector('.neo-empty-state');
-  if(empty) { empty.classList.remove('is-listening'); const p=empty.querySelector('.empty-listen p'); if(p) p.textContent='正在聆听...'; }
+  if(empty) { empty.classList.remove('is-listening'); const p=empty.querySelector('.empty-listen p'); if(p) p.textContent=t('正在聆听…','Đang lắng nghe…'); }
 }
 // 云端认字：把录好的音频发给云函数 /stt（Groq Whisper），只认字不翻译，
 // 约 1–2 秒就回原文；拿到原话后交给打字那条提交链去翻译+朗读，
@@ -2560,18 +2860,18 @@ async function startCloudRecording(control, side) {
     if(cloud.cancelled) return;
     const blob=new Blob(cloud.chunks, {type: recorder.mimeType || 'audio/mp4'});
     try { stream.getTracks().forEach(t=>t.stop()); } catch {}
-    if(!blob.size) { notify(t('没录到声音，请再试一次','Không ghi được âm thanh, thử lại')); return; }
+    if(!blob.size) { notify(t('没录到声音','Không ghi được âm thanh')); return; }
     const lang=side==='peer'?'vi':'zh';
     try {
       const data=await requestCloudSTT(blob, lang);
       const transcript=(data.transcript||'').trim();
-      if(!transcript) { notify(t('没听清，请再说一次','Không nghe rõ, nói lại')); return; }
+      if(!transcript) { notify(t('没听清','Không nghe rõ')); return; }
       // 原话认出来了就先上屏：走打字那条提交链（它会立刻把原话显示出来，
       // 再调翻译、翻好自动念出来），不用等翻译回来才有反应。
       const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
       if(form) { form.elements.interpret.value=transcript; form.requestSubmit(); }
     } catch (err) {
-      notify(t('语音转写失败，请打字输入','Chuyển giọng nói thất bại, hãy nhập văn bản'));
+      notify(t('转写失败，打字试试','Chuyển giọng nói thất bại, thử gõ chữ'));
       state.interpretTyping=true; render({preserve:true});
     }
   };
@@ -2643,7 +2943,7 @@ function startSpeechRecognition(control, side) {
     };
     const m=msgs[err];
     if(m) notify(t(m[0],m[1]));
-    else if(err==='no-speech'){ notify(t('没听到声音，已切换到打字输入','Không nghe thấy tiếng, chuyển sang nhập văn bản')); }
+    else if(err==='no-speech'){ notify(t('没听到声音，打字试试','Không nghe thấy tiếng, thử gõ chữ')); }
     else notify(t('语音识别启动失败','Speech recognition failed to start'));
     stopInterpretRecognition();
     state.interpretTyping=true; render({preserve:true});
@@ -2661,7 +2961,7 @@ function startSpeechRecognition(control, side) {
     stopInterpretRecognition();
     state.interpretTyping=true;
     render({preserve:true});
-    notify(t('没听到声音，已切换到打字输入','Không nghe thấy tiếng, chuyển sang nhập văn bản'));
+    notify(t('没听到声音，打字试试','Không nghe thấy tiếng, thử gõ chữ'));
   },3000);
 }
 root.addEventListener('pointerdown',event=>{
@@ -2680,6 +2980,37 @@ root.addEventListener('pointerdown',event=>{
   startSpeechRecognition(control, side);
 });
 root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-hold]')) unlockIOSAudio(); });
+/* 金句收藏：长按同传页任意译文行 500ms 存为金句（长按后那一下点按不翻面） */
+let interpretLongTimer=null;
+let interpretLongPressed=false;
+let interpretLongTarget=null;
+function clearInterpretLongTimer() {
+  if(interpretLongTimer) { clearTimeout(interpretLongTimer); interpretLongTimer=null; }
+  interpretLongTarget=null;
+}
+root.addEventListener('pointerdown',event=>{
+  if(event.target.closest('button')) return;
+  const line=event.target.closest('.neo-line');
+  if(!line || line.dataset.flip===undefined) return;
+  const [side,idx]=line.dataset.flip.split(':');
+  const item=(state.interpret[side]||[])[Number(idx)];
+  if(!item || item.pending || item.error || !item.trans) return;
+  interpretLongPressed=false;
+  interpretLongTarget={side,idx:Number(idx)};
+  interpretLongTimer=setTimeout(()=>{
+    interpretLongTimer=null;
+    const it=(state.interpret[interpretLongTarget.side]||[])[interpretLongTarget.idx];
+    if(!it || !it.trans) return;
+    if(state.savedPhrases.some(p=>p.src===it.src&&p.trans===it.trans)) { notify(t('已经收藏过了','Đã lưu rồi')); return; }
+    state.savedPhrases.unshift({src:it.src,trans:it.trans,side:interpretLongTarget.side,ts:Date.now()});
+    state.savedPhrases=state.savedPhrases.slice(0,50);
+    save('saved-phrases',state.savedPhrases);
+    interpretLongPressed=true;
+    try { if(navigator.vibrate) navigator.vibrate(20); } catch {}
+    notify(t('已收藏金句','Đã lưu câu hay'));
+  },500);
+});
+for(const type of ['pointerup','pointercancel','pointermove','lostpointercapture']) root.addEventListener(type,clearInterpretLongTimer);
 root.addEventListener('click',event=>{
   const btn=event.target.closest('[data-copy-side]');
   if(!btn) return;
@@ -2692,6 +3023,20 @@ root.addEventListener('click',event=>{
   if(navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(done).catch(()=>{ fallbackCopy(text); done(); });
   } else { fallbackCopy(text); done(); }
+});
+/* 译文翻面：点一下译文行，原文与译文上下互换，再点翻回来（按钮点按不触发） */
+root.addEventListener('click',event=>{
+  const btn=event.target.closest('button');
+  if(btn) return;
+  const line=event.target.closest('.neo-line');
+  if(!line || line.dataset.flip===undefined) return;
+  if(interpretLongPressed) { interpretLongPressed=false; return; }
+  const [side,idx]=line.dataset.flip.split(':');
+  const item=(state.interpret[side]||[])[Number(idx)];
+  if(!item || item.pending || item.error || !item.trans) return;
+  item.flipped=!item.flipped;
+  save('interpret',state.interpret);
+  render({preserve:true});
 });
 function fallbackCopy(text) {
   const ta=document.createElement('textarea');
@@ -2810,7 +3155,7 @@ root.addEventListener('submit', event => {
     const drafts=[...document.querySelectorAll('.interpret-form input')].map(el=>el===input?'':el.value);
     input.value='';
     const toLang=side==='peer'?'zh':'vi';
-    const entry={src:text,trans:'',pending:true,time:clock()};
+    const entry={src:text,trans:'',pending:true,time:clock(),ts:Date.now()};
     (state.interpret[side] ||= []).push(entry);
     state.interpret[side]=state.interpret[side].slice(-20);
     save('interpret',state.interpret);
@@ -2825,10 +3170,10 @@ root.addEventListener('submit', event => {
       document.querySelectorAll('.interpret-form input').forEach((el,i)=>{ el.value=now[i]||''; });
       if(trans && trans.trim() && state.tab==='translate') speakTranslation(trans, toLang);
     }).catch(()=>{
-      entry.pending=false;
+      entry.pending=false; entry.error=true;
       save('interpret',state.interpret);
       render({preserve:true});
-      notify(t('翻译失败，请重试（点输入框打字翻）','Dịch thất bại, thử lại (gõ chữ để dịch)'));
+      notify(t('翻译失败，点 ↻ 重试','Dịch thất bại, chạm ↻ để thử lại'));
     });
   }
 });
@@ -2837,10 +3182,10 @@ function installManifest() {
   const start=new URL(platform.location.href);
   start.hash='';
   const scope=new URL('./',start);
-  const icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#090B0E"/><path d="M122 170h268v150H240l-75 58v-58h-43z" fill="none" stroke="#D8B56D" stroke-width="18" stroke-linejoin="round"/><path d="M184 224h144m-144 43h104" stroke="#D8B56D" stroke-width="16" stroke-linecap="round"/></svg>';
+  const icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#0B0A08"/><path d="M122 170h268v150H240l-75 58v-58h-43z" fill="none" stroke="#D8B56D" stroke-width="18" stroke-linejoin="round"/><path d="M184 224h144m-144 43h104" stroke="#D8B56D" stroke-width="16" stroke-linecap="round"/></svg>';
   const manifest={
     id:start.pathname,name:brandName,short_name:'夜语',start_url:start.href,scope:scope.href,
-    display:'standalone',orientation:'portrait',background_color:'#090B0E',theme_color:'#090B0E',
+    display:'standalone',orientation:'portrait',background_color:'#0B0A08',theme_color:'#0B0A08',
     icons:[{src:'data:image/svg+xml,'+encodeURIComponent(icon),sizes:'any',type:'image/svg+xml',purpose:'any'}]
   };
   const link=document.createElement('link');
