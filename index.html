@@ -533,8 +533,6 @@ button[aria-expanded=true].icon-button { background:var(--choice);color:var(--st
 .composer-tools {gap:8px;margin-top:4px}
 .composer-tools button {min-height:44px;padding-inline:8px}
 .composer-tools [data-send-voice] {background:var(--soft)}
-.composer-tools [data-offline]:not([aria-pressed=true]) {color:var(--muted)}
-.composer-tools [data-offline][aria-pressed=true] {outline:1px solid var(--accent);outline-offset:-1px}
 .message-translate,.voice-actions button,.message-status button {min-height:44px}
 .message-translate[data-message-open=false] {color:var(--muted)}
 .message-status [data-retry-send],.translation [data-retry-translation] {text-decoration:underline;text-underline-offset:3px}
@@ -1098,7 +1096,7 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
-  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',interpretTyping:false,
+  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',interpretTyping:false,
   translated:{}, picker:false, prompter:{open:false,cat:'ice',active:null}, call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
@@ -1212,7 +1210,6 @@ function chatPanel(person, enterChat=false) {
         ${state.voiceDraft===person.id?`<span class="voice-demo-label" role="status">${t('录制中 · 未使用麦克风','Đang thu âm · Không dùng micrô')}</span>
           <button type="button" data-send-voice>${t('结束并发送','Kết thúc và gửi')}</button><button type="button" data-cancel-voice>${t('取消','Hủy')}</button>`
           :`<button type="button" data-record-voice>${icon('mic')} ${t('录制语音','Thu âm')}</button>`}
-        <button type="button" data-offline aria-pressed="${state.offlineDemo}">${t('断网','Mất mạng')}</button>
       </div>
       <div class="composer-note"><span>${icon('globe')} ${t('简体中文','Tiếng Trung')} <b>↔</b> ${t('Tiếng Việt','Tiếng Việt')}</span><span>${t('Enter 发送','Enter để gửi')}</span></div>
     </footer>
@@ -1432,7 +1429,7 @@ function queueDemoReply(person) {
     refreshDemoReply(person);
   },600);
 }
-function operationOffline() { return state.offlineDemo || globalThis.navigator?.onLine===false; }
+function operationOffline() { return globalThis.navigator?.onLine===false; }
 function sendDemoMessage(person, message) {
   const meta=message[5];
   if (pendingMessages.has(meta)) return;
@@ -2267,7 +2264,6 @@ root.addEventListener('click', event => {
   if(d.filter) { state.filter=d.filter; render({preserve:true}); }
   if('back' in d) { state.voiceDraft=null; state.mobileChat=false; state.leavingChat=true; render(); }
   if('details' in d) { state.details=!state.details; render({preserve:true}); }
-  if('offline' in d) { state.offlineDemo=!state.offlineDemo; render({preserve:true}); }
   if('recordVoice' in d) { state.voiceDraft=state.active; render({preserve:true}); }
   if('cancelVoice' in d) { state.voiceDraft=null; render({preserve:true}); }
   if('sendVoice' in d && state.voiceDraft===state.active) {
