@@ -142,6 +142,17 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-old .neo-src{font-size:16px}
 .neo-old .neo-trans{font-size:12px}
 .neo-latest .neo-src{animation:neo-breathe 4s ease-in-out infinite}
+.neo-latest .neo-trans{font-size:20px;color:#E8C97A;text-shadow:0 0 18px rgba(232,201,122,.18)}
+.neo-ms{display:inline-block;margin-top:10px;font-size:10px;line-height:1;color:#D8B56D;border:1px solid rgba(216,181,109,.35);border-radius:999px;padding:4px 8px;letter-spacing:.1em}
+.neo-type{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 76px);width:min(92vw,420px);z-index:6;background:rgba(16,19,23,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(216,181,109,.35);border-radius:16px;padding:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.neo-type[hidden]{display:none}
+.neo-type-row{display:flex;gap:8px;align-items:center}
+.neo-type input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#fff;font-size:15px;padding:8px 4px}
+.neo-type input::placeholder{color:#6E737B}
+.neo-type-send{flex:none;background:#D8B56D;color:#090B0E;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700}
+.neo-type-close{flex:none;background:transparent;border:0;color:#6E737B;font-size:18px;padding:4px 6px;line-height:1}
+.neo-type-preset{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.neo-type-preset button{background:transparent;border:1px solid rgba(216,181,109,.3);color:#D8B56D;border-radius:999px;padding:5px 10px;font-size:12px}
 @keyframes neo-breathe{0%,100%{text-shadow:0 0 16px rgba(255,255,255,.10),0 2px 12px rgba(0,0,0,.6)}50%{text-shadow:0 0 30px rgba(255,255,255,.24),0 2px 12px rgba(0,0,0,.6)}}
 .neo-pending{margin:6px 0 0;font-size:13px;color:#6E737B}
 .neo-empty-state{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:2;transition:opacity .45s ease;animation:neo-empty-breathe 3.6s ease-in-out infinite}
@@ -1074,7 +1085,7 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
-  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',
+  expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, offlineDemo:false, interpret:read('interpret',{peer:[],mine:[]}),interpretDir:'mine',interpretTyping:false,
   translated:{}, picker:false, prompter:{open:false,cat:'ice',active:null}, call:null, voiceDraft:null, pendingTranscript:null
 };
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
@@ -1874,7 +1885,7 @@ function interpretStream(side) {
   if(!items.length) return '';
   return items.map((item,i)=>{
     const latest=i===items.length-1;
-    return `<div class="neo-line${latest?' neo-latest':' neo-old'}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>`}</div>`;
+    return `<div class="neo-line${latest?' neo-latest':' neo-old'}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>${latest&&item.ms!=null?`<span class="neo-ms">${item.ms} ms</span>`:''}`}</div>`;
   }).join('');
 }
 function scrollInterpretStreams(){
@@ -1884,12 +1895,17 @@ function translatePage() {
   const dir=state.interpretDir || 'mine';
   const hasInterpret=(state.interpret.peer||[]).length>0||(state.interpret.mine||[]).length>0;
   const dirLabel=dir==='mine'?t('中 ⇄ 越','Trung ⇄ Việt'):t('越 ⇄ 中','Việt ⇄ Trung');
+  const typePreset=dir==='mine'?'你好，很高兴认识你':'Xin chào, rất vui được gặp bạn';
   return `<div class="interpret-neo">
     <form class="interpret-form" data-interpret-form="peer" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
     <form class="interpret-form" data-interpret-form="mine" hidden><input name="interpret" maxlength="300" autocomplete="off"></form>
     <section class="neo-half neo-peer" aria-label="${t('对方','Đối phương')}"><div class="neo-stream">${interpretStream('peer')}</div></section>
     <section class="neo-half neo-mine" aria-label="${t('我方','Tôi')}"><div class="neo-stream">${interpretStream('mine')}</div></section>
     <div class="neo-empty-state${hasInterpret?' is-hidden':''}"><div class="empty-guide"><p>轻触收音，即刻双向神经同传</p><p>Tap to stream bilingual translation</p></div><div class="empty-listen"><p>正在聆听...</p><p>Listening...</p></div></div>
+    <div class="neo-type"${state.interpretTyping?'':' hidden'}>
+      <div class="neo-type-row"><input type="text" data-interpret-type-input maxlength="300" autocomplete="off" placeholder="${t('输入要翻译的话…','Nhập câu cần dịch…')}"><button type="button" class="neo-type-send" data-interpret-type-send>${t('翻译','Dịch')}</button><button type="button" class="neo-type-close" data-interpret-type-close aria-label="${t('关闭','Đóng')}">×</button></div>
+      <div class="neo-type-preset"><button type="button" data-interpret-type-preset>${escape(typePreset)}</button></div>
+    </div>
     <div class="neo-pill">
       <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
       <button type="button" class="neo-mic translate-mic-btn" data-interpret-hold="${dir}" aria-label="${t('按住说话','Giữ để nói')}">${icon('mic')}</button>
@@ -2180,6 +2196,9 @@ root.addEventListener('click', event => {
   if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
   if('clearInterpret' in d) { state.interpret={peer:[],mine:[]}; save('interpret',state.interpret); render({preserve:true}); return; }
   if('interpretDir' in d) { state.interpretDir=state.interpretDir==='peer'?'mine':'peer'; stopInterpretRecognition(); render({preserve:true}); return; }
+  if('interpretTypeClose' in d) { state.interpretTyping=false; render({preserve:true}); return; }
+  if('interpretTypePreset' in d) { const side=state.interpretDir==='peer'?'peer':'mine'; const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`); if(form){ form.elements.interpret.value=control.textContent.trim(); state.interpretTyping=false; form.requestSubmit(); } return; }
+  if('interpretTypeSend' in d) { const input=document.querySelector('[data-interpret-type-input]'); const text=input?input.value.trim():''; if(!text) return; const side=state.interpretDir==='peer'?'peer':'mine'; const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`); if(form){ form.elements.interpret.value=text; state.interpretTyping=false; form.requestSubmit(); } return; }
   if('prompterToggle' in d) { state.prompter.open=!state.prompter.open; renderPrompter(); return; }
   if(d.prompterCat) { state.prompter.cat=d.prompterCat; state.prompter.active=null; renderPrompter(); return; }
   if(d.prompterPhrase!==undefined) {
@@ -2439,7 +2458,7 @@ root.addEventListener('pointerdown',event=>{
   unlockIOSAudio();
   if(interpretRecognition) { stopInterpretRecognition(); return; }
   const SpeechRecognition=globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
-  if(!SpeechRecognition) { notify(t('当前浏览器不支持语音识别，请打字输入','Trình duyệt này không hỗ trợ nhận diện giọng nói, hãy nhập văn bản')); return; }
+  if(!SpeechRecognition) { state.interpretTyping=true; render({preserve:true}); notify(t('当前浏览器不支持语音识别，请打字输入','Trình duyệt này không hỗ trợ nhận diện giọng nói, hãy nhập văn bản')); return; }
   try { if(navigator.vibrate) navigator.vibrate(20); } catch {}
   control.classList.add('tapped');
   setTimeout(()=>{ control.classList.remove('tapped'); },650);
@@ -2462,7 +2481,8 @@ root.addEventListener('pointerdown',event=>{
   recognition.onend=()=>{ stopInterpretRecognition(); };
   recognition.onerror=(event)=>{
     const err=event && event.error;
-    if(err && err!=='no-speech' && err!=='aborted'){
+    const realErr=err && err!=='no-speech' && err!=='aborted';
+    if(realErr){
       const msgs={
         'not-allowed':['麦克风权限被拒绝，请在浏览器设置里允许使用麦克风','Microphone permission denied'],
         'audio-capture':['没有检测到麦克风','No microphone detected'],
@@ -2474,11 +2494,15 @@ root.addEventListener('pointerdown',event=>{
       else notify(t('语音识别启动失败','Speech recognition failed to start'));
     }
     stopInterpretRecognition();
+    if(realErr){ state.interpretTyping=true; render({preserve:true}); }
   };
   try { recognition.start(); } catch { notify(t('语音识别启动失败','Speech recognition failed to start')); stopInterpretRecognition(); return; }
   interpretRecognition=recognition;
   interpretHoldButton=control;
   control.classList.add('holding');
+  state.interpretTyping=false;
+  const typeBox=document.querySelector('.neo-type');
+  if(typeBox) typeBox.hidden=true;
 });
 root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-hold]')) unlockIOSAudio(); });
 for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,event=>{
@@ -2501,6 +2525,16 @@ root.addEventListener('keyup',event=>{
   if(event.code!=='Space' || !event.target.matches('[data-hold-talk]')) return;
   event.preventDefault();
   holdVoice(event.target,false,true);
+});
+root.addEventListener('keydown',event=>{
+  if(event.key!=='Enter') return;
+  const input=event.target.closest('[data-interpret-type-input]');
+  if(!input) return;
+  const text=input.value.trim();
+  if(!text) return;
+  const side=state.interpretDir==='peer'?'peer':'mine';
+  const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
+  if(form){ form.elements.interpret.value=text; state.interpretTyping=false; form.requestSubmit(); }
 });
 root.addEventListener('change', event=>{
   const {contextKey,contextChat}=event.target.dataset;
@@ -2560,8 +2594,9 @@ root.addEventListener('submit', event => {
     save('interpret',state.interpret);
     render({preserve:true});
     document.querySelectorAll('.interpret-form input').forEach((el,i)=>{ el.value=drafts[i]||''; });
+    const t0=performance.now();
     requestRelayTranslation({sourceText:text,toLang}).then(trans=>{
-      entry.trans=trans; entry.pending=false;
+      entry.trans=trans; entry.pending=false; entry.ms=Math.round(performance.now()-t0);
       save('interpret',state.interpret);
       const now=[...document.querySelectorAll('.interpret-form input')].map(el=>el.value);
       render({preserve:true});
