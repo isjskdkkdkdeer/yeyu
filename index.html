@@ -1594,7 +1594,7 @@ async function requestRelayTranslation(payload) {
     const response=await platform.fetch(BACKEND_TRANSLATE_API,{
       method:'POST',signal:controller.signal,
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({text:payload.sourceText,to:payload.toLang})
+      body:JSON.stringify({text:payload.sourceText,to:payload.toLang,style:payload.style||state.titanium.style,myRole:payload.honorificProfile?.myRole,peerRole:payload.honorificProfile?.peerRole})
     });
     if(!response.ok) throw new Error('Relay HTTP '+response.status);
     const data=await response.json();
@@ -2081,7 +2081,6 @@ function profile() {
   )}
   ${group('SECURITY & PRIVACY',
     row('captions',t('通话字幕本地缓存','Lưu phụ đề cục bộ'),state.titanium.cache==='discard'?t('阅后即焚','Xóa sau khi gọi'):t('保留本地记录','Lưu trên máy'),'data-profile-page="cache-mode"')+
-    row('mic',t('麦克风音频隐私','Quyền riêng tư micrô'),t('未采集','Không thu'),'',t('不采集或上传原始音频','Không thu hoặc tải âm thanh lên'))+
     row('lock',t('设备访问与生物识别','Truy cập và sinh trắc học'),t('未接入','Chưa kết nối'),'', 'Face ID / Touch ID')+
     row('trash',t('清理本地翻译缓存','Xóa bộ nhớ đệm bản dịch'),state.translationCache.length?(cachedBytes/1024).toFixed(1)+' KB':'0 KB','data-clear-cache')
   )}
