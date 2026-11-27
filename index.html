@@ -448,6 +448,9 @@ input::placeholder {color:var(--muted);opacity:1}
 .profile-fields>div.editing {flex-direction:column;align-items:stretch;gap:8px}
 .profile-fields input,.profile-fields select {min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-control);background:var(--chat);color:var(--ink);font:inherit;width:100%;box-sizing:border-box}
 .profile-fields input:focus,.profile-fields select:focus {outline:2px solid var(--accent);outline-offset:1px}
+.region-chips {display:flex;flex-wrap:wrap;gap:6px}
+.region-chip {min-height:32px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--chat);color:var(--ink);font-size:var(--text-sm);cursor:pointer}
+@media (hover:hover){.region-chip:hover{border-color:var(--accent)}}
 .edit-avatar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .edit-avatar>div{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
 .edit-form{display:grid;gap:12px}
@@ -995,6 +998,8 @@ const phrases = [
   ['你好','Xin chào'],['谢谢','Cảm ơn'],['我到了','Mình đến rồi'],['马上到','Mình sắp tới rồi'],['晚点见','Hẹn gặp lại sau nhé'],['好呀','Được đó'],['晚安','Chúc ngủ ngon']
 ];
 
+// 地区预设：点一下就填好中文+越南语，不用手打。
+const VIETNAM_PLACES=[['河内','Hà Nội'],['胡志明市','Thành phố Hồ Chí Minh'],['岘港','Đà Nẵng'],['海防','Hải Phòng'],['芽庄','Nha Trang'],['大叻','Đà Lạt'],['顺化','Huế'],['芹苴','Cần Thơ'],['下龙','Hạ Long'],['会安','Hội An'],['富国','Phú Quốc'],['归仁','Quy Nhơn']];
 const demoProfile = {id:'bridge101',name:'James',vi:'James',initials:'J',avatarUrl:'https://view-link.cx/LujXnMs5NbT',vip:true,gender:['未填写','Chưa cung cấp'],region:['越南 · 河内','Việt Nam · Hà Nội']};
 const friendDirectory = [
   {id:'bao27',name:'范嘉宝',vi:'Phạm Gia Bảo',initials:'宝',tone:'sand',time:'',messages:[
@@ -1121,22 +1126,20 @@ function saveFriendOverrides(person) {
 let avatarTarget = null;
 // 个人资料行内编辑：当前正在改哪一行（name/nameVi/gender/region），null 表示没在改。
 let editingProfileField = null;
-// 把正在行内改的那一行存进资料（读输入框的值），没在改就什么都不做。
-function saveInlineProfileField() {
-  if (!editingProfileField) return;
-  const field = editingProfileField;
-  editingProfileField = null;
+// 把正在行内改的那一行存进资料：读页面上现有的所有行内输入框（不管当前在改哪一行），
+// 打字、切输入框都不会丢。只存、不退出编辑；退不退出由调用方决定。
+function saveInlineProfileField(exit) {
   const genders = {'未填写':['未填写','Chưa cung cấp'],'男':['男','Nam'],'女':['女','Nữ']};
   const val = id => document.querySelector(id)?.value.trim();
-  if (field==='name') { const v=val('#inline-profile-name'); if(v) demoProfile.name=v; }
-  else if (field==='nameVi') { const v=val('#inline-profile-name-vi'); if(v) demoProfile.vi=v; }
-  else if (field==='gender') { const v=document.querySelector('#inline-profile-gender')?.value; demoProfile.gender=genders[v]||genders['未填写']; }
-  else if (field==='region') {
-    const zh=val('#inline-profile-region-zh'), vi=val('#inline-profile-region-vi');
-    if(zh) demoProfile.region[0]=zh;
-    if(vi) demoProfile.region[1]=vi;
-  }
+  const name=val('#inline-profile-name'); if(name) demoProfile.name=name;
+  const nameVi=val('#inline-profile-name-vi'); if(nameVi) demoProfile.vi=nameVi;
+  const gender=document.querySelector('#inline-profile-gender')?.value;
+  if(gender) demoProfile.gender=genders[gender]||genders['未填写'];
+  const zh=val('#inline-profile-region-zh'), vi=val('#inline-profile-region-vi');
+  if(zh) demoProfile.region[0]=zh;
+  if(vi) demoProfile.region[1]=vi;
   saveMyProfile();
+  if(exit) editingProfileField=null;
 }
 // 换头像会整页重渲染，先把正在填的表单值暂存，渲染完再填回去，不然刚打的字会丢。
 let pendingProfileForm = null;
@@ -1966,7 +1969,7 @@ function details(person) {
       <button type="button" class="danger-button" data-delete-friend="${person.id}">${pendingDeleteFriend===person.id?t('确认删除？再点一下就删','Xác nhận xóa?'):t('删除好友','Xóa bạn bè')}</button>
       <button type="button" class="danger-button" data-block-friend="${person.id}">${pendingBlockFriend===person.id?t('确认拉黑？','Xác nhận chặn?'):t('拉黑好友','Chặn bạn bè')}</button>
     </div>`:'';
-  return `<aside class="details"><div class="details-heading">${icon('info')}<h2>${title}</h2>${button('more',t('关闭会话信息','Đóng thông tin'),'data-details','icon-button dismiss')}</div>
+  return `<aside class="details"><div class="details-heading">${button('back',t('返回','Quay lại'),'data-details','icon-button dismiss')}<h2>${title}</h2></div>
     <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
     ${state.editFriend === person.id ? friendEditForm(person) : (person.id!=='assistant' && chats.some(c => c.id === person.id) ? `<button type="button" class="text-button" data-edit-friend="${person.id}">${t('编辑资料', 'Chỉnh sửa hồ sơ')}</button>` : '')}
     ${person.id==='assistant'?'':`<div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>`}
@@ -2143,7 +2146,7 @@ function profile() {
         ${fieldRow('name','名字','Tên',escape(demoProfile.name),`<input id="inline-profile-name" type="text" value="${escape(demoProfile.name)}" maxlength="24" autocomplete="off">`)}
         ${fieldRow('nameVi','越南名字','Tên tiếng Việt',escape(demoProfile.vi),`<input id="inline-profile-name-vi" type="text" value="${escape(demoProfile.vi)}" maxlength="24" autocomplete="off">`)}
         ${fieldRow('gender','性别','Giới tính',t(...demoProfile.gender),`<select id="inline-profile-gender">${genders.map(([zh,vi])=>`<option value="${zh}" ${demoProfile.gender[0]===zh?'selected':''}>${t(zh,vi)}</option>`).join('')}</select>`)}
-        ${fieldRow('region','地区','Khu vực',t(...demoProfile.region),`<input id="inline-profile-region-zh" type="text" value="${escape(demoProfile.region[0])}" maxlength="32" autocomplete="off" placeholder="${t('中文','Tiếng Trung')}"><input id="inline-profile-region-vi" type="text" value="${escape(demoProfile.region[1])}" maxlength="32" autocomplete="off" placeholder="${t('越南语','Tiếng Việt')}">`)}
+        ${fieldRow('region','地区','Khu vực',t(...demoProfile.region),`<input id="inline-profile-region-zh" type="text" value="${escape(demoProfile.region[0])}" maxlength="32" autocomplete="off" placeholder="${t('中文','Tiếng Trung')}"><input id="inline-profile-region-vi" type="text" value="${escape(demoProfile.region[1])}" maxlength="32" autocomplete="off" placeholder="${t('越南语','Tiếng Việt')}"><div class="region-chips">${VIETNAM_PLACES.map(([zh,vi])=>`<button type="button" class="region-chip" data-region-place="${zh}|${vi}">${zh}</button>`).join('')}</div>`)}
         <div class="profile-field-row"><span class="pf-name">${t('邮箱','Email')}</span><span class="pf-value">${state.identity?escape(state.identity):t('未绑定','Chưa liên kết')}</span></div>
         <div class="profile-field-row"><span class="pf-name">言聊ID</span><span class="pf-value">${demoProfile.id}</span></div>
       </div>
@@ -2996,7 +2999,7 @@ root.addEventListener('click', event => {
     render({preserve:true});
   }
   if(d.profilePage) {
-    saveInlineProfileField();
+    saveInlineProfileField(true);
     if(d.profilePage==='qr') state.qrBack=state.profilePage;
     state.profilePage=d.profilePage;
     render();
@@ -3010,6 +3013,15 @@ root.addEventListener('click', event => {
     const input=document.querySelector(focusMap[d.editProfileField]||'');
     if(input) { try { input.focus(); input.select?.(); } catch {} }
   }
+  // 地区预设：点一个地方，中文+越南语一起填好、存好。
+  if(d.regionPlace) {
+    const [zh,vi]=d.regionPlace.split('|');
+    const zhInput=document.querySelector('#inline-profile-region-zh'), viInput=document.querySelector('#inline-profile-region-vi');
+    if(zhInput) zhInput.value=zh;
+    if(viInput) viInput.value=vi;
+    saveInlineProfileField(true);
+    render();
+  }
   if('handshakeConnect' in d) {
     const input=document.querySelector('#handshake-input');
     const value=(input?.value || '').trim();
@@ -3020,12 +3032,12 @@ root.addEventListener('click', event => {
     else done();
   }
   if(d.changeAvatar!==undefined) {
-    saveInlineProfileField();
+    saveInlineProfileField(true);
     avatarTarget = d.changeAvatar==='me' ? {kind:'me'} : {kind:'friend', id:d.changeAvatar};
     document.querySelector('#avatar-picker')?.click();
   }
   if(d.resetAvatar!==undefined) {
-    saveInlineProfileField();
+    saveInlineProfileField(true);
     if(d.resetAvatar==='me') {
       demoProfile.avatarUrl = DEFAULT_AVATAR;
       saveMyProfile();
@@ -3342,13 +3354,24 @@ root.addEventListener('focusin',event=>{
 root.addEventListener('focusout',event=>{
   if(event.target.matches?.('#message-form input')) queueMicrotask(keepComposerVisible);
 });
-// 个人资料行内改：输入框/下拉框一改完（失焦或选好）就自动保存、退出编辑。
-root.addEventListener('change',event=>{
-  if(event.target?.id?.startsWith('inline-profile-')) { saveInlineProfileField(); render(); }
+// 个人资料行内改：打字就存（input 事件，不刷新页面、不丢焦点）；失焦/选好也存。
+// 不在这里刷新页面——刷新会把刚点的按钮/行冲掉，导致那次点击没反应；退出编辑由回车、点另一行、点返回这些动作自己刷新。
+root.addEventListener('input',event=>{
+  if(event.target?.id?.startsWith('inline-profile-')) saveInlineProfileField();
 });
-// 行内输入框里按回车 = 改完，收起键盘触发保存。
+root.addEventListener('change',event=>{
+  if(event.target?.id?.startsWith('inline-profile-')) saveInlineProfileField();
+});
+root.addEventListener('focusout',event=>{
+  if(event.target?.id?.startsWith('inline-profile-')) saveInlineProfileField();
+});
+// 行内输入框里按回车 = 改完，退出编辑、收起键盘。
 root.addEventListener('keydown',event=>{
-  if(event.key==='Enter' && event.target?.id?.startsWith('inline-profile-') && event.target.tagName==='INPUT') event.target.blur();
+  if(event.key==='Enter' && event.target?.id?.startsWith('inline-profile-') && event.target.tagName==='INPUT') {
+    saveInlineProfileField(true);
+    event.target.blur();
+    render();
+  }
 });
 globalThis.visualViewport?.addEventListener('resize',keepComposerVisible);
 globalThis.visualViewport?.addEventListener('scroll',keepComposerVisible);
