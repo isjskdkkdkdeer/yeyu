@@ -427,8 +427,17 @@ input::placeholder {color:var(--muted);opacity:1}
 .profile-open {flex:1;min-width:0;text-align:start;padding:0;border-radius:var(--radius-control)}
 .profile-identity {overflow-wrap:anywhere}
 .profile-fields {margin:0}
-.profile-fields>div,.profile-field-link {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:8px 0;border-top:1px solid var(--line)}
-.profile-fields dd {margin:0;color:var(--muted);text-align:end}
+.profile-fields>div,.profile-fields>button,.profile-field-link {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:8px 0;border-top:1px solid var(--line)}
+.profile-fields>button {background:none;border:none;border-top:1px solid var(--line);font:inherit;color:inherit;text-align:start;width:100%;cursor:pointer}
+.profile-fields>button:hover {background:var(--soft)}
+.profile-fields .pf-name {font-weight:600;flex:none}
+.profile-fields .pf-value {margin:0;color:var(--muted);text-align:end;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.profile-fields .pf-edit {color:var(--muted);flex:none}
+.profile-fields .pf-value-row {display:flex;align-items:center;gap:10px;margin-left:auto}
+.profile-fields .pf-avatar-btn {background:none;border:none;padding:0;cursor:pointer;display:flex}
+.profile-fields>div.editing {flex-direction:column;align-items:stretch;gap:8px}
+.profile-fields input,.profile-fields select {min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-control);background:var(--chat);color:var(--ink);font:inherit;width:100%;box-sizing:border-box}
+.profile-fields input:focus,.profile-fields select:focus {outline:2px solid var(--accent);outline-offset:1px}
 .edit-avatar{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .edit-avatar>div{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
 .edit-form{display:grid;gap:12px}
@@ -469,7 +478,7 @@ button[aria-expanded=true].icon-button { background:var(--choice);color:var(--st
 .person-row>div,.profile-identity>div {min-width:0;overflow-wrap:anywhere}
 .settings-card {padding:var(--space-4)}
 .settings-card h2 {font-size:var(--text-md);line-height:1.4}
-.profile-fields>div,.profile-field-link {min-height:54px;gap:var(--space-4)}
+.profile-fields>div,.profile-fields>button,.profile-field-link {min-height:54px;gap:var(--space-4)}
 .profile-fields dt {font-weight:600}
 .profile-field-link {font-weight:700}
 .profile-summary .icon-button {background:var(--soft)}
@@ -1096,6 +1105,25 @@ function saveFriendOverrides(person) {
 }
 // 换头像：从相册选图或拍照，压到 256px 再存本地（图片太大 localStorage 装不下）。
 let avatarTarget = null;
+// 个人资料行内编辑：当前正在改哪一行（name/nameVi/gender/region），null 表示没在改。
+let editingProfileField = null;
+// 把正在行内改的那一行存进资料（读输入框的值），没在改就什么都不做。
+function saveInlineProfileField() {
+  if (!editingProfileField) return;
+  const field = editingProfileField;
+  editingProfileField = null;
+  const genders = {'未填写':['未填写','Chưa cung cấp'],'男':['男','Nam'],'女':['女','Nữ']};
+  const val = id => document.querySelector(id)?.value.trim();
+  if (field==='name') { const v=val('#inline-profile-name'); if(v) demoProfile.name=v; }
+  else if (field==='nameVi') { const v=val('#inline-profile-name-vi'); if(v) demoProfile.vi=v; }
+  else if (field==='gender') { const v=document.querySelector('#inline-profile-gender')?.value; demoProfile.gender=genders[v]||genders['未填写']; }
+  else if (field==='region') {
+    const zh=val('#inline-profile-region-zh'), vi=val('#inline-profile-region-vi');
+    if(zh) demoProfile.region[0]=zh;
+    if(vi) demoProfile.region[1]=vi;
+  }
+  saveMyProfile();
+}
 // 换头像会整页重渲染，先把正在填的表单值暂存，渲染完再填回去，不然刚打的字会丢。
 let pendingProfileForm = null;
 let pendingFriendForm = null;
@@ -2012,36 +2040,26 @@ function profile() {
     return `${back(state.qrBack)}<section class="card settings-card"><h2>${t('我的二维码','Mã QR của tôi')}</h2><div class="qr-card">${identity}${profileQr()}</div></section>`;
   }
   if (state.profilePage==='details') {
-    const fields=[
-      [t('头像','Ảnh đại diện'),avatar(demoProfile,'small')],
-      [t('名字','Tên'),label(demoProfile)],
-      [t('性别','Giới tính'),t(...demoProfile.gender)],
-      [t('地区','Khu vực'),t(...demoProfile.region)],
-      [t('邮箱','Email'),state.identity?escape(state.identity):t('未绑定','Chưa liên kết')],
-      ['言聊ID',demoProfile.id]
-    ];
-    return `${back('home')}<section class="card settings-card"><h2>${t('个人资料','Thông tin cá nhân')}</h2>
-      <dl class="profile-fields">${fields.map(([name,value])=>`<div><dt>${name}</dt><dd>${value}</dd></div>`).join('')}</dl>
-      <button class="profile-field-link" data-profile-page="qr"><span>${t('我的二维码','Mã QR của tôi')}</span>${icon('qr')}</button>
-      <button class="profile-field-link" data-profile-page="edit"><span>${t('编辑资料','Chỉnh sửa hồ sơ')}</span>${icon('next')}</button></section>`;
-  }
-  if (state.profilePage==='edit') {
+    // 个人资料直接在这一页点行改：头像点图换，名字/越南名字/性别/地区点行变输入框，改完自动保存，不用另开编辑页。
     const customAvatar = demoProfile.avatarUrl !== DEFAULT_AVATAR;
-    return `${back('details')}<section class="card settings-card"><h2>${t('编辑资料','Chỉnh sửa hồ sơ')}</h2>
-      <div class="edit-avatar">${avatar(demoProfile,'large')}<div>
-        <button type="button" class="social-button" data-change-avatar="me">${t('更换头像','Đổi ảnh đại diện')}</button>
-        ${customAvatar?`<button type="button" class="text-button" data-reset-avatar="me">${t('恢复默认头像','Khôi phục ảnh mặc định')}</button>`:''}
-      </div></div>
-      <div class="edit-form">
-        <label><span>${t('名字','Tên')}</span><input id="edit-my-name" type="text" value="${escape(demoProfile.name)}" maxlength="24" autocomplete="off"></label>
-        <label><span>${t('越南名字','Tên tiếng Việt')}</span><input id="edit-my-name-vi" type="text" value="${escape(demoProfile.vi)}" maxlength="24" autocomplete="off"></label>
-        <label><span>${t('性别','Giới tính')}</span><select id="edit-my-gender">${[['未填写','Chưa cung cấp'],['男','Nam'],['女','Nữ']].map(([zh,vi])=>`<option value="${zh}" ${demoProfile.gender[0]===zh?'selected':''}>${t(zh,vi)}</option>`).join('')}</select></label>
-        <label><span>${t('地区（中文）','Khu vực (tiếng Trung)')}</span><input id="edit-my-region-zh" type="text" value="${escape(demoProfile.region[0])}" maxlength="32" autocomplete="off"></label>
-        <label><span>${t('地区（越南语）','Khu vực (tiếng Việt)')}</span><input id="edit-my-region-vi" type="text" value="${escape(demoProfile.region[1])}" maxlength="32" autocomplete="off"></label>
-        <p class="local-note">${t('言聊ID 不可修改，头像和资料只保存在这台设备上。','Không thể đổi 言聊ID. Ảnh và hồ sơ chỉ lưu trên thiết bị này.')}</p>
+    const genders=[['未填写','Chưa cung cấp'],['男','Nam'],['女','Nữ']];
+    const editing=editingProfileField;
+    const fieldRow=(id,zh,vi,value,editor)=>{
+      if(editing===id) return `<div class="profile-field-row editing"><span class="pf-name">${t(zh,vi)}</span>${editor}</div>`;
+      return `<button type="button" class="profile-field-row" data-edit-profile-field="${id}"><span class="pf-name">${t(zh,vi)}</span><span class="pf-value">${value}</span><span class="pf-edit">${icon('next')}</span></button>`;
+    };
+    return `${back('home')}<section class="card settings-card"><h2>${t('个人资料','Thông tin cá nhân')}</h2>
+      <div class="profile-fields">
+        <div class="profile-field-row"><span class="pf-name">${t('头像','Ảnh đại diện')}</span><span class="pf-value-row"><button type="button" class="pf-avatar-btn" data-change-avatar="me" aria-label="${t('更换头像','Đổi ảnh đại diện')}">${avatar(demoProfile,'small')}</button>${customAvatar?`<button type="button" class="text-button" data-reset-avatar="me">${t('恢复默认','Khôi phục mặc định')}</button>`:''}</span></div>
+        ${fieldRow('name','名字','Tên',escape(demoProfile.name),`<input id="inline-profile-name" type="text" value="${escape(demoProfile.name)}" maxlength="24" autocomplete="off">`)}
+        ${fieldRow('nameVi','越南名字','Tên tiếng Việt',escape(demoProfile.vi),`<input id="inline-profile-name-vi" type="text" value="${escape(demoProfile.vi)}" maxlength="24" autocomplete="off">`)}
+        ${fieldRow('gender','性别','Giới tính',t(...demoProfile.gender),`<select id="inline-profile-gender">${genders.map(([zh,vi])=>`<option value="${zh}" ${demoProfile.gender[0]===zh?'selected':''}>${t(zh,vi)}</option>`).join('')}</select>`)}
+        ${fieldRow('region','地区','Khu vực',t(...demoProfile.region),`<input id="inline-profile-region-zh" type="text" value="${escape(demoProfile.region[0])}" maxlength="32" autocomplete="off" placeholder="${t('中文','Tiếng Trung')}"><input id="inline-profile-region-vi" type="text" value="${escape(demoProfile.region[1])}" maxlength="32" autocomplete="off" placeholder="${t('越南语','Tiếng Việt')}">`)}
+        <div class="profile-field-row"><span class="pf-name">${t('邮箱','Email')}</span><span class="pf-value">${state.identity?escape(state.identity):t('未绑定','Chưa liên kết')}</span></div>
+        <div class="profile-field-row"><span class="pf-name">言聊ID</span><span class="pf-value">${demoProfile.id}</span></div>
       </div>
-      <div class="edit-actions"><button type="button" class="social-button" data-save-profile>${t('保存','Lưu')}</button>
-      <button type="button" class="text-button" data-profile-page="details">${t('取消','Hủy')}</button></div></section>`;
+      <p class="local-note">${t('点一行就能改，改完自动保存。言聊ID 不可修改，头像和资料只保存在这台设备上。','Chạm một dòng để sửa, tự động lưu khi xong. Không thể đổi 言聊ID. Ảnh và hồ sơ chỉ lưu trên thiết bị này.')}</p>
+      <button class="profile-field-link" data-profile-page="qr"><span>${t('我的二维码','Mã QR của tôi')}</span>${icon('qr')}</button></section>`;
   }
   const pick=(name,labelText,value,sub='')=>`<button class="titanium-row" data-titanium-setting="${name}" data-setting-value="${value}" aria-pressed="${state.titanium[name]===value}"><span>${labelText}${sub?`<small>${sub}</small>`:''}</span>${state.titanium[name]===value?icon('check'):''}</button>`;
   const panel=(title,content)=>`${back('home')}<section class="titanium-card titanium-selection"><h2>${title}</h2>${content}</section>`;
@@ -2870,9 +2888,19 @@ root.addEventListener('click', event => {
     render({preserve:true});
   }
   if(d.profilePage) {
+    saveInlineProfileField();
     if(d.profilePage==='qr') state.qrBack=state.profilePage;
     state.profilePage=d.profilePage;
     render();
+  }
+  // 个人资料行内改：点一行变输入框，先存下正在改的那一行再切到新行。
+  if(d.editProfileField) {
+    saveInlineProfileField();
+    editingProfileField=d.editProfileField;
+    render();
+    const focusMap={name:'#inline-profile-name',nameVi:'#inline-profile-name-vi',region:'#inline-profile-region-zh'};
+    const input=document.querySelector(focusMap[d.editProfileField]||'');
+    if(input) { try { input.focus(); input.select?.(); } catch {} }
   }
   if('handshakeConnect' in d) {
     const input=document.querySelector('#handshake-input');
@@ -2884,10 +2912,12 @@ root.addEventListener('click', event => {
     else done();
   }
   if(d.changeAvatar!==undefined) {
+    saveInlineProfileField();
     avatarTarget = d.changeAvatar==='me' ? {kind:'me'} : {kind:'friend', id:d.changeAvatar};
     document.querySelector('#avatar-picker')?.click();
   }
   if(d.resetAvatar!==undefined) {
+    saveInlineProfileField();
     if(d.resetAvatar==='me') {
       demoProfile.avatarUrl = DEFAULT_AVATAR;
       saveMyProfile();
@@ -3202,6 +3232,14 @@ root.addEventListener('focusin',event=>{
 });
 root.addEventListener('focusout',event=>{
   if(event.target.matches?.('#message-form input')) queueMicrotask(keepComposerVisible);
+});
+// 个人资料行内改：输入框/下拉框一改完（失焦或选好）就自动保存、退出编辑。
+root.addEventListener('change',event=>{
+  if(event.target?.id?.startsWith('inline-profile-')) { saveInlineProfileField(); render(); }
+});
+// 行内输入框里按回车 = 改完，收起键盘触发保存。
+root.addEventListener('keydown',event=>{
+  if(event.key==='Enter' && event.target?.id?.startsWith('inline-profile-') && event.target.tagName==='INPUT') event.target.blur();
 });
 globalThis.visualViewport?.addEventListener('resize',keepComposerVisible);
 globalThis.visualViewport?.addEventListener('scroll',keepComposerVisible);
