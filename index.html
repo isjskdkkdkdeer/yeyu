@@ -163,8 +163,8 @@ input::placeholder {color:var(--muted);opacity:1}
 @keyframes neo-ripple{from{transform:scale(.85);opacity:.9}to{transform:scale(1.5);opacity:0}}
 .neo-mic.listening{border-color:#D8B56D;color:#fff;animation:neo-listen 1.6s ease-in-out infinite}
 @keyframes neo-listen{0%,100%{box-shadow:0 0 0 1px rgba(216,181,109,.25),0 0 16px rgba(216,181,109,.3)}50%{box-shadow:0 0 0 1px rgba(216,181,109,.5),0 0 30px rgba(216,181,109,.55)}}
-.neo-mic.speaking{animation:neo-speak 1.4s ease-in-out infinite}
-@keyframes neo-speak{0%,100%{border-color:rgba(216,181,109,.55);box-shadow:0 0 0 1px rgba(216,181,109,.15),0 0 14px rgba(216,181,109,.18)}50%{border-color:#D8B56D;box-shadow:0 0 0 1px rgba(216,181,109,.4),0 0 26px rgba(216,181,109,.4)}}
+.translate-mic-btn.is-speaking{animation:goldPulse 1.2s infinite ease-in-out;box-shadow:0 0 20px rgba(216,181,109,.4)}
+@keyframes goldPulse{0%,100%{border-color:rgba(216,181,109,.4);transform:scale(1)}50%{border-color:rgba(216,181,109,1);transform:scale(1.05)}}
 .composer form,.comment-area form {display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:16px;background:var(--chat);padding:4px}
 .composer input,.comment-area input {flex:1;width:0;padding:8px 4px}
 .send,.primary {background:var(--strong);color:var(--outer);border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-weight:700}
@@ -1892,7 +1892,7 @@ function translatePage() {
     <div class="neo-empty-state${hasInterpret?' is-hidden':''}"><div class="empty-guide"><p>轻触收音，即刻双向神经同传</p><p>Tap to stream bilingual translation</p></div><div class="empty-listen"><p>正在聆听...</p><p>Listening...</p></div></div>
     <div class="neo-pill">
       <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
-      <button type="button" class="neo-mic" data-interpret-hold="${dir}" aria-label="${t('按住说话','Giữ để nói')}">${icon('mic')}</button>
+      <button type="button" class="neo-mic translate-mic-btn" data-interpret-hold="${dir}" aria-label="${t('按住说话','Giữ để nói')}">${icon('mic')}</button>
       <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
     </div>
   </div>`;
@@ -1916,34 +1916,40 @@ const PROMPTS=[
   {zh:'晚上一起去喝一杯吗？',vi:'Tối nay cùng đi uống một ly nhé?',say:'妥依 内 拱 滴 翁 莫 李 涅'},
   {zh:'我叫车去接你',vi:'Anh đặt xe qua đón em nhé',say:'安 达特 些 瓜 东 嗯 涅'}]}
 ];
-let audioCtx=null;
-function unlockAudio(){
+let audioUnlocked=false;
+function unlockIOSAudio(){
+  if(audioUnlocked) return;
   try{
     if('speechSynthesis' in globalThis){
-      const u=new SpeechSynthesisUtterance('');
+      const u=new SpeechSynthesisUtterance(' ');
+      u.volume=0.01;
       globalThis.speechSynthesis.speak(u);
     }
-  }catch(e){}
-  try{
     const AC=globalThis.AudioContext||globalThis.webkitAudioContext;
     if(AC){
-      if(!audioCtx) audioCtx=new AC();
-      if(audioCtx.state==='suspended') audioCtx.resume();
+      const ctx=new AC();
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      gain.gain.value=0.01;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(0);
+      osc.stop(0.001);
     }
-  }catch(e){}
+    audioUnlocked=true;
+  }catch(e){ console.warn('Audio unlock err',e); }
 }
-function speakInterpret(text,lang){
+function speakTranslation(text,lang){
   if(!text || !('speechSynthesis' in globalThis)) return;
-  const mic=document.querySelector('.neo-mic');
-  try{
-    globalThis.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang=lang; u.rate=.95;
-    const done=()=>{ if(mic) mic.classList.remove('speaking'); };
-    u.onend=done; u.onerror=done;
-    if(mic) mic.classList.add('speaking');
-    globalThis.speechSynthesis.speak(u);
-  }catch(e){ if(mic) mic.classList.remove('speaking'); }
+  globalThis.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.lang=lang==='vi'?'vi-VN':'zh-CN';
+  utterance.rate=0.95;
+  const micBtn=document.querySelector('.translate-mic-btn');
+  utterance.onstart=()=>micBtn?.classList.add('is-speaking');
+  utterance.onend=()=>micBtn?.classList.remove('is-speaking');
+  utterance.onerror=()=>micBtn?.classList.remove('is-speaking');
+  globalThis.speechSynthesis.speak(utterance);
 }
 function speakPrompt(text){
   if(!('speechSynthesis' in globalThis)) return;
@@ -2430,10 +2436,10 @@ function stopInterpretRecognition() {
 root.addEventListener('pointerdown',event=>{
   const control=event.target.closest('[data-interpret-hold]');
   if(!control || event.button!==0) return;
+  unlockIOSAudio();
   if(interpretRecognition) { stopInterpretRecognition(); return; }
   const SpeechRecognition=globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
   if(!SpeechRecognition) { notify(t('当前浏览器不支持语音识别，请打字输入','Trình duyệt này không hỗ trợ nhận diện giọng nói, hãy nhập văn bản')); return; }
-  unlockAudio();
   try { if(navigator.vibrate) navigator.vibrate(20); } catch {}
   control.classList.add('tapped');
   setTimeout(()=>{ control.classList.remove('tapped'); },650);
@@ -2474,6 +2480,7 @@ root.addEventListener('pointerdown',event=>{
   interpretHoldButton=control;
   control.classList.add('holding');
 });
+root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-hold]')) unlockIOSAudio(); });
 for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,event=>{
   const control=event.target.closest('[data-interpret-hold]');
   if(!control) return;
@@ -2559,7 +2566,7 @@ root.addEventListener('submit', event => {
       const now=[...document.querySelectorAll('.interpret-form input')].map(el=>el.value);
       render({preserve:true});
       document.querySelectorAll('.interpret-form input').forEach((el,i)=>{ el.value=now[i]||''; });
-      if(trans && trans.trim() && state.tab==='translate') speakInterpret(trans, toLang==='vi'?'vi-VN':'zh-CN');
+      if(trans && trans.trim() && state.tab==='translate') speakTranslation(trans, toLang);
     }).catch(()=>{
       entry.pending=false;
       save('interpret',state.interpret);
