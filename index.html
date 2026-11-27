@@ -2984,9 +2984,11 @@ root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-
 let interpretLongTimer=null;
 let interpretLongPressed=false;
 let interpretLongTarget=null;
+let interpretLongStart=null;
 function clearInterpretLongTimer() {
   if(interpretLongTimer) { clearTimeout(interpretLongTimer); interpretLongTimer=null; }
   interpretLongTarget=null;
+  interpretLongStart=null;
 }
 root.addEventListener('pointerdown',event=>{
   if(event.target.closest('button')) return;
@@ -2997,6 +2999,7 @@ root.addEventListener('pointerdown',event=>{
   if(!item || item.pending || item.error || !item.trans) return;
   interpretLongPressed=false;
   interpretLongTarget={side,idx:Number(idx)};
+  interpretLongStart={x:event.clientX,y:event.clientY};
   interpretLongTimer=setTimeout(()=>{
     interpretLongTimer=null;
     const it=(state.interpret[interpretLongTarget.side]||[])[interpretLongTarget.idx];
@@ -3010,7 +3013,12 @@ root.addEventListener('pointerdown',event=>{
     notify(t('已收藏金句','Đã lưu câu hay'));
   },500);
 });
-for(const type of ['pointerup','pointercancel','pointermove','lostpointercapture']) root.addEventListener(type,clearInterpretLongTimer);
+for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,clearInterpretLongTimer);
+root.addEventListener('pointermove',event=>{
+  if(!interpretLongTimer || !interpretLongStart) return;
+  const dx=event.clientX-interpretLongStart.x, dy=event.clientY-interpretLongStart.y;
+  if(dx*dx+dy*dy>100) clearInterpretLongTimer();
+});
 root.addEventListener('click',event=>{
   const btn=event.target.closest('[data-copy-side]');
   if(!btn) return;
