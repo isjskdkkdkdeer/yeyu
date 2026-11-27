@@ -2139,6 +2139,32 @@ root.addEventListener('scroll', event => {
   if (chatFollowing) chatUnreadBelow = 0;
   syncScrollToBottomButton(timeline);
 }, true);
+/* iOS 键盘收起回落：点输入框弹键盘时页面会上移，收键盘后 Safari 不把
+   滚动位置还回来，输入框就“卡在上面下不来”，下面留一大片黑。
+   输入框失焦、或可视区域高度恢复（键盘收了）时，把页面滚回顶部、
+   把时间线滚到底部，输入框就落回原位。120ms 等键盘动画收完再滚，
+   否则 iOS 会把滚动位置再顶回去。 */
+let lastViewportHeight = globalThis.visualViewport ? visualViewport.height : 0;
+function restoreAfterKeyboard() {
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+    const timeline = document.querySelector('.timeline');
+    if (timeline && chatFollowing) {
+      timeline.scrollTop = timeline.scrollHeight;
+      syncScrollToBottomButton(timeline);
+    }
+  }, 120);
+}
+root.addEventListener('focusout', event => {
+  if (event.target && event.target.matches && event.target.matches('#message-form input[name="message"]')) restoreAfterKeyboard();
+});
+if (globalThis.visualViewport) {
+  visualViewport.addEventListener('resize', () => {
+    const h = visualViewport.height;
+    if (h > lastViewportHeight + 80) restoreAfterKeyboard();
+    lastViewportHeight = h;
+  });
+}
 function render({preserve=false,enterChat=false}={}) {
   const oldTimeline=document.querySelector('.timeline');
   const oldSection=document.querySelector('.section-page');
