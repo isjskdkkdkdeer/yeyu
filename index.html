@@ -2463,31 +2463,21 @@ function stopInterpretRecognition() {
   const empty=document.querySelector('.neo-empty-state');
   if(empty) { empty.classList.remove('is-listening'); const p=empty.querySelector('.empty-listen p'); if(p) p.textContent='正在聆听...'; }
 }
-// 云端录音转写：把录好的音频发给云函数 /transcribe（Groq Whisper 认字 + GLM 翻译），
-// 一次返回 {transcript, translation}，直接上屏，不再走打字那条翻译链。
-async function requestCloudTranscribe(blob, lang, to) {
+// 云端认字：把录好的音频发给云函数 /stt（Groq Whisper），只认字不翻译，
+// 约 1–2 秒就回原文；拿到原话后交给打字那条提交链去翻译+朗读，
+// 这样用户 2 秒就能看到自己说的话，不用干等翻译。
+async function requestCloudSTT(blob, lang) {
   const form=new FormData();
   form.append('audio', blob, 'audio.mp4');
   form.append('lang', lang);
-  form.append('to', to);
   const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(), 45000);
+  const timer=setTimeout(()=>ctrl.abort(), 30000);
   try {
-    const resp=await fetch(BACKEND_TRANSLATE_API+'transcribe', {method:'POST', body:form, signal:ctrl.signal});
+    const resp=await fetch(BACKEND_TRANSLATE_API+'stt', {method:'POST', body:form, signal:ctrl.signal});
     const data=await resp.json().catch(()=>({}));
     if(!resp.ok) throw new Error(data?.error || ('HTTP '+resp.status));
     return data;
   } finally { clearTimeout(timer); }
-}
-function addInterpretEntry(side, src, trans, ms) {
-  const entry={src, trans:trans||'', pending:false, time:clock()};
-  if(ms!=null) entry.ms=ms;
-  (state.interpret[side] ||= []).push(entry);
-  state.interpret[side]=state.interpret[side].slice(-20);
-  save('interpret', state.interpret);
-  render({preserve:true});
-  const toLang=side==='peer'?'zh':'vi';
-  if(trans && trans.trim() && state.tab==='translate') speakTranslation(trans, toLang);
 }
 async function startCloudRecording(control, side) {
   const empty=document.querySelector('.neo-empty-state');
@@ -2529,15 +2519,14 @@ async function startCloudRecording(control, side) {
     try { stream.getTracks().forEach(t=>t.stop()); } catch {}
     if(!blob.size) { notify(t('没录到声音，请再试一次','Không ghi được âm thanh, thử lại')); return; }
     const lang=side==='peer'?'vi':'zh';
-    const to=side==='peer'?'zh':'vi';
-    const t0=performance.now();
     try {
-      const data=await requestCloudTranscribe(blob, lang, to);
+      const data=await requestCloudSTT(blob, lang);
       const transcript=(data.transcript||'').trim();
-      const translation=(data.translation||'').trim();
       if(!transcript) { notify(t('没听清，请再说一次','Không nghe rõ, nói lại')); return; }
-      addInterpretEntry(side, transcript, translation, data.latency!=null? data.latency : Math.round(performance.now()-t0));
-      if(!translation) notify(t('认出了原话，但翻译没回来，点输入框打字翻','Đã nhận ra câu nói nhưng dịch chưa về'));
+      // 原话认出来了就先上屏：走打字那条提交链（它会立刻把原话显示出来，
+      // 再调翻译、翻好自动念出来），不用等翻译回来才有反应。
+      const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
+      if(form) { form.elements.interpret.value=transcript; form.requestSubmit(); }
     } catch (err) {
       notify(t('语音转写失败，请打字输入','Chuyển giọng nói thất bại, hãy nhập văn bản'));
       state.interpretTyping=true; render({preserve:true});
