@@ -1969,7 +1969,7 @@ function details(person) {
       <button type="button" class="danger-button" data-delete-friend="${person.id}">${pendingDeleteFriend===person.id?t('确认删除？再点一下就删','Xác nhận xóa?'):t('删除好友','Xóa bạn bè')}</button>
       <button type="button" class="danger-button" data-block-friend="${person.id}">${pendingBlockFriend===person.id?t('确认拉黑？','Xác nhận chặn?'):t('拉黑好友','Chặn bạn bè')}</button>
     </div>`:'';
-  return `<aside class="details"><div class="details-heading">${button('back',t('返回','Quay lại'),'data-details','icon-button dismiss')}<h2>${title}</h2></div>
+  return `<aside class="details"><div class="details-heading"><button type="button" class="text-button" data-details>${icon('back')} ${t('返回','Quay lại')}</button><h2>${title}</h2></div>
     <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
     ${state.editFriend === person.id ? friendEditForm(person) : (person.id!=='assistant' && chats.some(c => c.id === person.id) ? `<button type="button" class="text-button" data-edit-friend="${person.id}">${t('编辑资料', 'Chỉnh sửa hồ sơ')}</button>` : '')}
     ${person.id==='assistant'?'':`<div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>`}
