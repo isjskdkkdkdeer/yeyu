@@ -2454,8 +2454,22 @@ root.addEventListener('pointerdown',event=>{
     if(form) { form.elements.interpret.value=text; form.requestSubmit(); }
   };
   recognition.onend=()=>{ stopInterpretRecognition(); };
-  recognition.onerror=()=>{ stopInterpretRecognition(); };
-  try { recognition.start(); } catch { stopInterpretRecognition(); return; }
+  recognition.onerror=(event)=>{
+    const err=event && event.error;
+    if(err && err!=='no-speech' && err!=='aborted'){
+      const msgs={
+        'not-allowed':['麦克风权限被拒绝，请在浏览器设置里允许使用麦克风','Microphone permission denied'],
+        'audio-capture':['没有检测到麦克风','No microphone detected'],
+        'service-not-allowed':['语音识别服务不可用','Speech recognition unavailable'],
+        'network':['网络不通，语音识别失败','Network error, speech recognition failed']
+      };
+      const m=msgs[err];
+      if(m) notify(t(m[0],m[1]));
+      else notify(t('语音识别启动失败','Speech recognition failed to start'));
+    }
+    stopInterpretRecognition();
+  };
+  try { recognition.start(); } catch { notify(t('语音识别启动失败','Speech recognition failed to start')); stopInterpretRecognition(); return; }
   interpretRecognition=recognition;
   interpretHoldButton=control;
   control.classList.add('holding');
