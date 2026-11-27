@@ -2454,7 +2454,7 @@ function stopInterpretRecognition() {
   if(interpretHoldButton) { interpretHoldButton.classList.remove('holding'); interpretHoldButton.classList.remove('listening'); interpretHoldButton=null; }
   interpretTapMode=false;
   const empty=document.querySelector('.neo-empty-state');
-  if(empty) empty.classList.remove('is-listening');
+  if(empty) { empty.classList.remove('is-listening'); const p=empty.querySelector('.empty-listen p'); if(p) p.textContent='正在聆听...'; }
 }
 root.addEventListener('pointerdown',event=>{
   const control=event.target.closest('[data-interpret-hold]');
@@ -2474,14 +2474,28 @@ root.addEventListener('pointerdown',event=>{
   if(empty) empty.classList.add('is-listening');
   const recognition=new SpeechRecognition();
   recognition.lang=side==='peer'?'vi-VN':'zh-CN';
-  recognition.interimResults=false;
+  recognition.interimResults=true;
   recognition.maxAlternatives=1;
   recognition.onresult=event=>{
     clearTimeout(interpretNoResultTimer);
-    const text=[...event.results].map(r=>r[0]?.transcript || '').join('').trim();
-    if(!text) return;
-    const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
-    if(form) { form.elements.interpret.value=text; form.requestSubmit(); }
+    let interim='', final='';
+    for(const r of event.results){
+      const t=r[0]?.transcript || '';
+      if(r.isFinal) final+=t; else interim+=t;
+    }
+    if(final.trim()){
+      const form=document.querySelector(`.interpret-form[data-interpret-form="${side}"]`);
+      if(form) { form.elements.interpret.value=final.trim(); form.requestSubmit(); }
+      return;
+    }
+    // 还没说完：先把听到的字实时显示出来，让用户知道麦克风是通的
+    if(interim.trim()){
+      const empty=document.querySelector('.neo-empty-state');
+      if(empty){
+        const p=empty.querySelector('.empty-listen p');
+        if(p) p.textContent=interim.trim();
+      }
+    }
   };
   recognition.onend=()=>{ stopInterpretRecognition(); };
   recognition.onerror=(event)=>{
@@ -2509,7 +2523,9 @@ root.addEventListener('pointerdown',event=>{
   state.interpretTyping=false;
   const typeBox=document.querySelector('.neo-type');
   if(typeBox) typeBox.hidden=true;
-  // 1.5 秒没收到任何识别结果 → 认定语音没进来，停收音、直接弹打字框（不静默等）
+  // 3 秒没收到任何识别结果 → 认定语音没进来，停收音、直接弹打字框（不静默等）
+  // 注意：iOS 识别要 2-3 秒才回第一个结果，1.5 秒会把正在说的识别掐断，所以放宽到 3 秒；
+  // 上面已开 interimResults，说话时一有半截结果就清掉这个计时器，不会误弹框。
   clearTimeout(interpretNoResultTimer);
   interpretNoResultTimer=setTimeout(()=>{
     if(!interpretRecognition) return;
@@ -2517,7 +2533,7 @@ root.addEventListener('pointerdown',event=>{
     state.interpretTyping=true;
     render({preserve:true});
     notify(t('没听到声音，已切换到打字输入','Không nghe thấy tiếng, chuyển sang nhập văn bản'));
-  },1500);
+  },3000);
 });
 root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-hold]')) unlockIOSAudio(); });
 for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,event=>{
