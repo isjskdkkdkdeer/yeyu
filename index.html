@@ -1462,7 +1462,7 @@ const platform=globalThis.window || globalThis;
 const BACKEND_TRANSLATE_API='https://yeyu-translate.jameswilson199079.workers.dev/';
 async function requestRelayTranslation(payload) {
   const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),15000);
+  const timer=setTimeout(()=>controller.abort(),25000);
   try {
     const response=await platform.fetch(BACKEND_TRANSLATE_API,{
       method:'POST',signal:controller.signal,
