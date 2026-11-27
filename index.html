@@ -243,6 +243,16 @@ input::placeholder {color:var(--muted);opacity:1}
 .details-profile small {background:var(--soft);padding:4px 9px;border-radius:var(--radius-card);display:flex;align-items:center;gap:5px;font-size:var(--text-xs)}
 .details-profile i {width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .detail-actions {display:flex;justify-content:center;gap:24px;padding:0 12px 24px}
+.avatar-button{background:none;border:none;padding:0;cursor:pointer;display:flex}
+.detail-danger{display:grid;gap:10px;padding:0 16px 20px}
+.danger-button{min-height:44px;border:1px solid rgba(220,80,80,.4);border-radius:var(--radius-control);background:transparent;color:#e07070;font:inherit;cursor:pointer}
+.danger-button:hover{background:rgba(220,80,80,.12)}
+.blocked-section{margin-top:18px}
+.blocked-section h3{font-size:var(--text-sm);color:var(--muted);margin:0 0 8px}
+.blocked-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.blocked-row>div{flex:1;min-width:0}
+.blocked-row strong{display:block;font-size:var(--text-base)}
+.blocked-row small{color:var(--muted)}
 .detail-actions button {display:grid;justify-items:center;gap:6px;font-size:var(--text-xs);color:var(--muted)}
 .detail-actions span,.setting-icon {display:grid;place-items:center;background:var(--soft);color:var(--accent);border-radius:var(--radius-control);width:39px;height:39px}
 .detail-settings {border-block:1px solid var(--line);padding:16px}
@@ -1229,6 +1239,7 @@ const state = {
   lang:read('lang',globalThis.navigator?.language?.toLowerCase().startsWith('vi')?'vi':'zh'), sent:read('messages',{}),
   read:read('read',{}), history:read('history',[]),
   friends:read('friends',{thao18:'incoming'}), friendPanel:null, messageMenu:false, profilePage:'home', qrBack:'home', friendQuery:'',
+  detailsPerson:null, deletedFriends:read('deleted-friends',[]), blockedFriends:read('blocked-friends',[]),
   expanded:{}, translationErrors:{}, groupLanguages:read('group-languages',{}), groupViewer:{}, editFriend:null, lastTranslateMs:null, savedPhrases:read('saved-phrases',[]),
   learn:{pack:'night-market',daily:null,dailyLoading:false,dailyFlipped:false,dictQuery:'',dict:null,dictLoading:false,practiceInput:'',practice:null,practiceLoading:false,tutor:{status:'idle',elapsed:0,lastSeconds:0,userText:'',userFinal:false,tutorText:'',tutorFinal:false,tutorZh:'',notice:''}},
   translated:{}, picker:false, prompter:{open:false,active:null}, prompterPack:'night-market', call:null, voiceDraft:null, pendingTranscript:null
@@ -1236,6 +1247,39 @@ const state = {
 const defaultContext=Object.freeze({myRole:'anh',peerRole:'em',style:'daily'});
 const conversationContext=id=>({...defaultContext,...state.conversationContexts[id]});
 const roleText={anh:'Anh',em:'Em',ban:'Bạn'};
+// 好友删除/拉黑：只记 id（存在本地），列表渲染时过滤掉；消息记录保留，重加好友后还在。
+const isHiddenFriend=id=>state.deletedFriends.includes(id)||state.blockedFriends.includes(id);
+let pendingDeleteFriend=null, pendingBlockFriend=null;
+function leaveFriendChat(id) {
+  if(state.active===id) {
+    const next=chats.find(p=>!p.group&&!isHiddenFriend(p.id)&&p.id!==id);
+    state.active=next?next.id:(chats.find(p=>!p.group)?.id||'linh');
+    state.mobileChat=false;
+  }
+  state.details=false; state.detailsPerson=null; pendingDeleteFriend=null; pendingBlockFriend=null;
+}
+function deleteFriend(id) {
+  if(!state.deletedFriends.includes(id)) state.deletedFriends.push(id);
+  state.blockedFriends=state.blockedFriends.filter(x=>x!==id);
+  save('deleted-friends',state.deletedFriends);
+  save('blocked-friends',state.blockedFriends);
+  leaveFriendChat(id);
+  render();
+  notify(t('已删除好友','Đã xóa bạn bè'));
+}
+function blockFriend(id) {
+  if(!state.blockedFriends.includes(id)) state.blockedFriends.push(id);
+  save('blocked-friends',state.blockedFriends);
+  leaveFriendChat(id);
+  render();
+  notify(t('已拉黑','Đã chặn'));
+}
+function unblockFriend(id) {
+  state.blockedFriends=state.blockedFriends.filter(x=>x!==id);
+  save('blocked-friends',state.blockedFriends);
+  render({preserve:true});
+  notify(t('已解除拉黑','Đã bỏ chặn'));
+}
 function translationPayload(person,text,sourceLanguage) {
   return {
     conversationId:person.id,text,sourceLanguage,targetLanguage:otherLanguage(sourceLanguage),
@@ -1293,7 +1337,7 @@ function brand() {
 }
 function listRows() {
   const query = state.search.trim().toLowerCase();
-  const threads=[...chats,...friendDirectory.filter(person=>state.friends[person.id]==='friend')];
+  const threads=[...chats,...friendDirectory.filter(person=>state.friends[person.id]==='friend')].filter(person=>!isHiddenFriend(person.id));
   const filtered=threads.filter(person => (state.filter==='all' || Boolean(person.group)===(state.filter==='group')) &&
     (!query || [person.name,person.vi,...messages(person).at(-1).slice(1,3)].join(' ').toLowerCase().includes(query)));
   const isUnread=person=>state.unreadBadges&&person.unread&&!state.read[person.id];
@@ -1332,7 +1376,7 @@ function chatPanel(person, enterChat=false) {
   return `<main class="chat-panel${enterChat?' chat-entering':''}">
     <header class="chat-header">
       ${button('back',t('返回列表','Về danh sách'),'data-back','icon-button back')}
-      ${avatar(person,'small')}<div class="chat-title"><strong>${label(person)}</strong><small>${person.signature?escape(person.signature):secondary(person)}</small>${contactPresence(person)}</div>
+      ${person.group?avatar(person,'small'):`<button type="button" class="avatar-button" data-view-friend="${person.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(person,'small')}</button>`}<div class="chat-title"><strong>${label(person)}</strong><small>${person.signature?escape(person.signature):secondary(person)}</small>${contactPresence(person)}</div>
       <div class="head-actions">${button('phone',t('语音通话','Gọi thoại'),`data-call="voice" data-person="${person.id}"`)}${button('video',t('视频通话','Gọi video'),`data-call="video" data-person="${person.id}"`)}${button('more',t('切换会话信息','Bật/tắt thông tin'),'data-details aria-expanded="'+state.details+'"')}</div>
     </header>
     <section class="timeline" data-conversation="${person.id}" aria-label="${t('聊天记录','Lịch sử trò chuyện')}">
@@ -1381,7 +1425,8 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   const canToggle=!translating && state.translated[person.id]!==false && !primaryTranslation && !meta?.voice;
   const originalDetails=primaryTranslation?`<details class="message-original-details" ${meta?.voice?'open':''}><summary>${t('查看原文','Xem nguyên văn')}</summary><div class="message-original" lang="${textLanguage(lang)}">${escape(original)}</div></details>`:'';
 
-  return `<article class="message ${own?'own':''}" data-mid="${key}"><div class="message-side">${avatar(own?demoProfile:author,'tiny')}</div><div class="message-content">
+  const avatarBtn=own?`<button type="button" class="avatar-button" data-view-my-profile aria-label="${t('我的资料','Hồ sơ của tôi')}">${avatar(demoProfile,'tiny')}</button>`:`<button type="button" class="avatar-button" data-view-friend="${author.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(author,'tiny')}</button>`;
+  return `<article class="message ${own?'own':''}" data-mid="${key}"><div class="message-side">${avatarBtn}</div><div class="message-content">
     ${person.group&&!own?`<small class="sender">${label(author)}</small>`:''}
     <div class="bubble ${primaryTranslation?'bubble-translated':''}">
       ${meta?.voice?`<div class="voice-meta"><strong>${t('语音消息','Tin nhắn thoại')}</strong><small>${elapsedLabel(meta.duration || 3)} · ${t('时长','Thời lượng')}</small></div>
@@ -1591,7 +1636,7 @@ function sendDemoMessage(person, message) {
     refresh();
     if(meta.status==='delivered') {
       setTimeout(()=>{meta.status='read'; refresh();},1200);
-      if(!meta.voice) setTimeout(()=>{if(!operationOffline()) queueDemoReply(person);},1050); // 好友在发送后 1.5 秒回消息（450ms 送达 + 1050ms）
+      if(!meta.voice) setTimeout(()=>{if(!operationOffline() && !isHiddenFriend(person.id)) queueDemoReply(person);},1050); // 好友在发送后 1.5 秒回消息（450ms 送达 + 1050ms）
     }
   },450);
 }
@@ -1874,11 +1919,10 @@ function details(person) {
   const enabled=state.translated[person.id]!==false;
   const context=conversationContext(person.id);
   const field=(name,label,options)=>`<label><span>${label}</span><select data-context-key="${name}" data-context-chat="${person.id}">${options.map(([value,text])=>`<option value="${value}" ${context[name]===value?'selected':''}>${text}</option>`).join('')}</select></label>`;
-  return `<aside class="details"><div class="details-heading">${icon('info')}<h2>${t('会话信息','Thông tin trò chuyện')}</h2>${button('more',t('关闭会话信息','Đóng thông tin'),'data-details','icon-button dismiss')}</div>
-    <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
-    ${state.editFriend === person.id ? friendEditForm(person) : (chats.some(c => c.id === person.id) ? `<button type="button" class="text-button" data-edit-friend="${person.id}">${t('编辑资料', 'Chỉnh sửa hồ sơ')}</button>` : '')}
-    <div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>
-    <div class="detail-settings"><h3>${t('翻译设置','Cài đặt bản dịch')}</h3>
+  // 从头像点开看的不是当前会话那个人时，标题叫“好友资料”，且不显示当前会话的翻译设置。
+  const isActiveChat=person.id===state.active;
+  const title=isActiveChat?t('会话信息','Thông tin trò chuyện'):t('好友资料','Hồ sơ bạn bè');
+  const settingsHtml=isActiveChat?`<div class="detail-settings"><h3>${t('翻译设置','Cài đặt bản dịch')}</h3>
       <div class="setting"><span class="setting-icon">${icon('translate')}</span><div><strong>${t('显示译文','Hiện bản dịch')}</strong><small>${t('中文 ↔ 越南语','Tiếng Trung ↔ Tiếng Việt')}</small></div>
       <button class="switch ${enabled?'checked':''}" type="button" role="switch" aria-label="${t('显示译文','Hiện bản dịch')}" aria-checked="${enabled}" data-translate></button></div>
     </div>
@@ -1887,7 +1931,17 @@ function details(person) {
       ${field('peerRole',t('对方称谓','Vai của người kia'),[['anh','Anh'],['em','Em'],['ban','Bạn']])}
       ${field('style',t('会话风格','Phong cách'),[['dating',t('情侣调情','Thân mật')],['daily',t('日常','Hằng ngày')]])}
       <small>${t('仅用于已支持的短句。','Chỉ áp dụng cho các câu đã hỗ trợ.')}</small>
-    </section><div class="detail-foot">${icon('globe')} ${t('原文与译文同步展示','Hiển thị nguyên văn cùng bản dịch')}</div>
+    </section>`:'';
+  const dangerHtml=!person.group?`<div class="detail-danger">
+      <button type="button" class="danger-button" data-delete-friend="${person.id}">${pendingDeleteFriend===person.id?t('确认删除？再点一下就删','Xác nhận xóa?'):t('删除好友','Xóa bạn bè')}</button>
+      <button type="button" class="danger-button" data-block-friend="${person.id}">${pendingBlockFriend===person.id?t('确认拉黑？','Xác nhận chặn?'):t('拉黑好友','Chặn bạn bè')}</button>
+    </div>`:'';
+  return `<aside class="details"><div class="details-heading">${icon('info')}<h2>${title}</h2>${button('more',t('关闭会话信息','Đóng thông tin'),'data-details','icon-button dismiss')}</div>
+    <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
+    ${state.editFriend === person.id ? friendEditForm(person) : (chats.some(c => c.id === person.id) ? `<button type="button" class="text-button" data-edit-friend="${person.id}">${t('编辑资料', 'Chỉnh sửa hồ sơ')}</button>` : '')}
+    <div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>
+    ${dangerHtml}
+    ${settingsHtml}<div class="detail-foot">${icon('globe')} ${t('原文与译文同步展示','Hiển thị nguyên văn cùng bản dịch')}</div>
   </aside>`;
 }
 function friendRow(person) {
@@ -1942,13 +1996,18 @@ function friendPanels() {
   }
   return `<section class="card settings-card friend-panel"><button class="text-button" data-friend-panel="close">${t('关闭','Đóng')}</button>${content}</section>`;
 }
+function blockedSection() {
+  if(!state.blockedFriends.length) return '';
+  const rows=state.blockedFriends.map(id=>find(id)).filter(Boolean).map(p=>`<div class="blocked-row">${avatar(p)}<div><strong>${label(p)}</strong><small>${secondary(p)}</small></div><button type="button" class="text-button" data-unblock-friend="${p.id}">${t('解除拉黑','Bỏ chặn')}</button></div>`).join('');
+  return `<section class="blocked-section"><h3>${t('已拉黑','Đã chặn')}</h3>${rows}</section>`;
+}
 function contacts() {
   const incoming=friendDirectory.filter(person=>state.friends[person.id]==='incoming').length;
   return `<div class="social-actions"><button data-friend-panel="add">${t('添加好友','Thêm bạn')}</button>
     <button data-friend-panel="requests">${t('好友申请','Lời mời kết bạn')}${incoming?` (${incoming})`:''}</button>
     <button data-friend-panel="card">${t('个人名片','Danh thiếp')}</button>
     </div>
-    ${friendPanels()}<div class="people-cards">${chats.filter(person=>!person.group).map((person,i)=>`<article class="card people-card${i===0?' people-featured':''}"><div class="people-card-head">${avatar(person,'large')}<div><strong>${label(person)}</strong><small>${secondary(person)}</small></div>${contactPresence(person)}</div>${person.bio?`<p class="people-card-role">${t(...person.bio)}</p>`:''}${person.signature?`<p class="people-card-signature" lang="vi">${escape(person.signature)}</p>`:''}<div class="people-card-tags"><span>中文</span><span>Tiếng Việt</span></div><button type="button" class="social-button people-card-chat" data-chat="${person.id}">${icon('chat')} ${t('私密会话','Trò chuyện riêng tư')}</button></article>`).join('')}</div>`;
+    ${friendPanels()}<div class="people-cards">${chats.filter(person=>!person.group&&!isHiddenFriend(person.id)).map((person,i)=>`<article class="card people-card${i===0?' people-featured':''}"><div class="people-card-head"><button type="button" class="avatar-button" data-view-friend="${person.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(person,'large')}</button><div><strong>${label(person)}</strong><small>${secondary(person)}</small></div>${contactPresence(person)}</div>${person.bio?`<p class="people-card-role">${t(...person.bio)}</p>`:''}${person.signature?`<p class="people-card-signature" lang="vi">${escape(person.signature)}</p>`:''}<div class="people-card-tags"><span>中文</span><span>Tiếng Việt</span></div><button type="button" class="social-button people-card-chat" data-chat="${person.id}">${icon('chat')} ${t('私密会话','Trò chuyện riêng tư')}</button></article>`).join('')}</div>${blockedSection()}`;
 }
 function savedPhrasesSection() {
   const items=state.savedPhrases||[];
@@ -2738,7 +2797,7 @@ function render({preserve=false,enterChat=false}={}) {
     return;
   }
   root.innerHTML=`<div class="shell ${state.tab==='messages'?'message-shell':'other-shell'} ${state.mobileChat&&state.tab==='messages'?'mobile-open':''} ${state.details?'with-details':''} ${state.tab==='me'&&!['details','qr'].includes(state.profilePage)?'profile-settings-shell':''}" ${state.pendingTranscript?'inert':''}>
-    ${state.identity?nodeStatus():''}${sidebar()}${state.tab==='messages'?chatPanel(person,enterChat)+(state.details?details(person):''):otherPage()}
+    ${state.identity?nodeStatus():''}${sidebar()}${state.tab==='messages'?chatPanel(person,enterChat)+(state.details?details(find(state.detailsPerson)||person):''):otherPage()}
   </div>${!state.identity?`<div class="handshake-backdrop handshake-staged"><section class="handshake-card" role="dialog" aria-modal="true" aria-label="NOCTIS · 专属身份接入"><div class="hs-stage hs-stage-1 handshake-illust">${spotkitSVG(SPOTKIT.handshake,72,t('握手','Bắt tay'))}</div><div class="hs-stage hs-stage-2 dotword" role="img" aria-label="NOCTIS">${dotMatrixSVG()}</div><div class="hs-stage hs-stage-3"><h1>专属身份接入</h1><p>${t('输入邮箱。','Nhập email.')}</p><input id="handshake-input" type="email" value="" placeholder="${t('输入邮箱，例如 you@example.com','Nhập email, ví dụ you@example.com')}" autocomplete="off" aria-label="${t('输入邮箱','Nhập email')}"><button type="button" data-handshake-connect>${t('建立安全握手 (CONNECT)','Thiết lập bắt tay an toàn (CONNECT)')}</button></div></section></div>`:''}${transcriptPrompt()}${state.toast?`<div class="titanium-toast" role="status">${escape(state.toast)}</div>`:''}`;
   state.leavingChat=false;
   if(state.pendingTranscript) root.querySelector('[data-transcript-action="cancel"]')?.focus();
@@ -2828,11 +2887,30 @@ root.addEventListener('click', event => {
     if(state.tab!=='messages') { state.filter='all'; state.search=''; }
     if(matchMedia('(max-width: 950px)').matches) state.details=false;
     state.active=d.chat; state.tab='messages'; state.mobileChat=true; state.picker=false;
+    state.detailsPerson=null; pendingDeleteFriend=null; pendingBlockFriend=null;
     state.read[d.chat]=true; save('read',state.read); state.scrollLatest=true; render({enterChat:true});
   }
   if(d.filter) { state.filter=d.filter; render({preserve:true}); }
   if('back' in d) { state.voiceDraft=null; state.mobileChat=false; state.leavingChat=true; render(); }
-  if('details' in d) { state.details=!state.details; render({preserve:true}); }
+  if('details' in d) { state.details=!state.details; if(!state.details) { state.detailsPerson=null; pendingDeleteFriend=null; pendingBlockFriend=null; } render({preserve:true}); }
+  // 点好友头像看资料：聊天里只展开资料面板；名片里先打开这个人的会话再展开。
+  if(d.viewFriend) {
+    const person=find(d.viewFriend);
+    if(!person) return;
+    state.details=true; state.detailsPerson=person.id; pendingDeleteFriend=null; pendingBlockFriend=null;
+    if(state.tab!=='messages') { state.tab='messages'; state.active=person.id; state.mobileChat=true; state.scrollLatest=true; }
+    render();
+  }
+  if('viewMyProfile' in d) { state.tab='me'; state.profilePage='details'; render(); }
+  if(d.deleteFriend) {
+    if(pendingDeleteFriend===d.deleteFriend) { pendingDeleteFriend=null; deleteFriend(d.deleteFriend); }
+    else { pendingDeleteFriend=d.deleteFriend; pendingBlockFriend=null; render({preserve:true}); }
+  }
+  if(d.blockFriend) {
+    if(pendingBlockFriend===d.blockFriend) { pendingBlockFriend=null; blockFriend(d.blockFriend); }
+    else { pendingBlockFriend=d.blockFriend; pendingDeleteFriend=null; render({preserve:true}); }
+  }
+  if(d.unblockFriend) unblockFriend(d.unblockFriend);
   if('recordVoice' in d) { state.voiceDraft=state.active; render({preserve:true}); }
   if('cancelVoice' in d) { state.voiceDraft=null; render({preserve:true}); }
   if('sendVoice' in d && state.voiceDraft===state.active) {
