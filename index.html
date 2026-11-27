@@ -148,6 +148,22 @@ input::placeholder {color:var(--muted);opacity:1}
 .neo-latest{animation:neo-fade-in .2s ease-out}
 .neo-latest .neo-trans{font-size:var(--text-base);color:var(--gold-light);text-shadow:0 0 18px rgba(232,201,122,.18)}
 .neo-ms{display:inline-block;margin-top:10px;font-size:11px;line-height:1;color:var(--gold);border:1px solid rgba(216,181,109,.35);border-radius:var(--radius-pill);padding:4px 8px;letter-spacing:.1em}
+.neo-copy{display:inline-grid;place-items:center;vertical-align:middle;width:32px;height:32px;min-width:32px;min-height:32px;margin:6px 0 0 8px;background:transparent;border:1px solid rgba(216,181,109,.3);border-radius:50%;color:var(--gold);cursor:pointer}
+.neo-copy svg{width:15px;height:15px}
+.neo-copy:active{background:rgba(216,181,109,.15)}
+/* 录音计时：录音时出现在金键上方，告诉用户已经录了几秒 */
+.neo-rec-timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 96px);z-index:5;color:var(--gold);font-size:var(--text-sm);font-weight:600;letter-spacing:.12em;background:rgba(16,19,23,.85);border:1px solid rgba(216,181,109,.4);border-radius:var(--radius-pill);padding:6px 12px;pointer-events:none}
+.neo-rec-timer[hidden]{display:none}
+/* 录音声波：录音时在金键上方跳动，听没听到一眼能看出来 */
+.neo-wave{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(24px,env(safe-area-inset-bottom)) + 140px);z-index:5;display:flex;align-items:flex-end;gap:4px;height:28px;pointer-events:none}
+.neo-wave[hidden]{display:none}
+.neo-wave i{width:3px;border-radius:2px;background:var(--gold);animation:neo-wave 0.9s ease-in-out infinite}
+.neo-wave i:nth-child(1){height:10px;animation-delay:0s}
+.neo-wave i:nth-child(2){height:20px;animation-delay:.15s}
+.neo-wave i:nth-child(3){height:26px;animation-delay:.3s}
+.neo-wave i:nth-child(4){height:16px;animation-delay:.45s}
+.neo-wave i:nth-child(5){height:10px;animation-delay:.6s}
+@keyframes neo-wave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
 .neo-type:focus-within{border-color:var(--gold)}
 .composer form:focus-within,.comment-area form:focus-within{border-color:var(--gold)}
 .search:focus-within{border-color:var(--gold)}
@@ -1878,11 +1894,13 @@ function profile() {
   <button class="titanium-exit" data-sign-out>${t('安全退出','Thoát an toàn')}</button>`;
 }
 function interpretStream(side) {
-  const items=(state.interpret[side] || []).slice(-3);
+  const all=(state.interpret[side] || []);
+  const items=all.slice(-3);
   if(!items.length) return '';
   return items.map((item,i)=>{
     const latest=i===items.length-1;
-    return `<div class="neo-line${latest?' neo-latest':' neo-old'}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>${latest&&item.ms!=null?`<span class="neo-ms">${item.ms} ms</span>`:''}`}</div>`;
+    const realIndex=all.length-items.length+i;
+    return `<div class="neo-line${latest?' neo-latest':' neo-old'}"><p class="neo-src" lang="${side==='peer'?'vi':'zh-CN'}">${escape(item.src)}</p>${item.pending?`<p class="neo-pending">${t('正在翻译…','Đang dịch…')}</p>`:`<p class="neo-trans" lang="${side==='peer'?'zh-CN':'vi'}">${escape(item.trans)}</p>${latest&&item.ms!=null?`<span class="neo-ms">${item.ms} ms</span>`:''}<button type="button" class="neo-copy" data-copy-side="${side}" data-copy-index="${realIndex}" aria-label="${t('复制译文','Sao chép bản dịch')}">${icon('copy')}</button>`}</div>`;
   }).join('');
 }
 function scrollInterpretStreams(){
@@ -1903,6 +1921,8 @@ function translatePage() {
       <div class="neo-type-row"><input type="text" data-interpret-type-input maxlength="300" autocomplete="off" placeholder="${t('输入要翻译的话…','Nhập câu cần dịch…')}"><button type="button" class="neo-type-send" data-interpret-type-send>${t('翻译','Dịch')}</button><button type="button" class="neo-type-close" data-interpret-type-close aria-label="${t('关闭','Đóng')}">×</button></div>
       <div class="neo-type-preset"><button type="button" data-interpret-type-preset>${escape(typePreset)}</button></div>
     </div>
+    <div class="neo-wave" hidden><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="neo-rec-timer" hidden>00:00</div>
     <div class="neo-pill">
       <button type="button" class="neo-dir" data-interpret-dir aria-label="${t('切换方向','Đổi chiều')}">${dirLabel}</button>
       <button type="button" class="neo-mic translate-mic-btn" data-interpret-hold="${dir}" aria-label="${t('按住说话','Giữ để nói')}">${icon('mic')}</button>
@@ -2451,6 +2471,7 @@ let interpretNoResultTimer=null;
 let interpretCloud=null; // 云端录音 {recorder, stream, chunks, side, cancelled}
 function stopInterpretRecognition() {
   clearTimeout(interpretNoResultTimer);
+  stopRecTimer();
   if(interpretRecognition) { try { interpretRecognition.stop(); } catch {} interpretRecognition=null; }
   if(interpretCloud) {
     interpretCloud.cancelled=true;
@@ -2534,13 +2555,14 @@ async function startCloudRecording(control, side) {
   };
   recorder.onerror=()=>{ try { stream.getTracks().forEach(t=>t.stop()); } catch {} stopInterpretRecognition(); state.interpretTyping=true; render({preserve:true}); };
   interpretCloud=cloud;
-  try { recorder.start(); } catch { stopInterpretRecognition(); startSpeechRecognition(control, side); }
+  try { recorder.start(); startRecTimer(); } catch { stopInterpretRecognition(); startSpeechRecognition(control, side); }
 }
 function finishInterpretRecording() {
   // 再点一下停下：云端录音 → 停录并转写；浏览器识别 → 直接停（最终结果已在 onresult 送出）
   if(interpretCloud) {
     const rec=interpretCloud.recorder;
     interpretCloud=null;
+    stopRecTimer();
     if(interpretHoldButton) { interpretHoldButton.classList.remove('holding'); interpretHoldButton.classList.remove('listening'); interpretHoldButton=null; }
     interpretTapMode=false;
     const empty=document.querySelector('.neo-empty-state');
@@ -2604,7 +2626,7 @@ function startSpeechRecognition(control, side) {
     stopInterpretRecognition();
     state.interpretTyping=true; render({preserve:true});
   };
-  try { recognition.start(); } catch { notify(t('语音识别启动失败','Speech recognition failed to start')); stopInterpretRecognition(); return; }
+  try { recognition.start(); startRecTimer(); } catch { notify(t('语音识别启动失败','Speech recognition failed to start')); stopInterpretRecognition(); return; }
   interpretRecognition=recognition;
   interpretHoldButton=control;
   control.classList.add('holding');
@@ -2636,6 +2658,49 @@ root.addEventListener('pointerdown',event=>{
   startSpeechRecognition(control, side);
 });
 root.addEventListener('click',event=>{ if(event.target.closest('[data-interpret-hold]')) unlockIOSAudio(); });
+root.addEventListener('click',event=>{
+  const btn=event.target.closest('[data-copy-side]');
+  if(!btn) return;
+  const side=btn.dataset.copySide;
+  const idx=parseInt(btn.dataset.copyIndex,10);
+  const item=(state.interpret[side]||[])[idx];
+  const text=item && item.trans ? item.trans.trim() : '';
+  if(!text) return;
+  const done=()=>notify(t('已复制译文','Đã sao chép bản dịch'));
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(()=>{ fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+});
+function fallbackCopy(text) {
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch {}
+  ta.remove();
+}
+// 录音计时：录音时每秒刷新金键上方的秒数，停下就藏起来
+let interpretRecTimer=null;
+let interpretRecStartedAt=0;
+function startRecTimer() {
+  stopRecTimer();
+  interpretRecStartedAt=Date.now();
+  const el=document.querySelector('.neo-rec-timer');
+  const wave=document.querySelector('.neo-wave');
+  if(el) { el.hidden=false; el.textContent='00:00'; }
+  if(wave) wave.hidden=false;
+  interpretRecTimer=setInterval(()=>{
+    const s=Math.floor((Date.now()-interpretRecStartedAt)/1000);
+    const el2=document.querySelector('.neo-rec-timer');
+    if(el2) el2.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  },1000);
+}
+function stopRecTimer() {
+  if(interpretRecTimer) { clearInterval(interpretRecTimer); interpretRecTimer=null; }
+  const el=document.querySelector('.neo-rec-timer');
+  if(el) el.hidden=true;
+  const wave=document.querySelector('.neo-wave');
+  if(wave) wave.hidden=true;
+}
 for(const type of ['pointerup','pointercancel','lostpointercapture']) root.addEventListener(type,event=>{
   const control=event.target.closest('[data-interpret-hold]');
   if(!control) return;
