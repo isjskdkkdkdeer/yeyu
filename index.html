@@ -37,10 +37,11 @@ h1,h2,h3,p {margin:0}
 small {color:var(--muted)}
 [hidden] {display:none!important}
 .shell {display:grid;grid-template-columns:304px minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); width:100%; height:100dvh; max-width:1680px;margin:auto;background:var(--chat)}
-.node-status{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-height:30px;padding:0 14px;background:var(--bg);border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;letter-spacing:.08em;white-space:nowrap;overflow:hidden}
-.node-status i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(216,181,109,.55);animation:node-pulse 2s ease-in-out infinite alternate}
+.node-status{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;background:var(--bg);border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;letter-spacing:.02em;white-space:nowrap;overflow:hidden}
+.node-status i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--muted)}
 .node-status b{color:var(--gold);font-weight:650}
-@keyframes node-pulse{from{opacity:.55}to{opacity:1}}
+.node-status>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.node-status-link{flex:none;min-height:36px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--radius-pill);background:transparent;color:var(--gold);font:inherit;letter-spacing:0}
 .handshake-backdrop{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(11,10,8,.86);backdrop-filter:blur(8px);transition:opacity .2s ease-out}
 .handshake-card{width:min(420px,100%);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:28px 24px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);transition:transform .2s ease-out,opacity .2s ease-out}
 .handshake-card h1{font-size:var(--text-md);letter-spacing:.14em;margin:0 0 6px;color:var(--ink)}
@@ -87,7 +88,7 @@ input::placeholder {color:var(--muted);opacity:1}
 .filters button,.language-buttons button {padding:8px 12px;border-radius:var(--radius-sm);color:var(--muted);font-size:var(--text-sm)}
 .filters .on,.language-buttons [aria-pressed=true] {background:var(--choice);color:var(--strong);font-weight:700}
 .threads {min-height:0;overflow:auto;flex:1;padding:0 10px 10px}
-.threads,.timeline,.details,.section-page,.caption-scroll,.message-scan{-webkit-overflow-scrolling:touch}
+.threads,.timeline,.details,.section-page,.caption-scroll{-webkit-overflow-scrolling:touch}
 .thread {width:100%;display:flex;align-items:center;text-align:start;gap:12px;padding:11px 10px;margin:3px 0;border:1px solid transparent;border-radius:var(--radius-control)}
 .thread.current {background:var(--choice);border-color:var(--line);box-shadow:inset 3px 0 var(--accent)}
 /* 消息页时间锚：未读优先后，按今天 / 更早分组 */
@@ -153,7 +154,6 @@ input::placeholder {color:var(--muted);opacity:1}
 .empty-illust{text-align:center;padding-top:32px}
 .empty-illust svg{display:block;margin:0 auto}
 .empty-illust p{margin-top:12px}
-.titanium-vip svg{width:16px;height:16px;vertical-align:-3px;margin-right:4px}
 /* 学语页：每日一句大卡（点一下翻面，0.22s 只动 transform/opacity；翻面时一道金线扫过） */
 .learn-daily{position:relative;overflow:hidden;cursor:pointer;padding:20px}
 .learn-daily .learn-daily-kicker{margin:0 0 12px;font-size:var(--text-xs);letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase}
@@ -215,7 +215,6 @@ input::placeholder {color:var(--muted);opacity:1}
 @media (prefers-reduced-motion: reduce){
  .icon-swap{animation:none}
  .handshake-staged .hs-stage,.handshake-staged .dot-lit{animation:none;opacity:1}
- .relay-arc{animation:none}
  .learn-daily.learn-flipped .learn-daily-main,.learn-daily.learn-flipped .learn-daily-sub{animation:none}
  .learn-daily.learn-flipped::after{animation:none}
  .tutor-dot.is-live,.tutor-zh{animation:none}
@@ -431,7 +430,6 @@ input::placeholder {color:var(--muted);opacity:1}
 .message-menu {position:absolute;right:0;top:calc(100% + 6px);z-index:4;min-width:180px;max-width:100%;padding:5px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-control);box-shadow:var(--shadow-float)}
 .message-menu button {display:flex;align-items:center;gap:8px;min-height:44px;width:100%;padding:7px 9px;border-radius:var(--radius-sm);text-align:start;font-size:var(--text-sm);color:var(--strong)}
 .message-menu button:focus-visible {background:var(--soft)}
-.message-scan {flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 12px}
 .profile-identity {display:flex;align-items:center;gap:12px}
 .profile-summary {align-items:flex-start}
 .profile-open {flex:1;min-width:0;text-align:start;padding:0;border-radius:var(--radius-control)}
@@ -715,7 +713,7 @@ body {overflow:hidden}
 .titanium-identity h2 {font-size:var(--text-md);font-weight:750;line-height:1.24;overflow-wrap:anywhere}
 .titanium-avatar {padding:0;width:64px;height:64px;border-radius:50%}
 .titanium-avatar .avatar.large {width:64px;height:64px;border:1.5px solid var(--accent);background:#242019;color:var(--accent);font-size:1.5rem}
-.titanium-vip {color:var(--accent);font-size:.6875rem;letter-spacing:.10em;font-weight:750;display:inline-block;line-height:1.5}
+.profile-tag {color:var(--accent);font-size:.6875rem;letter-spacing:.02em;font-weight:650;display:inline-block;line-height:1.5}
 .titanium-id {padding:0;display:inline-flex;align-items:center;gap:5px;min-height:44px;margin:-3px 0 -8px;color:var(--muted);font-size:var(--text-xs);text-align:start}
 .titanium-id svg {width:13px;height:13px}
 .titanium-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line)}
@@ -749,20 +747,10 @@ body {overflow:hidden}
 /* 身份卡分享：我的页金色描边大按钮 */
 .identity-share-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:20px;background:rgba(216,181,109,.08);border:1px solid rgba(216,181,109,.45);border-radius:var(--radius-control);color:var(--gold);font-size:var(--text-sm);font-weight:700}
 .identity-share-btn svg{width:18px;height:18px}
-/* 专线实况：点地球路线图 + 实时延迟 + 5×5 LED 状态 + 最近一次翻译耗时 */
-.relay-live{display:flex;gap:12px;align-items:center;padding:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.relay-globe{flex:none;width:84px;height:84px}
-.relay-globe svg{width:100%;height:100%;display:block}
-.relay-arc{stroke-dasharray:3 4;animation:relay-flow 1.6s linear infinite}
-@keyframes relay-flow{to{stroke-dashoffset:-14}}
-.relay-info{flex:1;min-width:0}
-.relay-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--text-sm);font-weight:700;color:var(--ink)}
-.relay-led{display:inline-grid;grid-template-columns:repeat(5,4px);gap:2px}
-.relay-led i{width:4px;height:4px;border-radius:1px;background:rgba(216,181,109,.18)}
-.relay-led i.on{background:var(--gold);box-shadow:0 0 4px rgba(216,181,109,.5)}
-.relay-stats{display:flex;gap:14px;margin-top:6px;font-size:var(--text-xs);color:var(--muted)}
-.relay-stats b{color:var(--gold);font-variant-numeric:tabular-nums}
-.relay-route{margin-top:4px;font-size:var(--text-xs);color:var(--muted)}
+.privacy-flow{display:grid;gap:10px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--muted);font-size:var(--text-sm);line-height:1.6}
+.privacy-flow h3,.privacy-flow p{margin:0}
+.privacy-flow strong{color:var(--ink)}
+.privacy-flow ul{display:grid;gap:8px;margin:0;padding-inline-start:20px}
 .titanium-group h2 {font-size:.6875rem;font-weight:700;letter-spacing:.105em;color:var(--muted);margin:0 0 8px 3px}
 .titanium-row {display:flex;align-items:center;text-align:start;width:100%;gap:8px;min-height:56px;padding:8px 12px;color:var(--ink);font-size:var(--text-base);line-height:1.42}
 .titanium-row + .titanium-row {border-top:1px solid var(--line)}
@@ -949,7 +937,6 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 /* Codex 加的头像：真人照片、在线状态、签名（better-ui：照片头像的边由图片描边定，不再另加一圈） */
 .avatar:not(.avatar-photo) {border:1px solid var(--border)}
 .avatar.avatar-photo {background:var(--border);color:var(--gold)}
-.avatar.avatar-vip,.titanium-avatar .avatar.avatar-vip {border:1px solid var(--gold);box-shadow:0 0 0 2px var(--gold)18}
 .avatar img {border-radius:inherit}
 .contact-presence {display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;line-height:1.3}
 .contact-presence.online {color:var(--online)}
@@ -1008,7 +995,9 @@ const lines = [
 ];
 
 const phrases = [
-  ['你好','Xin chào'],['谢谢','Cảm ơn'],['我到了','Mình đến rồi'],['马上到','Mình sắp tới rồi'],['晚点见','Hẹn gặp lại sau nhé'],['好呀','Được đó'],['晚安','Chúc ngủ ngon']
+  ['你好','Xin chào'],['谢谢','Cảm ơn'],['我到了','Mình đến rồi'],['马上到','Mình sắp tới rồi'],['晚点见','Hẹn gặp lại sau nhé'],['好呀','Được đó'],['晚安','Chúc ngủ ngon'],
+  ['到家告诉我','Về đến nhà thì nói cho mình biết nhé'],['我没听懂','Mình chưa hiểu'],['请再说一遍','Bạn nói lại giúp mình nhé'],
+  ['可以说慢一点吗','Bạn có thể nói chậm hơn một chút không'],['你是说这个吗','Ý bạn là điều này phải không']
 ];
 
 // 地区预设：点一下就填好中文+越南语，不用手打。
@@ -1019,7 +1008,7 @@ function normalizeAvatarUrl(value) {
   if(LOCAL_AVATAR_ASSETS.has(value)) return value;
   return value.length<=1_000_000 && /^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)?value:'';
 }
-const demoProfile = {id:'bridge101',name:'James',vi:'James',initials:'J',avatarUrl:'',vip:true,gender:['未填写','Chưa cung cấp'],region:['越南 · 河内','Việt Nam · Hà Nội']};
+const demoProfile = {id:'bridge101',name:'James',vi:'James',initials:'J',avatarUrl:'',gender:['未填写','Chưa cung cấp'],region:['越南 · 河内','Việt Nam · Hà Nội']};
 const friendDirectory = [
   {id:'bao27',name:'范嘉宝',vi:'Phạm Gia Bảo',initials:'宝',tone:'sand',time:'',messages:[
     ['vi','Chào bạn! Cuối tuần bạn có muốn đi uống cà phê không?','你好！周末想一起喝咖啡吗？','09:00']
@@ -1108,7 +1097,6 @@ function spotkitPackSVG(inner,size=48,label='') {
 const SPOTKIT={
  emptyMessages:'<rect x="22" y="26" width="60" height="38" rx="12"/><path d="M38 64l-6 14 18-12"/><line x1="32" y1="40" x2="72" y2="40"/><line x1="32" y1="50" x2="58" y2="50"/><rect x="68" y="70" width="32" height="24" rx="10"/><path d="M88 94l4 12-12-10"/><circle cx="98" cy="72" r="4" fill="#D8B56D" stroke="#0B0A08" stroke-width="1"/>',
  handshake:'<rect x="28" y="58" width="36" height="32" rx="8"/><path d="M36 58V48a10 10 0 0 1 20 0v10"/><circle cx="46" cy="72" r="3.5" fill="#D8B56D" stroke="none"/><circle cx="88" cy="36" r="8"/><path d="M82 42L64 60"/><path d="M70 54l5 5M64 60l5 5"/>',
- vip:'<path d="M26 80L22 44l20 14 18-20 18 20 20-14-4 36z"/><path d="M26 88h68"/><circle cx="60" cy="66" r="4" fill="#D8B56D" stroke="none"/>'
 };
 const SPOTKIT_PACKS={
  'night-market':'<ellipse cx="24" cy="22" rx="11" ry="13"/><path d="M17 9h14M17 35h14M24 9v26M24 35v5M21 40h6"/><circle cx="24" cy="22" r="2.5" fill="#D8B56D" stroke="none"/>',
@@ -1275,12 +1263,6 @@ avatarPicker.addEventListener('change', () => {
   };
   reader.readAsDataURL(file);
 });
-const policies=[
-  ['auto','自动智能降级','Tự động chuyển phương án','端侧 NPU → 离线模型 → 云端容灾','NPU trên máy → mô hình ngoại tuyến → đám mây'],
-  ['offline','本机离线隐私优先','Ưu tiên riêng tư trên máy','Apple NPU · 零流量方案','Apple NPU · Phương án không dùng dữ liệu mạng'],
-  ['cloud','跨境低延迟光纤','Kết nối xuyên biên giới độ trễ thấp','Cloud Fast · 流式方案','Cloud Fast · Phương án phát trực tuyến'],
-  ['titanium','黑钛金神经同传','Phiên dịch Titanium AI','Titanium AI · 上下文方案','Titanium AI · Phương án theo ngữ cảnh']
-];
 const speechStyles=[
   ['couple','情侣日常','Trò chuyện tình cảm','Hôm nay em thế nào?'],
   ['friend','朋友自然','Bạn bè tự nhiên','Hôm nay bạn thế nào?'],
@@ -1372,7 +1354,7 @@ const nav = [
 ];
 function avatar(person, size='') {
   const avatarUrl=normalizeAvatarUrl(person.avatarUrl);
-  return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size} ${person.vip?'avatar-vip':''} ${avatarUrl?'avatar-photo':''}">
+  return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size} ${avatarUrl?'avatar-photo':''}">
     <span aria-hidden="true">${escape(person.initials)}</span>
     ${avatarUrl?`<img src="${escape(avatarUrl)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
   </span>`;
@@ -1417,18 +1399,17 @@ function listRows() {
   return out.join('') || `<div class="empty empty-illust">${spotkitSVG(SPOTKIT.emptyMessages,96,t('没有找到会话','Không tìm thấy cuộc trò chuyện'))}<p>${t('没有找到会话','Không tìm thấy cuộc trò chuyện')}</p></div>`;
 }
 function nodeStatus() {
-  return `<div class="node-status"><i aria-hidden="true"></i><span><b>SG-01</b> 新加坡边缘网关已连接 · E2EE 加密</span></div>`;
+  return `<div class="node-status"><i aria-hidden="true"></i><span><b>${t('本机演示','Bản xem trước')}</b> · ${t('在线翻译会发送输入文本；助手会带最近 10 条消息','Dịch trực tuyến gửi nội dung nhập; trợ lý gửi kèm 10 tin nhắn gần nhất')}</span><button type="button" class="node-status-link" data-open-privacy>${t('数据去向','Dữ liệu đi đâu')}</button></div>`;
 }
 function sidebar() {
   return `<aside class="sidebar${state.leavingChat?' sidebar-entering':''}">${brand()}${state.tab==='messages'? `
     <div class="list-heading"><h1>${t('消息','Tin nhắn')}</h1>
       ${button('plus',t('打开消息操作','Mở tùy chọn tin nhắn'),'data-message-menu aria-expanded="'+state.messageMenu+'"','icon-button add')}
-      ${state.messageMenu?`<div class="message-menu"><button data-tab="contacts">${icon('chat')} ${t('发起聊天','Nhắn tin')}</button><button data-friend-panel="scan">${icon('qr')} ${t('扫一扫添加好友','Quét mã để kết bạn')}</button></div>`:''}
+      ${state.messageMenu?`<div class="message-menu"><button data-tab="contacts">${icon('chat')} ${t('发起聊天','Nhắn tin')}</button></div>`:''}
     </div>
-    ${state.friendPanel==='scan'?`<div class="message-scan">${friendPanels()}</div>`:`
     <label class="search">${icon('search')}<input id="search" type="search" value="${escape(state.search)}" placeholder="${t('搜索会话','Tìm cuộc trò chuyện')}" aria-label="${t('搜索会话','Tìm cuộc trò chuyện')}"></label>
     <div class="filters">${[['all','全部','Tất cả'],['private','私聊','Cá nhân'],['group','群聊','Nhóm']].map(([id,zh,vi])=>`<button class="${state.filter===id?'on':''}" data-filter="${id}" aria-pressed="${state.filter===id}">${t(zh,vi)}</button>`).join('')}</div>
-    <div class="threads">${listRows()}</div>`}` : `<div class="sidebar-person">${avatar(demoProfile)}<div><strong>${t('我的账号','Tài khoản của tôi')}</strong><small>${brandName}</small></div></div>`}
+    <div class="threads">${listRows()}</div>` : `<div class="sidebar-person">${avatar(demoProfile)}<div><strong>${t('我的账号','Tài khoản của tôi')}</strong><small>${brandName}</small></div></div>`}
     ${navBar()}</aside>`;
 }
 function chatPanel(person, enterChat=false) {
@@ -1449,7 +1430,7 @@ function chatPanel(person, enterChat=false) {
     </section>
     <footer class="composer">
       ${state.picker?`<div class="emoji-picker">${['😊','👋','👍','☕','❤️','🎉'].map(item=>`<button type="button" data-emoji="${item}">${item}</button>`).join('')}</div>`:''}
-      <div class="quick-phrases">${['在忙吗','吃饭了吗','回酒店了','晚安','到家告诉我','明天见'].map(phrase=>`<button type="button" data-quick-phrase="${phrase}">${phrase}</button>`).join('')}</div>
+      <div class="quick-phrases" aria-label="${t('沟通快捷句','Câu giao tiếp nhanh')}">${['晚安','到家告诉我','我没听懂','请再说一遍','可以说慢一点吗','你是说这个吗'].map(phrase=>`<button type="button" data-quick-phrase="${phrase}">${phrase}</button>`).join('')}</div>
       <form id="message-form">${button('smile',t('选择表情','Chọn biểu tượng'),'data-emoji-picker')}
       <input name="message" maxlength="500" autocomplete="off" placeholder="${t('输入消息…','Nhập tin nhắn…')}" aria-label="${t('输入消息','Nhập tin nhắn')}">
       ${button('translate',t('显示或隐藏译文','Hiện hoặc ẩn bản dịch'),'data-translate aria-pressed="'+(state.translated[person.id]!==false)+'"','icon-button composer-translate')}
@@ -2102,8 +2083,8 @@ function downloadProfileQr() {
 }
 
 function profileQr() {
-  return `${qrMarkup('bridge101',184,t('James 的好友二维码','Mã QR kết bạn của James'))}
-      <p class="local-note">${t('二维码包含言聊ID，扫码即可添加。','Mã QR chứa 言聊ID. Quét mã để kết bạn.')}</p>
+  return `${qrMarkup(demoProfile.id,184,t('本地演示名片二维码','Mã QR danh thiếp xem trước'))}
+      <p class="local-note">${t('二维码包含本地演示 ID；当前没有好友同步服务。','Mã QR chứa ID xem trước trên thiết bị; hiện chưa có dịch vụ đồng bộ bạn bè.')}</p>
       <button type="button" class="social-button" data-download-qr>${t('保存二维码','Lưu mã QR')}</button>`;
 }
 function friendPanels() {
@@ -2113,10 +2094,6 @@ function friendPanels() {
   let content;
   if (panel==='card') {
     content=`<div class="qr-card">${avatar(demoProfile,'large')}<strong>${escape(label(demoProfile))}</strong><small>言聊ID ${demoProfile.id}</small>${profileQr()}</div>`;
-  } else if (panel==='scan') {
-    content=`<div class="qr-card"><p class="local-note">${t('扫码添加，未启用相机。','Quét mã để kết bạn, camera chưa được bật.')}</p>
-      ${qrMarkup('huy08',160,t('武光辉的二维码','Mã QR của Vũ Quang Huy'))}
-      <button class="primary" data-scan="${friendDirectory[2].id}">${t('扫描二维码','Quét mã QR')}</button></div>`;
   } else if (panel==='requests') {
     const requests=friendDirectory.filter(person=>['incoming','sent'].includes(state.friends[person.id]));
     content=`<h2>${t('待处理申请','Lời mời đang chờ')}</h2>${requests.map(friendRow).join('')||`<p class="local-note">${t('暂无待处理申请','Không có lời mời đang chờ')}</p>`}`;
@@ -2151,33 +2128,8 @@ function savedPhrasesSection() {
   }).join('');
   return `<section class="saved-section"><h2>${t('金句收藏','Câu hay đã lưu')}</h2>${items.length?`<div class="saved-row">${cards}</div>`:`<p class="saved-empty">${t('在学语页的情景短语里长按一句，就能把金句存到这里。','Nhấn giữ một câu trong phần cụm từ ở trang học để lưu câu hay vào đây.')}</p>`}</section>`;
 }
-function relayLive() {
-  const lastMs=state.lastTranslateMs;
-  const led=Array.from({length:25},(_,i)=>`<i class="${i<21?'on':''}"></i>`).join('');
-  return `<div class="relay-live">
-    <div class="relay-globe" role="img" aria-label="SG-01 专线：新加坡 → 河内 / 胡志明">
-      <svg viewBox="0 0 120 120" fill="none" stroke="#D8B56D" stroke-width="0.75" stroke-linecap="round">
-        <circle cx="60" cy="60" r="54" stroke-opacity=".35"/>
-        <ellipse cx="60" cy="60" rx="54" ry="20" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
-        <ellipse cx="60" cy="60" rx="54" ry="38" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
-        <ellipse cx="60" cy="60" rx="20" ry="54" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
-        <ellipse cx="60" cy="60" rx="38" ry="54" stroke-opacity=".3" stroke-dasharray="0.5 5"/>
-        <path class="relay-arc" d="M78 82 Q92 62 88 44" stroke-width="1.25"/>
-        <path class="relay-arc" d="M78 82 Q96 74 94 60" stroke-width="1.25"/>
-        <circle cx="78" cy="82" r="3.5" fill="#D8B56D" stroke="none"/>
-        <circle cx="88" cy="44" r="3" fill="#D8B56D" stroke="none"/>
-        <circle cx="94" cy="60" r="3" fill="#D8B56D" stroke="none"/>
-        <text x="84" y="94" fill="#A4A6A5" font-size="7" stroke="none">SG</text>
-        <text x="92" y="40" fill="#A4A6A5" font-size="7" stroke="none">HN</text>
-        <text x="98" y="58" fill="#A4A6A5" font-size="7" stroke="none">HCM</text>
-      </svg>
-    </div>
-    <div class="relay-info">
-      <div class="relay-title"><span>SG-01 · ${t('专线实况','Tuyến riêng trực tiếp')}</span><span class="relay-led" aria-hidden="true">${led}</span></div>
-      <div class="relay-stats"><span>${t('延迟','Độ trễ')} <b>18 ms</b></span><span>${t('最近翻译','Dịch gần nhất')} <b>${lastMs!=null?lastMs+' ms':'—'}</b></span></div>
-      <div class="relay-route">${t('新加坡 → 河内 / 胡志明 · 已连线','Singapore → Hà Nội / TP.HCM · Đã kết nối')}</div>
-    </div>
-  </div>`;
+function privacySettingsRow() {
+  return `<button class="titanium-row" data-profile-page="privacy"><i>${icon('lock')}</i><span>${t('隐私与数据去向','Quyền riêng tư và dữ liệu')}<small>${t('查看本地保存与云端请求说明','Xem dữ liệu lưu cục bộ và gửi qua mạng')}</small></span>${icon('next')}</button>`;
 }
 function identityCardSVG() {
   const name=escape(demoProfile.name||'James');
@@ -2190,9 +2142,9 @@ function identityCardSVG() {
 <text x="36" y="128" fill="#F5F6F8" font-size="30" font-weight="700">${name}</text>
 <text x="36" y="156" fill="#D8B56D" font-size="15">言聊 ID ${id}</text>
 <text x="36" y="330" fill="#9CA3AF" font-size="14">中越同传 · 夜语 · NOCTIS Private Chat</text>
-<text x="36" y="352" fill="#D8B56D" font-size="13" letter-spacing="2">TITANIUM BLACK VIP</text>
-<g transform="translate(500,252)"><rect x="-8" y="-8" width="100" height="100" rx="12" fill="#FFFFFF"/>${qrMarkup('bridge101',84,'')}</g>
-<text x="542" y="372" fill="#9CA3AF" font-size="11" text-anchor="middle">扫码加我</text>
+<text x="36" y="352" fill="#D8B56D" font-size="13" letter-spacing="2">中越日常交流</text>
+<g transform="translate(500,252)"><rect x="-8" y="-8" width="100" height="100" rx="12" fill="#FFFFFF"/>${qrMarkup(demoProfile.id,84,'')}</g>
+<text x="542" y="372" fill="#9CA3AF" font-size="11" text-anchor="middle">本地演示名片</text>
 </svg>`;
 }
 async function downloadIdentityCard() {
@@ -2256,7 +2208,14 @@ function profile() {
   }
   const pick=(name,labelText,value,sub='')=>`<button class="titanium-row" data-titanium-setting="${name}" data-setting-value="${value}" aria-pressed="${state.titanium[name]===value}"><span>${labelText}${sub?`<small>${sub}</small>`:''}</span>${state.titanium[name]===value?icon('check'):''}</button>`;
   const panel=(title,content)=>`${back('home')}<section class="titanium-card titanium-selection"><h2>${title}</h2>${content}</section>`;
-  if(state.profilePage==='policy') return panel(t('引擎调度策略','Chiến lược điều phối'),`<p>${t('方案预览 · 引擎未接入','Xem trước cấu hình · Chưa kết nối công cụ dịch')}</p>${policies.map(([id,zh,vi,subZh,subVi])=>pick('policy',t(zh,vi),id,t(subZh,subVi))).join('')}`);
+  if(state.profilePage==='privacy') return panel(t('隐私与数据去向','Quyền riêng tư và dữ liệu'),`<div class="privacy-flow">
+    <p><strong>${t('本机数据','Dữ liệu trên thiết bị')}</strong> · ${t('发送的消息、个人资料、偏好和收藏写入浏览器 localStorage；源码没有显示本地加密或跨设备同步。','Tin nhắn đã gửi, hồ sơ, tùy chọn và câu đã lưu được ghi vào localStorage của trình duyệt; mã nguồn không thể hiện mã hóa cục bộ hoặc đồng bộ thiết bị.')}</p>
+    <p><strong>${t('在线翻译','Dịch trực tuyến')}</strong> · ${t('在线时会尝试向 Cloudflare Worker 发送原文、目标语言、会话风格和称谓；失败时使用本地短语匹配。','Khi trực tuyến, ứng dụng gửi văn bản gốc, ngôn ngữ đích, phong cách và cách xưng hô đến Cloudflare Worker; nếu lỗi thì dùng cụm từ cục bộ.')}</p>
+    <p><strong>${t('助手与查词','Trợ lý và tra từ')}</strong> · ${t('助手请求包含当前输入和最近 10 条消息；查词会发送查询词。','Yêu cầu trợ lý gồm nội dung hiện tại và 10 tin nhắn gần nhất; tra từ sẽ gửi từ khóa.')}</p>
+    <p><strong>${t('练一句','Luyện một câu')}</strong> · ${t('练习输入直接发送到翻译中继；当前没有本地回退。','Nội dung luyện tập được gửi trực tiếp đến relay dịch; hiện không có phương án dự phòng cục bộ.')}</p>
+    <p><strong>${t('麦克风与实时通话','Micrô và cuộc gọi trực tiếp')}</strong> · ${t('口语陪练会采集麦克风并向配置的 WebSocket 中继发送音频；真实通话依赖外部适配器。具体服务端处理与保留方式未知。','Luyện nói thu âm thanh từ micrô và gửi đến WebSocket relay; gọi trực tiếp cần adapter bên ngoài. Cách máy chủ xử lý và lưu dữ liệu: chưa rõ.')}</p>
+    <p>${t('Worker 的访问控制、日志与数据保留策略未知。当前说明披露已有数据流，不会更改联网或权限行为。','Quyền truy cập, nhật ký và thời hạn lưu của Worker chưa rõ. Phần này chỉ mô tả luồng dữ liệu hiện có, không thay đổi kết nối mạng hay quyền truy cập.')}</p>
+  </div>`);
   if(state.profilePage==='speech-style') return panel(t('中越称谓与会话风格','Xưng hô và phong cách'),speechStyles.map(([id,zh,vi,sample])=>pick('style',t(zh,vi),id,sample)).join(''));
   if(state.profilePage==='cache-mode') return panel(t('通话字幕本地缓存','Lưu phụ đề trên thiết bị'),
     pick('cache',t('阅后即焚','Xóa khi kết thúc'), 'discard',t('挂断后清除本次临时字幕','Xóa phụ đề tạm khi kết thúc'))+
@@ -2264,7 +2223,6 @@ function profile() {
   if(state.profilePage==='translation' || state.profilePage==='general') return panel(t('界面语言','Ngôn ngữ giao diện'),[['zh','简体中文'],['vi','Tiếng Việt']].map(([id,text])=>`<button class="titanium-row" data-lang="${id}" aria-pressed="${id===state.lang}"><span>${text}</span>${id===state.lang?icon('check'):''}</button>`).join(''));
   if(state.profilePage==='about') return panel(t('关于夜语','Giới thiệu DạNgữ'),`<p>${brandName}<br>${brandSubtitle}</p><p>Clean-47</p>`);
 
-  const selectedPolicy=policies.find(([id])=>id===state.titanium.policy) || policies[0];
   const selectedStyle=speechStyles.find(([id])=>id===state.titanium.style) || speechStyles[0];
   const cachedBytes=new TextEncoder().encode(JSON.stringify(state.translationCache)).length;
   const row=(glyph,title,value,action='',detail='')=>{
@@ -2274,30 +2232,28 @@ function profile() {
   const group=(name,content)=>`<section class="titanium-group"><h2>${name}</h2><div class="titanium-card">${content}</div></section>`;
   return `<article class="titanium-card titanium-profile">
     <div class="titanium-identity"><button class="titanium-avatar" data-profile-page="details" aria-label="${t('个人资料','Hồ sơ')}">${avatar(demoProfile,'large')}</button>
-      <div><small class="titanium-vip">${spotkitSVG(SPOTKIT.vip,16,'VIP',6)}TITANIUM BLACK VIP · 终身特权</small><h2>${escape(label(demoProfile))}</h2>
+      <div><small class="profile-tag">${t('中越日常交流','Giao tiếp Trung–Việt hằng ngày')}</small><h2>${escape(label(demoProfile))}</h2>
       <button class="titanium-id" data-copy-id>ID: ${demoProfile.id} ${icon('copy')}</button></div>
       ${button('qr',t('我的二维码','Mã QR của tôi'),'data-profile-page="qr"')}
     </div>
     <dl class="titanium-metrics">
-      <div><dt>${t('专属通道延迟','Độ trễ kênh riêng')}</dt><dd><b></b>18 ms</dd></div>
-      <div><dt>${t('日志','Nhật ký')}</dt><dd><b></b>${t('无日志存储','Không lưu nhật ký')}</dd></div>
-      <div><dt>${t('密钥','Khóa')}</dt><dd>${icon('lock')}${t('端到端动态密钥','Khóa động đầu cuối')}</dd></div>
+      <div><dt>${t('聊天与资料','Tin nhắn và hồ sơ')}</dt><dd>${t('本机保存','Lưu trên máy')}</dd></div>
+      <div><dt>${t('在线翻译','Dịch trực tuyến')}</dt><dd>${t('Cloudflare Worker','Cloudflare Worker')}</dd></div>
+      <div><dt>${t('助手上下文','Ngữ cảnh trợ lý')}</dt><dd>${t('最近 10 条','10 tin gần nhất')}</dd></div>
     </dl>
   </article>
   <div class="me-bento">${group('TRANSLATION & CALLS',
-    row('sliders',t('引擎调度策略','Điều phối công cụ'),t(selectedPolicy[1],selectedPolicy[2]),'data-profile-page="policy"',t('方案预览 · 端侧优先','Xem trước · Ưu tiên trên máy'))+
     row('chat',t('中越称谓与会话风格','Xưng hô và phong cách'),t(selectedStyle[1],selectedStyle[2]),'data-profile-page="speech-style"')+
     `<button class="titanium-row" role="switch" aria-checked="${state.callPreferences.captions}" data-call-preference="captions"><i>${icon('captions')}</i><span>${t('通话实时双语 HUD','HUD song ngữ')}<small>${t('半透明双语字幕 · 不播放合成音','Phụ đề nổi · Không phát giọng tổng hợp')}</small></span><span class="titanium-switch"></span></button>`+
-    row('download',t('离线语言包状态','Gói ngôn ngữ ngoại tuyến'),t('内置','Có sẵn'),'',t('内置中越话术','Có mẫu câu Việt–Trung'))
+    row('book',t('本地表达库','Cụm từ cục bộ'),t('可离线使用','Dùng ngoại tuyến'),'',t('每日句与情景短语','Câu mỗi ngày và cụm từ tình huống'))
   )}
   ${group('SECURITY & PRIVACY',
     row('captions',t('通话字幕本地缓存','Lưu phụ đề cục bộ'),state.titanium.cache==='discard'?t('阅后即焚','Xóa sau khi gọi'):t('保留本地记录','Lưu trên máy'),'data-profile-page="cache-mode"')+
-    row('lock',t('设备访问与生物识别','Truy cập và sinh trắc học'),t('未接入','Chưa kết nối'),'', 'Face ID / Touch ID')+
     row('trash',t('清理本地翻译缓存','Xóa bộ nhớ đệm bản dịch'),state.translationCache.length?(cachedBytes/1024).toFixed(1)+' KB':'0 KB','data-clear-cache')
   )}
   ${group('PREFERENCES',
     row('globe',t('界面语言','Ngôn ngữ giao diện'),languageName(state.lang),'data-profile-page="general"')+
-    relayLive()+
+    privacySettingsRow()+
     row('info',t('关于夜语','Giới thiệu DạNgữ'),'Clean-47','data-profile-page="about"')
   )}</div>
   <button type="button" class="identity-share-btn" data-share-identity>${icon('share')} ${t('分享我的身份卡','Chia sẻ thẻ danh tính của tôi')}</button>
@@ -2815,7 +2771,7 @@ function callView() {
   ];
   return `<main class="call-screen active${call.rtcMode?' rtc-mode':''} ${call.kind==='video'&&call.camera?'video-live':'voice-live'} ${call.captionLocked?'subtitles-locked':''}" style="${subtitleStyle}" aria-label="${call.rtcMode?t('实时通话','Cuộc gọi trực tiếp'):t('通话','Cuộc gọi')}">
     ${call.rtcMode?`<video id="remote-call-media" class="rtc-remote-media ${call.kind==='voice'?'audio-only':''}" autoplay playsinline></video>`:''}
-    <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${escape(label(person))}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('E2EE 端到端加密通话就绪','Cuộc gọi mã hóa E2EE đã sẵn sàng')}</div></header>
+    <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${escape(label(person))}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('演示通话 · 尚未接入实时服务','Cuộc gọi xem trước · Chưa kết nối dịch vụ trực tiếp')}</div></header>
     ${call.kind==='video'&&call.camera?'':`<div class="call-portrait">${avatar(person,'large')}<p>${call.kind==='video'?t('摄像头已关闭','Camera đã tắt'):escape(label(person))}</p></div>`}
     ${call.kind==='voice'&&!call.rtcMode?`<div class="voice-turn"><strong id="voice-language" aria-live="polite"></strong>
       <button type="button" class="call-tool" data-hold-talk aria-pressed="false">${t('按住说话','Nhấn giữ để nói')}</button>
@@ -3041,6 +2997,7 @@ root.addEventListener('click', event => {
   const control=event.target.closest('button');
   if(!control) return;
   const d=control.dataset;
+  if('openPrivacy' in d) { state.tab='me'; state.profilePage='privacy'; state.mobileChat=false; state.details=false; render(); return; }
   if('scrollBottom' in d) { const timeline=document.querySelector('.timeline'); if(timeline) { chatFollowing=true; chatUnreadBelow=0; timeline.scrollTo({top:timeline.scrollHeight,behavior:'smooth'}); syncScrollToBottomButton(timeline); } return; }
   if('learnDailySpeak' in d) { speakDailySentence(); return; }
   if('tutorToggle' in d) { toggleTutor(); return; }
@@ -3284,10 +3241,6 @@ root.addEventListener('click', event => {
     state.friendQuery='';
     render({preserve:true});
     document.querySelector('.friend-panel')?.scrollIntoView({block:'nearest'});
-  }
-  if(d.scan) {
-    state.tab='contacts'; state.friendPanel='add'; state.friendQuery=d.scan;
-    render({preserve:true});
   }
   if(d.friend && friendDirectory.some(person=>person.id===d.friend)) {
     const status=state.friends[d.friend];

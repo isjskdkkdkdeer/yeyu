@@ -249,3 +249,39 @@ test('call subtitle overlay streams safely and remembers its controls', async ({
   await expect(page.locator('[data-subtitle-font]')).toHaveValue('28');
   await expect(page.locator('[data-subtitle-opacity]')).toHaveValue('0');
 });
+
+test('chat repair phrases have local translations while offline', async ({ page }) => {
+  await page.evaluate(() => Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false }));
+  const relayRequests = [];
+  page.on('request', request => {
+    if (new URL(request.url()).hostname === RELAY_HOST) relayRequests.push(request.url());
+  });
+  const phrases = [
+    ['晚安', 'Chúc ngủ ngon'],
+    ['到家告诉我', 'Về đến nhà thì nói cho mình biết nhé'],
+    ['我没听懂', 'Mình chưa hiểu'],
+    ['请再说一遍', 'Bạn nói lại giúp mình nhé'],
+    ['可以说慢一点吗', 'Bạn có thể nói chậm hơn một chút không'],
+    ['你是说这个吗', 'Ý bạn là điều này phải không'],
+  ];
+
+  for (const [source, translation] of phrases) {
+    await page.locator(`[data-quick-phrase="${source}"]`).click();
+    const message = page.locator('article.message.own').filter({ hasText: source }).last();
+    await expect(message.locator('.message-original')).toHaveText(source);
+    await expect(message.locator('.translation span')).toHaveText(translation);
+  }
+  expect(relayRequests).toEqual([]);
+});
+
+test('privacy disclosure matches the visible data flow and removes mock security claims', async ({ page }) => {
+  await expect(page.locator('.node-status')).toContainText('本机演示');
+  await expect(page.locator('.node-status')).toContainText('最近 10 条消息');
+  await page.locator('[data-tab="me"]').click();
+  await expect(page.locator('.titanium-profile')).not.toContainText(/18 ms|无日志存储|端到端动态密钥|终身特权/);
+  await expect(page.locator('[data-profile-page="policy"]')).toHaveCount(0);
+  await page.locator('[data-open-privacy]').click();
+  await expect(page.locator('.section-content')).toContainText('Cloudflare Worker');
+  await expect(page.locator('.section-content')).toContainText('最近 10 条消息');
+  await expect(page.locator('.section-content')).toContainText('数据保留策略未知');
+});
