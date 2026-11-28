@@ -32,6 +32,6 @@
 - T-07 回归：新增用例覆盖本人/好友旧外链值的清理、外域请求为零、三个内置资源路径仍在，以及本地图片上传后成为 JPEG data URL 且刷新后保留。独立 worktree 实测 **4 passed（5.3s）**，`git diff --check` 通过；修复已合入本地 `master`，提交 `cafe271`。
 - T-07 整合验证：本地 `master` HEAD `d8d13da` 再执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **4 passed（5.7s）**；经用户确认后已推送并部署至 `b6150fd`。
 - T-08 开始：从当前远端已部署 `master` HEAD `b6150fd` 创建独立分支 `feat/daily-phrase-builtin` 与 `.worktrees/daily-phrase-builtin` worktree。已确认每日卡片当前通过 `/tatoeba` 请求数据，朗读与翻面分别由 `speakDailySentence()` 和 `dailyFlipped` 处理。
-- T-08 完成：`index.html` 内置 60 组越南语/简体中文完整日常句，越南语和中文各自均无重复；以年内日序从第 1 句开始每 60 天循环，连续日期轮换不同。移除了每日一句的前端 Tatoeba 请求，词典、陪练、翻面和朗读路径保持原状；`speakDailySentence()` 在本地句子无音频时继续走原有语音合成回退。`regression.spec.js` 新增日期固定测试，验证相邻日期句子不同且没有 `/tatoeba` 请求。独立 worktree 执行 `npm ci` 后运行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **5 passed（12.7s）**；`git diff --check` 通过，内置句库计数/去重检查为 60/60。当前改动未推送或部署，等待用户确认。
+- T-08 完成：`index.html` 内置 60 组越南语/简体中文完整日常句，越南语和中文各自均无重复；以年内日序从第 1 句开始每 60 天循环，连续日期轮换不同。移除了每日一句的前端 Tatoeba 请求，词典、陪练、翻面和朗读路径保持原状；`speakDailySentence()` 在本地句子无音频时继续走原有语音合成回退。`regression.spec.js` 新增日期固定测试，验证相邻日期句子不同且没有 `/tatoeba` 请求。独立 worktree 执行 `npm ci` 后运行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **5 passed（12.7s）**；`git diff --check` 通过，内置句库计数/去重检查为 60/60。功能提交 `836cd34` 已合入本地 `master`，在整合提交 `c9622c3` 上再次实跑 **5 passed（11.3s）**。当前改动未推送或部署，等待用户确认。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
 
