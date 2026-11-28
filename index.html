@@ -2233,33 +2233,79 @@ function profile() {
   <button type="button" class="identity-share-btn" data-share-identity>${icon('share')} ${t('分享我的身份卡','Chia sẻ thẻ danh tính của tôi')}</button>
   <button class="titanium-exit" data-sign-out>${t('安全退出','Thoát an toàn')}</button>`;
 }
-/* 学语页：每日一句（14 个日常关键词，按一年中的第几天轮换） */
-const LEARN_KEYWORDS=['xin chào','ăn cơm','cảm ơn','tạm biệt','hẹn gặp lại','chúc ngủ ngon','bạn khỏe không','đi đâu','bao nhiêu tiền','ngon quá','xin lỗi','rất vui được gặp bạn','tôi yêu bạn','chúc mừng sinh nhật'];
-/* 本地 fallback：中继取不到时也绝不空白、绝不报错 */
-const LEARN_DAILY_FALLBACK={vie:'Xin chào, rất vui được gặp bạn',cmn:'你好，很高兴认识你',audio:null};
+/* 学语页：60 句内置越中日常整句，按一年中的第几天轮换。 */
+const LEARN_DAILY_SENTENCES=[
+  ['Xin chào, hôm nay bạn thế nào?','你好，你今天怎么样？'],
+  ['Sáng nay tôi dậy sớm để đi bộ một chút.','今天早上我起得很早，出去散了一会儿步。'],
+  ['Hôm nay trời mát nên đi dạo rất dễ chịu.','今天天气凉爽，散步很舒服。'],
+  ['Bạn có muốn uống một cốc nước không?','你想喝一杯水吗？'],
+  ['Tôi đang tìm một quán ăn gần đây.','我正在找附近的餐馆。'],
+  ['Món này thơm quá, tôi muốn thử một chút.','这道菜闻起来真香，我想尝一点。'],
+  ['Bạn có thể cho tôi xem thực đơn được không?','可以给我看一下菜单吗？'],
+  ['Cho tôi một phần ít cay nhé.','请给我来一份少辣的。'],
+  ['Tôi không ăn được đồ quá cay.','我吃不了太辣的东西。'],
+  ['Chúng ta gọi thêm một món rau nhé.','我们再点一道蔬菜吧。'],
+  ['Bữa trưa hôm nay ăn rất ngon.','今天的午饭很好吃。'],
+  ['Tôi muốn mang phần còn lại về.','我想把剩下的打包带走。'],
+  ['Hóa đơn tính riêng giúp tôi nhé.','麻烦帮我分开结账。'],
+  ['Tôi có thể thanh toán bằng thẻ không?','可以刷卡付款吗？'],
+  ['Quán này có Wi-Fi miễn phí không?','这家店有免费 Wi-Fi 吗？'],
+  ['Nhà vệ sinh ở phía nào vậy?','洗手间在哪个方向？'],
+  ['Tôi cần mua một chai nước suối.','我需要买一瓶矿泉水。'],
+  ['Cửa hàng này mở cửa đến mấy giờ?','这家店营业到几点？'],
+  ['Giá này đã bao gồm thuế chưa?','这个价格含税了吗？'],
+  ['Tôi muốn đổi sang cỡ lớn hơn.','我想换成大一码。'],
+  ['Tôi đang đợi xe buýt ở bên kia đường.','我在马路对面等公交车。'],
+  ['Trạm gần nhất cách đây bao xa?','最近的车站离这里有多远？'],
+  ['Chúng ta xuống ở trạm tiếp theo nhé.','我们在下一站下车吧。'],
+  ['Tôi bị lạc, bạn chỉ giúp đường được không?','我迷路了，可以帮我指一下路吗？'],
+  ['Đi bộ đến đó mất khoảng mười phút.','走路到那里大约需要十分钟。'],
+  ['Hôm nay đường đông nên xe đi chậm.','今天路上很堵，车开得比较慢。'],
+  ['Bạn gọi giúp tôi một chiếc xe được không?','你能帮我叫一辆车吗？'],
+  ['Tôi muốn đến địa chỉ này.','我想去这个地址。'],
+  ['Bạn có thể dừng ở đây giúp tôi không?','可以在这里帮我停一下吗？'],
+  ['Tôi sẽ đến muộn khoảng năm phút.','我大概会晚到五分钟。'],
+  ['Tôi đang trên đường đến chỗ hẹn.','我正在去约好的地方。'],
+  ['Hôm nay tôi có nhiều việc cần hoàn thành.','我今天有很多事情要完成。'],
+  ['Bạn gửi lại tin nhắn giúp tôi nhé.','麻烦你再给我发一次消息。'],
+  ['Tôi sẽ gọi lại cho bạn sau cuộc họp.','我开完会再给你回电话。'],
+  ['Mạng ở đây hơi chậm một chút.','这里的网络有点慢。'],
+  ['Điện thoại của tôi sắp hết pin rồi.','我的手机快没电了。'],
+  ['Bạn cho tôi mượn bộ sạc một lát được không?','你能把充电器借我用一会儿吗？'],
+  ['Tôi cần gửi tài liệu này trước buổi trưa.','我需要在中午前把这份资料发出去。'],
+  ['Hôm nay mình cùng làm việc này nhé.','今天我们一起做这件事吧。'],
+  ['Tôi cần nghỉ vài phút rồi làm tiếp.','我需要休息几分钟再继续。'],
+  ['Tối nay tôi muốn ở nhà nghỉ ngơi.','我今晚想待在家里休息。'],
+  ['Bạn thường làm gì vào cuối tuần?','你周末通常做什么？'],
+  ['Tôi muốn đi chợ mua ít trái cây.','我想去市场买点水果。'],
+  ['Trái cây này chín vừa tới và rất ngọt.','这些水果熟得正好，也很甜。'],
+  ['Tôi cần giặt quần áo trước khi đi ngủ.','我需要在睡觉前洗衣服。'],
+  ['Bạn nhớ khóa cửa trước khi ra ngoài nhé.','出门前记得锁门。'],
+  ['Trong nhà hơi nóng, mình mở cửa sổ nhé.','屋里有点热，我们开窗吧。'],
+  ['Tôi sẽ nấu bữa tối đơn giản hôm nay.','我今天会做一顿简单的晚饭。'],
+  ['Bữa tối xong, chúng ta cùng dọn nhé.','晚饭后我们一起收拾吧。'],
+  ['Tôi muốn học thêm vài câu tiếng Việt.','我想再学几句越南语。'],
+  ['Bạn nói chậm hơn một chút được không?','你可以说慢一点吗？'],
+  ['Tôi chưa hiểu rõ ý của câu này.','我还不太明白这句话的意思。'],
+  ['Bạn có thể nhắc lại điều vừa nói không?','你能重复一下刚才说的话吗？'],
+  ['Cảm ơn bạn đã giúp tôi hôm nay.','谢谢你今天帮助我。'],
+  ['Không sao đâu, lần sau mình thử lại nhé.','没关系，下次我们再试一次吧。'],
+  ['Tôi rất vui vì hôm nay mọi việc thuận lợi.','今天一切顺利，我很开心。'],
+  ['Trời sắp mưa, mình mang theo ô nhé.','快要下雨了，我们带上伞吧。'],
+  ['Tôi sẽ chuẩn bị đồ từ tối nay.','我今晚就把东西准备好。'],
+  ['Chúc bạn có một buổi tối thật yên bình.','祝你度过一个宁静的夜晚。'],
+  ['Ngày mai chúng ta gặp lại và nói chuyện tiếp nhé.','明天我们再见面，继续聊天吧。']
+];
 function learnDayOfYear(now=new Date()) {
   const start=new Date(now.getFullYear(),0,0);
   return Math.floor((now-start)/86400000);
 }
-async function ensureDailySentence() {
-  const day=learnDayOfYear();
-  if(state.learn.daily?.day===day || state.learn.dailyLoading) return;
-  state.learn.dailyLoading=true;
-  const keyword=LEARN_KEYWORDS[day % LEARN_KEYWORDS.length];
-  try {
-    const ctrl=new AbortController();
-    const timer=setTimeout(()=>ctrl.abort(),10000);
-    try {
-      const resp=await fetch(BACKEND_TRANSLATE_API+'tatoeba?q='+encodeURIComponent(keyword),{signal:ctrl.signal});
-      const data=await resp.json().catch(()=>({}));
-      if(data?.ok && data.vie && data.cmn) state.learn.daily={vie:data.vie,cmn:data.cmn,audio:typeof data.audio==='string'?data.audio:null,day};
-      else state.learn.daily={...LEARN_DAILY_FALLBACK,day};
-    } finally { clearTimeout(timer); }
-  } catch {
-    state.learn.daily={...LEARN_DAILY_FALLBACK,day};
-  }
+function ensureDailySentence(now=new Date()) {
+  const day=learnDayOfYear(now);
+  if(state.learn.daily?.day===day) return;
+  const [vie,cmn]=LEARN_DAILY_SENTENCES[(day-1)%LEARN_DAILY_SENTENCES.length];
+  state.learn.daily={vie,cmn,audio:null,day};
   state.learn.dailyLoading=false;
-  if(state.tab==='learn') render({preserve:true});
 }
 function speakDailySentence() {
   const d=state.learn.daily;
@@ -2833,6 +2879,7 @@ if (globalThis.visualViewport) {
   });
 }
 function render({preserve=false,enterChat=false}={}) {
+  if(state.tab==='learn') ensureDailySentence();
   const oldTimeline=document.querySelector('.timeline');
   const oldSection=document.querySelector('.section-page');
   const oldScroll=oldTimeline?.scrollTop;
@@ -2886,7 +2933,6 @@ function render({preserve=false,enterChat=false}={}) {
       input.setSelectionRange(previousInput.selectionStart, previousInput.selectionEnd);
     }
   }
-  if(state.tab==='learn') ensureDailySentence();
 }
 
 let timer, toastTimer;

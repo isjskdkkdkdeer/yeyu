@@ -159,3 +159,40 @@ test('uploaded avatar is resized to local JPEG data and persists after reload', 
   await expect(page.locator('.pf-avatar-btn img')).toHaveAttribute('src', savedAvatar);
   expect(externalRequests).toEqual([]);
 });
+
+test('daily sentence changes on the next calendar day without a Tatoeba request', async ({ page }) => {
+  const tatoebaRequests = [];
+  page.on('request', request => {
+    const url = new URL(request.url());
+    if (url.hostname === RELAY_HOST && url.pathname.endsWith('/tatoeba')) {
+      tatoebaRequests.push(request.url());
+    }
+  });
+
+  const sentenceFor = async isoDate => {
+    await page.addInitScript(date => {
+      const NativeDate = Date;
+      const fixedTime = NativeDate.parse(date);
+      class FixedDate extends NativeDate {
+        constructor(...args) {
+          super(...(args.length ? args : [fixedTime]));
+        }
+        static now() { return fixedTime; }
+      }
+      globalThis.Date = FixedDate;
+    }, isoDate);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.node-status')).toBeVisible();
+    await page.locator('[data-tab="learn"]').click();
+    const sentence = page.locator('[data-learn-daily-flip] .learn-daily-main');
+    await expect(sentence).toBeVisible();
+    return { text: await sentence.textContent(), lang: await sentence.getAttribute('lang') };
+  };
+
+  const firstDay = await sentenceFor('2025-01-01T12:00:00');
+  const secondDay = await sentenceFor('2025-01-02T12:00:00');
+  expect(firstDay.lang).toBe('vi');
+  expect(secondDay.lang).toBe('vi');
+  expect(secondDay.text).not.toBe(firstDay.text);
+  expect(tatoebaRequests).toEqual([]);
+});

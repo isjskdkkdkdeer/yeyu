@@ -11,6 +11,7 @@
 | T-05 | 协调者 | 补齐 d372965 合并、推送与线上验证交接 | `TASKS.md`（独立 worktree） | 明确保留远端 main 历史、推送成功和 Pages 验证结果；清理过时状态 | 已完成 |
 | T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 已完成 |
 | T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 已完成 |
+| T-08 | 前端 + 测试 | 用 60 句本地双语库替换每日一句联网获取 | `index.html`、`tests/regression.spec.js`（独立 worktree） | 每年按日轮换；无 Tatoeba 前端请求；翻面/朗读保留；本地测试通过 | 已完成 |
 
 ## 交接记录
 
@@ -29,6 +30,8 @@
 - T-06 完成：独立验证 worktree 在目标代码提交 `d372965311d33d94ce8b14292317723fd210d278` 上执行 `npm ci`（4 packages audited，0 vulnerabilities），随后在 PowerShell 执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **2 passed（4.2s）**。未修改源码；外链请求按预期被测试策略拦截。
 - T-07 头像来源审计及修复完成：三位内置联系人使用 `assets/avatars/linh.jpg`、`assets/avatars/an.jpg`、`assets/avatars/mai.jpg`（`index.html:966,978,981`），路径和图像均未更改。本人旧默认值曾是外域 `https://view-link.cx/...`，现改为 initials 回退。用户头像来源仅为 `noiloi-my-profile`/`noiloi-friend-overrides` 的历史持久化值或现有相册/拍照 file picker（`1183-1244`）；启动时迁移并写回非法旧值，头像渲染器只接受三个内置路径或不超过 1 MB 的 JPEG Base64 data URL（`1003-1010,1120-1145,1352-1358`）。用户上传经 canvas 256px 缩放并重新编码为 JPEG；外部 URL 不会写入 `img.src` 或触发请求。
 - T-07 回归：新增用例覆盖本人/好友旧外链值的清理、外域请求为零、三个内置资源路径仍在，以及本地图片上传后成为 JPEG data URL 且刷新后保留。独立 worktree 实测 **4 passed（5.3s）**，`git diff --check` 通过；修复已合入本地 `master`，提交 `cafe271`。
-- T-07 整合验证：本地 `master` HEAD `d8d13da` 再执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **4 passed（5.7s）**。当前改动尚未推送或部署，等待用户确认。
+- T-07 整合验证：本地 `master` HEAD `d8d13da` 再执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **4 passed（5.7s）**；经用户确认后已推送并部署至 `b6150fd`。
+- T-08 开始：从当前远端已部署 `master` HEAD `b6150fd` 创建独立分支 `feat/daily-phrase-builtin` 与 `.worktrees/daily-phrase-builtin` worktree。已确认每日卡片当前通过 `/tatoeba` 请求数据，朗读与翻面分别由 `speakDailySentence()` 和 `dailyFlipped` 处理。
+- T-08 完成：`index.html` 内置 60 组越南语/简体中文完整日常句，越南语和中文各自均无重复；以年内日序从第 1 句开始每 60 天循环，连续日期轮换不同。移除了每日一句的前端 Tatoeba 请求，词典、陪练、翻面和朗读路径保持原状；`speakDailySentence()` 在本地句子无音频时继续走原有语音合成回退。`regression.spec.js` 新增日期固定测试，验证相邻日期句子不同且没有 `/tatoeba` 请求。独立 worktree 执行 `npm ci` 后运行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **5 passed（12.7s）**；`git diff --check` 通过，内置句库计数/去重检查为 60/60。当前改动未推送或部署，等待用户确认。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
 
