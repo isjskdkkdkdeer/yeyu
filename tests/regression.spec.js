@@ -81,3 +81,81 @@ test('learning daily card flips language and keeps the design tokens', async ({ 
   expect(tokens.muted).toBe('#a4a6a5');
   expect(parseFloat(tokens.navMinHeight)).toBeGreaterThanOrEqual(44);
 });
+
+test('legacy external avatar values are discarded without external image requests', async ({ page }) => {
+  const externalRequests = [];
+  const appOrigin = new URL(BASE).origin;
+  page.on('request', request => {
+    const requestUrl = new URL(request.url());
+    if (requestUrl.origin !== appOrigin && requestUrl.hostname !== RELAY_HOST) {
+      externalRequests.push(request.url());
+    }
+  });
+
+  await page.evaluate(() => {
+    localStorage.setItem('noiloi-my-profile', JSON.stringify({
+      avatarUrl: 'https://view-link.cx/LujXnMs5NbT',
+    }));
+    localStorage.setItem('noiloi-friend-overrides', JSON.stringify({
+      linh: { avatarUrl: 'https://legacy.example/avatar.jpg' },
+    }));
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.node-status')).toBeVisible();
+
+  expect(externalRequests).toEqual([]);
+  const storedAvatar = await page.evaluate(() => JSON.parse(localStorage.getItem('noiloi-my-profile')).avatarUrl);
+  expect(storedAvatar).not.toMatch(/^https?:/i);
+  const friendAvatars = await page.locator('.thread-item .avatar img').evaluateAll(images =>
+    images.map(image => new URL(image.src).pathname),
+  );
+  expect(friendAvatars).toEqual(expect.arrayContaining([
+    '/assets/avatars/linh.jpg',
+    '/assets/avatars/an.jpg',
+    '/assets/avatars/mai.jpg',
+  ]));
+});
+
+test('uploaded avatar is resized to local JPEG data and persists after reload', async ({ page }) => {
+  const externalRequests = [];
+  const appOrigin = new URL(BASE).origin;
+  page.on('request', request => {
+    const requestUrl = new URL(request.url());
+    if (requestUrl.origin !== appOrigin && requestUrl.hostname !== RELAY_HOST) {
+      externalRequests.push(request.url());
+    }
+  });
+
+  await page.locator('[data-tab="me"]').click();
+  await page.locator('.titanium-avatar[data-profile-page="details"]').click();
+  const avatarButton = page.locator('.pf-avatar-btn[data-change-avatar="me"]');
+  await expect(avatarButton).toBeVisible();
+  await avatarButton.click();
+
+  const pngBase64 = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 8;
+    canvas.height = 8;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#d8b56d';
+    context.fillRect(0, 0, 8, 8);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  await page.locator('#avatar-picker').setInputFiles({
+    name: 'test-avatar.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(pngBase64, 'base64'),
+  });
+
+  const uploadedAvatar = page.locator('.pf-avatar-btn img');
+  await expect(uploadedAvatar).toHaveAttribute('src', /^data:image\/jpeg;base64,/);
+  const savedAvatar = await page.evaluate(() => JSON.parse(localStorage.getItem('noiloi-my-profile')).avatarUrl);
+  expect(savedAvatar).toMatch(/^data:image\/jpeg;base64,/);
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.node-status')).toBeVisible();
+  await page.locator('[data-tab="me"]').click();
+  await page.locator('.titanium-avatar[data-profile-page="details"]').click();
+  await expect(page.locator('.pf-avatar-btn img')).toHaveAttribute('src', savedAvatar);
+  expect(externalRequests).toEqual([]);
+});

@@ -1000,7 +1000,13 @@ const phrases = [
 
 // 地区预设：点一下就填好中文+越南语，不用手打。
 const VIETNAM_PLACES=[['河内','Hà Nội'],['胡志明市','Thành phố Hồ Chí Minh'],['岘港','Đà Nẵng'],['海防','Hải Phòng'],['芽庄','Nha Trang'],['大叻','Đà Lạt'],['顺化','Huế'],['芹苴','Cần Thơ'],['下龙','Hạ Long'],['会安','Hội An'],['富国','Phú Quốc'],['归仁','Quy Nhơn']];
-const demoProfile = {id:'bridge101',name:'James',vi:'James',initials:'J',avatarUrl:'https://view-link.cx/LujXnMs5NbT',vip:true,gender:['未填写','Chưa cung cấp'],region:['越南 · 河内','Việt Nam · Hà Nội']};
+const LOCAL_AVATAR_ASSETS=new Set(['assets/avatars/linh.jpg','assets/avatars/an.jpg','assets/avatars/mai.jpg']);
+function normalizeAvatarUrl(value) {
+  if(typeof value!=='string') return '';
+  if(LOCAL_AVATAR_ASSETS.has(value)) return value;
+  return value.length<=1_000_000 && /^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)?value:'';
+}
+const demoProfile = {id:'bridge101',name:'James',vi:'James',initials:'J',avatarUrl:'',vip:true,gender:['未填写','Chưa cung cấp'],region:['越南 · 河内','Việt Nam · Hà Nội']};
 const friendDirectory = [
   {id:'bao27',name:'范嘉宝',vi:'Phạm Gia Bảo',initials:'宝',tone:'sand',time:'',messages:[
     ['vi','Chào bạn! Cuối tuần bạn có muốn đi uống cà phê không?','你好！周末想一起喝咖啡吗？','09:00']
@@ -1109,12 +1115,36 @@ const read = (key, fallback) => {
 };
 const save = (key, value) => { try { localStorage.setItem('noiloi-' + key, JSON.stringify(value)); } catch {} };
 // 资料修改（头像、名字、性别、地区、简介、签名）只保存在这台设备上，刷新还在；没改过就用默认。
-const DEFAULT_AVATAR = demoProfile.avatarUrl;
+const DEFAULT_AVATAR = '';
 const DEFAULT_FRIEND_AVATARS = {};
 chats.forEach(chat => { DEFAULT_FRIEND_AVATARS[chat.id] = chat.avatarUrl; });
 const friendOverrides = read('friend-overrides', {});
-Object.assign(demoProfile, read('my-profile', {}));
-chats.forEach(chat => { if (friendOverrides[chat.id]) Object.assign(chat, friendOverrides[chat.id]); });
+const storedMyProfile=read('my-profile', {});
+Object.assign(demoProfile, storedMyProfile);
+const storedAvatar=demoProfile.avatarUrl;
+demoProfile.avatarUrl=normalizeAvatarUrl(storedAvatar);
+if(storedAvatar!==demoProfile.avatarUrl) save('my-profile',{...storedMyProfile,avatarUrl:demoProfile.avatarUrl});
+let friendAvatarStorageChanged=false;
+if(friendOverrides && typeof friendOverrides==='object') {
+  for(const [id,override] of Object.entries(friendOverrides)) {
+    if(!override || typeof override!=='object' || !('avatarUrl' in override)) continue;
+    const safeAvatar=normalizeAvatarUrl(override.avatarUrl);
+    if(override.avatarUrl!==safeAvatar) { override.avatarUrl=safeAvatar; friendAvatarStorageChanged=true; }
+    if(id in DEFAULT_FRIEND_AVATARS && !safeAvatar) {
+      override.avatarUrl=DEFAULT_FRIEND_AVATARS[id];
+      friendAvatarStorageChanged=true;
+    }
+  }
+}
+chats.forEach(chat => {
+  if(friendOverrides[chat.id]) Object.assign(chat, friendOverrides[chat.id]);
+  chat.avatarUrl=normalizeAvatarUrl(chat.avatarUrl) || DEFAULT_FRIEND_AVATARS[chat.id] || '';
+  if(friendOverrides[chat.id] && friendOverrides[chat.id].avatarUrl!==chat.avatarUrl) {
+    friendOverrides[chat.id].avatarUrl=chat.avatarUrl;
+    friendAvatarStorageChanged=true;
+  }
+});
+if(friendAvatarStorageChanged) save('friend-overrides',friendOverrides);
 function saveMyProfile() {
   save('my-profile', {name: demoProfile.name, vi: demoProfile.vi, avatarUrl: demoProfile.avatarUrl, gender: demoProfile.gender, region: demoProfile.region});
 }
@@ -1199,7 +1229,7 @@ avatarPicker.addEventListener('change', () => {
         const next = new FileReader();
         next.onload = () => {
           const url = String(next.result || '');
-          if (!url.startsWith('data:image/')) return;
+          if (!url.startsWith('data:image/jpeg;base64,') || normalizeAvatarUrl(url)!==url) return;
           if (target.kind === 'me') {
             demoProfile.avatarUrl = url;
             saveMyProfile();
@@ -1320,9 +1350,10 @@ const nav = [
  ['learn','book','学语','Học'],['me','user','我的','Tôi'],
 ];
 function avatar(person, size='') {
-  return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size} ${person.vip?'avatar-vip':''} ${person.avatarUrl?'avatar-photo':''}">
+  const avatarUrl=normalizeAvatarUrl(person.avatarUrl);
+  return `<span class="avatar avatar-gradient ${person.tone || 'mint'} ${size} ${person.vip?'avatar-vip':''} ${avatarUrl?'avatar-photo':''}">
     <span aria-hidden="true">${escape(person.initials)}</span>
-    ${person.avatarUrl?`<img src="${escape(person.avatarUrl)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+    ${avatarUrl?`<img src="${escape(avatarUrl)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
   </span>`;
 }
 function contactPresence(person) {
