@@ -10,7 +10,7 @@
 | T-04 | 后端 | 梳理翻译、助手、实时陪练接口与数据流 | 无（只读审计，结果由协调者登记） | 标注已证实信息及未知的限流/保留策略 | 已完成 |
 | T-05 | 协调者 | 补齐 d372965 合并、推送与线上验证交接 | `TASKS.md`（独立 worktree） | 明确保留远端 main 历史、推送成功和 Pages 验证结果；清理过时状态 | 已完成 |
 | T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 已完成 |
-| T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 待开始 |
+| T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 已完成 |
 
 ## 交接记录
 
@@ -27,5 +27,7 @@
 - T-05 完成：推送前 `master` 干净且 HEAD 为 `c247288`。远端 `main` 已有独立历史，首次 push 被拒绝（fetch first）；随后将 `origin/main` 合并到 `master`，生成 `d372965`，保留远端历史且代码树与 `c247288` 一致。仅执行 `git push origin master:main`，远端从 `016e9d9` 前进到 `d372965`，推送成功。
 - T-05 线上验证：推送后等待 90 秒，`https://isjskdkkdkdeer.github.io/yeyu/?v=c247288` 返回 HTTP 200；Pages 内容与 GitHub `main/index.html` 完全一致，已核实姓名和时间转义修复存在。
 - T-06 完成：独立验证 worktree 在目标代码提交 `d372965311d33d94ce8b14292317723fd210d278` 上执行 `npm ci`（4 packages audited，0 vulnerabilities），随后在 PowerShell 执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **2 passed（4.2s）**。未修改源码；外链请求按预期被测试策略拦截。
+- T-07 头像来源审计及修复完成：三位内置联系人使用 `assets/avatars/linh.jpg`、`assets/avatars/an.jpg`、`assets/avatars/mai.jpg`（`index.html:966,978,981`），路径和图像均未更改。本人旧默认值曾是外域 `https://view-link.cx/...`，现改为 initials 回退。用户头像来源仅为 `noiloi-my-profile`/`noiloi-friend-overrides` 的历史持久化值或现有相册/拍照 file picker（`1183-1244`）；启动时迁移并写回非法旧值，头像渲染器只接受三个内置路径或不超过 1 MB 的 JPEG Base64 data URL（`1003-1010,1120-1145,1352-1358`）。用户上传经 canvas 256px 缩放并重新编码为 JPEG；外部 URL 不会写入 `img.src` 或触发请求。
+- T-07 回归：新增用例覆盖本人/好友旧外链值的清理、外域请求为零、三个内置资源路径仍在，以及本地图片上传后成为 JPEG data URL 且刷新后保留。执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **4 passed（5.3s）**。`git diff --check` 通过。该任务只修改了本地分支，未推送或部署。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
 
