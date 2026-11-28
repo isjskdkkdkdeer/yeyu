@@ -9,7 +9,7 @@
 | T-03 | 测试与安全 | 配置两个 Playwright 用例本地运行 | `tests/`、必要的测试配置/脚本（独立 worktree） | `YEYU_URL` 指向本地服务；默认目标不再是线上；提供本地命令并实际运行 | 已完成 |
 | T-04 | 后端 | 梳理翻译、助手、实时陪练接口与数据流 | 无（只读审计，结果由协调者登记） | 标注已证实信息及未知的限流/保留策略 | 已完成 |
 | T-05 | 协调者 | 补齐 d372965 合并、推送与线上验证交接 | `TASKS.md`（独立 worktree） | 明确保留远端 main 历史、推送成功和 Pages 验证结果；清理过时状态 | 已完成 |
-| T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree（只读） | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 待开始 |
+| T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 已完成 |
 | T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 待开始 |
 
 ## 交接记录
@@ -26,5 +26,6 @@
 - 整合验证：本轮测试时 `master` 代码 HEAD 为 `e9434f0`；已运行 `npm ci`（4 个包审计，0 漏洞）和上述本地 Playwright 命令；验证后工作区干净。
 - T-05 完成：推送前 `master` 干净且 HEAD 为 `c247288`。远端 `main` 已有独立历史，首次 push 被拒绝（fetch first）；随后将 `origin/main` 合并到 `master`，生成 `d372965`，保留远端历史且代码树与 `c247288` 一致。仅执行 `git push origin master:main`，远端从 `016e9d9` 前进到 `d372965`，推送成功。
 - T-05 线上验证：推送后等待 90 秒，`https://isjskdkkdkdeer.github.io/yeyu/?v=c247288` 返回 HTTP 200；Pages 内容与 GitHub `main/index.html` 完全一致，已核实姓名和时间转义修复存在。
+- T-06 完成：独立验证 worktree 在目标代码提交 `d372965311d33d94ce8b14292317723fd210d278` 上执行 `npm ci`（4 packages audited，0 vulnerabilities），随后在 PowerShell 执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **2 passed（4.2s）**。未修改源码；外链请求按预期被测试策略拦截。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
 
