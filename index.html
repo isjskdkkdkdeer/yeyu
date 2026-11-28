@@ -828,17 +828,28 @@ button.titanium-row:focus-visible {outline-offset:-2px}
 .context-settings select {min-width:86px;min-height:44px;padding:5px;background:var(--chat);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-sm);font:inherit}
 .context-settings small {font-size:var(--text-xs)}
 .call-hud-subtitles {
-  position:absolute;bottom:120px;bottom:max(120px,calc(var(--call-bottom) + var(--controls-offset) + 6px));
-  left:50%;right:auto;transform:translateX(-50%);width:min(90%,340px);z-index:10;
-  background:rgba(23,19,16,.85);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(216,181,109,.3);border-radius:var(--radius-control);padding:10px 14px;text-align:center;
+  position:absolute;bottom:max(120px,calc(var(--call-bottom) + var(--controls-offset) + 6px));
+  left:50%;right:auto;transform:translateX(-50%);width:min(88vw,680px);z-index:10;
+  background:var(--sub-bg,rgba(23,19,16,.55));
+  backdrop-filter:blur(var(--sub-blur,12px));-webkit-backdrop-filter:blur(var(--sub-blur,12px));
+  border:1px solid rgba(216,181,109,calc(var(--sub-opacity,.55) * .35));border-radius:var(--radius-control);padding:8px 14px;text-align:center;
 }
-.call-hud-subtitles .caption-pair {display:block}
-.call-hud-subtitles .caption-pair + .caption-pair {margin-top:8px;padding-top:8px;border-top:1px solid var(--gold)26}
-.call-hud-subtitles .caption-pair p {margin-bottom:0}
-.call-hud-subtitles .hud-source-text {font-size:var(--text-sm);color:var(--muted);font-weight:500;line-height:1.4}
-.call-hud-subtitles .hud-target-text {font-size:var(--text-base);color:var(--gold);font-weight:600;line-height:1.4;margin-top:2px}
+.call-hud-subtitles .caption-scroll {height:clamp(80px,22dvh,220px);overflow:auto;scrollbar-width:none;mask-image:linear-gradient(to bottom,transparent 0%,#000 18%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 18%,#000 100%)}
+.call-hud-subtitles .caption-pair {display:flex;flex-direction:column;align-items:flex-start;max-width:85%;margin:5px 0;text-align:left}
+.call-hud-subtitles .caption-pair.role-self {align-items:flex-end;margin-left:auto;text-align:right}
+.call-hud-subtitles .caption-pair.role-peer {padding:6px 10px;border:1px solid #d8b56d22;border-radius:12px 12px 12px 3px;background:#111a17bb}
+.call-hud-subtitles .caption-pair.role-self {padding:6px 10px;border:1px solid #d5f1df22;border-radius:12px 12px 3px 12px;background:#193126bb}
+.call-hud-subtitles .caption-pair p {margin:0;overflow-wrap:anywhere;font-family:Inter,'Noto Sans',system-ui,-apple-system,sans-serif;line-height:1.55;text-shadow:0 2px 5px #000,0 0 3px #000}
+.call-hud-subtitles .sub-original {font-size:var(--sub-original-size,15px);color:#e2e4e1;font-weight:450}
+.call-hud-subtitles .sub-translated {font-size:var(--sub-font-size,22px);color:#fff;font-weight:700}
+.call-hud-subtitles .caption-pair.role-peer .sub-translated {color:#f3d58f}
+.call-hud-subtitles .caption-pair.role-self .sub-translated {color:#d5f1df}
+.call-hud-subtitles .caption-pair.streaming .sub-translated {opacity:.82}
+.subtitle-toolbar {position:absolute;z-index:12;top:max(72px,calc(env(safe-area-inset-top) + 58px));right:clamp(12px,4vw,40px);display:grid;grid-template-columns:auto auto;gap:6px 10px;align-items:center;padding:8px 10px;border:1px solid #d8b56d55;border-radius:var(--radius-control);background:#171310bb;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font:12px/1.4 Inter,'Noto Sans',system-ui,sans-serif}
+.subtitle-toolbar label {display:grid;grid-template-columns:auto minmax(90px,130px) 34px;align-items:center;gap:6px;white-space:nowrap}
+.subtitle-toolbar input {width:100%;accent-color:var(--gold)}
+.subtitle-toolbar button {min-height:36px;padding:4px 8px;border:1px solid #d8b56d66;border-radius:8px;background:#211b16;color:white;font:inherit}
+.call-screen.subtitles-locked .call-hud-subtitles {pointer-events:none;user-select:none}
 .call-hud-subtitles [data-caption-size="1"] :is(.hud-source-text,.hud-target-text) {font-size:var(--text-md)}
 .call-hud-subtitles [data-caption-size="2"] :is(.hud-source-text,.hud-target-text) {font-size:var(--text-md)}
 @media (max-width:768px), (max-width:950px) and (pointer:coarse) {
@@ -847,7 +858,9 @@ button.titanium-row:focus-visible {outline-offset:-2px}
  .chat-header,.section-header {min-height:calc(60px + max(16px,env(safe-area-inset-top, 0px)))}
  .message-shell.with-details.mobile-open .details {inset:0;width:100%;height:100%;border:0;overscroll-behavior:contain;padding-bottom:max(12px,env(safe-area-inset-bottom, 0px))}
  .message-shell.with-details.mobile-open .details-heading {position:sticky;top:0;z-index:1;background:var(--paper);padding-top:max(12px,env(safe-area-inset-top, 0px))}
+ .call-hud-subtitles {width:88vw}
  .call-hud-subtitles .caption-scroll {height:clamp(68px,18dvh,170px)}
+ .subtitle-toolbar {right:10px;grid-template-columns:auto auto;max-width:calc(100vw - 20px)}
 }
 
 @media (max-width:768px), (max-width:950px) and (pointer:coarse) {
@@ -1114,6 +1127,14 @@ const read = (key, fallback) => {
   catch { return fallback; }
 };
 const save = (key, value) => { try { localStorage.setItem('noiloi-' + key, JSON.stringify(value)); } catch {} };
+function loadCallPreferences() {
+  const saved=read('call-preferences',{captions:true,follow:true});
+  return {...saved,
+    captions:typeof saved.captions==='boolean'?saved.captions:true,
+    follow:typeof saved.follow==='boolean'?saved.follow:true,
+    subtitleFontSize:Number.isFinite(saved.subtitleFontSize)?Math.max(14,Math.min(28,Math.round(saved.subtitleFontSize))):22,
+    subtitleOpacity:Number.isFinite(saved.subtitleOpacity)?Math.max(0,Math.min(90,Math.round(saved.subtitleOpacity))):55};
+}
 // 资料修改（头像、名字、性别、地区、简介、签名）只保存在这台设备上，刷新还在；没改过就用默认。
 const DEFAULT_AVATAR = '';
 const DEFAULT_FRIEND_AVATARS = {};
@@ -1269,7 +1290,7 @@ const speechStyles=[
 ];
 const state = {
   tab:'messages', active:'linh', mobileChat:false, leavingChat:false, filter:'all', search:'', details:matchMedia('(min-width: 951px)').matches,
-  callPreferences:read('call-preferences',{captions:true,follow:true}), unreadBadges:read('unread-badges',true),
+  callPreferences:loadCallPreferences(), unreadBadges:read('unread-badges',true),
   conversationContexts:read('conversation-contexts',{}),
   titanium:read('titanium',{policy:'auto',style:'couple',cache:'keep'}),
   translationCache:read('translation-cache',[]), signedOut:read('signed-out',false), toast:'', identity:(()=>{const v=read('identity',null); return typeof v==='string'&&v.includes('@')?v:null;})(),
@@ -1816,6 +1837,29 @@ const CallManager=platform.CallManager={
   },
   getCaptionHistory() {
     return state.call?sortedCaptions(state.call).map(item=>({...item})):[];
+  },
+  // Adapter API: langPair may be {original,translated}, [original,translated], or a language-pair string.
+  // Pass streaming:true (or isFinal:false) while a speaker is still talking; reuse segmentId to update it.
+  addSubtitle({role='peer',langPair=null,translated,original,streaming=false,isFinal,segmentId}={}) {
+    const call=state.call;
+    if(!call || typeof original!=='string' || typeof translated!=='string' || original.length>4000 || translated.length>4000) return false;
+    const normalizedRole=['self','me','local','user'].includes(String(role).toLowerCase())?'self':'peer';
+    const activeId=call.activeSubtitleSegments[normalizedRole];
+    const id=typeof segmentId==='string'&&segmentId.length>0&&segmentId.length<=128?segmentId:
+      (activeId||`adapter-${normalizedRole}-${Date.now()}-${++call.subtitleSequence}`);
+    const pair=Array.isArray(langPair)?{original:langPair[0],translated:langPair[1]}:
+      typeof langPair==='object'&&langPair?langPair:
+      typeof langPair==='string'?(()=>{const parts=langPair.toLowerCase().split(/[-_/\s]+/);return {original:parts[0],translated:parts[1]}})():{};
+    const detected=text=>/\p{Script=Han}/u.test(text)?'zh-CN':'vi';
+    const normalizeLanguage=value=>['vi','vi-vn'].includes(String(value).toLowerCase())?'vi':
+      ['zh','zh-cn','zh-hans'].includes(String(value).toLowerCase())?'zh-CN':null;
+    const originalLang=normalizeLanguage(pair.original)||detected(original);
+    const translatedLang=normalizeLanguage(pair.translated)||detected(translated);
+    const final=typeof isFinal==='boolean'?isFinal:streaming!==true;
+    receiveCaption(call,{segmentId:id,sourceText:original,translatedText:translated,timestamp:Date.now()-call.start,isFinal:final,role:normalizedRole,langPair:{original:originalLang,translated:translatedLang}});
+    if(final) delete call.activeSubtitleSegments[normalizedRole];
+    else call.activeSubtitleSegments[normalizedRole]=id;
+    return true;
   }
 };
 
@@ -1834,12 +1878,18 @@ function receiveCaption(call,data) {
     typeof item.translatedText!=='string' || item.translatedText.length>4000 ||
     !Number.isFinite(item.timestamp) || item.timestamp<0 || typeof item.isFinal!=='boolean') return;
   const {segmentId,sourceText,translatedText,isFinal,timestamp}=item;
+  call.hasRtcCaptions=true;
+  const role=['self','me','local','user'].includes(String(item.role||'peer').toLowerCase())?'self':'peer';
+  const language=text=>/\p{Script=Han}/u.test(text)?'zh-CN':'vi';
+  const langPair=item.langPair&&typeof item.langPair==='object'?item.langPair:{};
   if(call.finalCaptions.has(segmentId)) return;
   const existing=call.captionDrafts.get(segmentId);
   if(!isFinal && existing && existing.item.timestamp>timestamp) return;
   if(!isFinal && !existing && call.captionDrafts.size>=64) return;
   clearTimeout(existing?.timer);
-  const clean={segmentId,sourceText,translatedText,isFinal,timestamp};
+  const clean={segmentId,sourceText,translatedText,isFinal,timestamp,role,
+    originalLang:typeof langPair.original==='string'?langPair.original:language(sourceText),
+    translatedLang:typeof langPair.translated==='string'?langPair.translated:language(translatedText)};
   if(isFinal) {
     call.captionDrafts.delete(segmentId);
     call.finalCaptions.set(segmentId,clean);
@@ -1866,7 +1916,26 @@ function renderRtcCaptions(call) {
   const follow=call.resumeFollow || (!call.followPaused && (rendered?captionsAtBottom(area):call.captionPosition?.follow ?? true));
   call.resumeFollow=false;
   const draft=[...call.captionDrafts.values()].map(entry=>entry.visible).filter(Boolean).sort((a,b)=>a.timestamp-b.timestamp);
-  rows.innerHTML=[...sortedCaptions(call),...draft].map(item=>`<div class="caption-pair"><p class="hud-source-text hud-source">${escape(item.sourceText)}</p><p class="hud-target-text hud-target">${escape(item.translatedText)}</p></div>`).join('');
+  const items=[...sortedCaptions(call),...draft];
+  const keep=new Set();
+  for(const item of items) {
+    keep.add(item.segmentId);
+    let card=[...rows.children].find(row=>row.dataset.segmentId===item.segmentId);
+    if(!card) {
+      card=document.createElement('div');card.className='caption-pair';card.dataset.segmentId=item.segmentId;
+      const original=document.createElement('p');original.className='sub-original';
+      const translated=document.createElement('p');translated.className='sub-translated';
+      card.append(original,translated);rows.append(card);
+    }
+    card.classList.toggle('role-self',item.role==='self');
+    card.classList.toggle('role-peer',item.role!=='self');
+    card.classList.toggle('streaming',!item.isFinal);
+    const original=card.querySelector('.sub-original'),translated=card.querySelector('.sub-translated');
+    if(original.textContent!==item.sourceText) original.textContent=item.sourceText;
+    if(translated.textContent!==item.translatedText) translated.textContent=item.translatedText;
+    original.lang=item.originalLang;translated.lang=item.translatedLang;
+  }
+  for(const card of [...rows.children]) if(!keep.has(card.dataset.segmentId)) card.remove();
   rows.dataset.rtcRevision=call.captionRevision;
   if(follow) area.scrollTop=area.scrollHeight;
   else if(!rendered) area.scrollTop=call.captionPosition?.top || 0;
@@ -1934,6 +2003,7 @@ function bindRtcMedia(call) {
 function openCall(person,kind) {
   if(state.call || !find(person)) return false;
   state.call={person,kind,start:Date.now(),mic:true,speaker:true,captions:state.callPreferences.captions,
+    captionLocked:false,subtitleSequence:0,activeSubtitleSegments:{},
     followPaused:!state.callPreferences.follow,camera:kind==='video',voiceCount:1,voiceTimes:[0],nextTurn:4,
     rtcMode:!!rtcAdapter,captionRevision:0,finalCaptions:new Map(),captionDrafts:new Map()};
   state.prompter={open:false,active:null};
@@ -2736,11 +2806,14 @@ function renderPrompter(){
 function callView() {
   const call=state.call;
   const person=find(call.person);
+  const subtitleFontSize=state.callPreferences.subtitleFontSize;
+  const subtitleOpacity=state.callPreferences.subtitleOpacity;
+  const subtitleStyle=`--sub-font-size:${subtitleFontSize}px;--sub-original-size:${(subtitleFontSize*.68).toFixed(2)}px;--sub-opacity:${subtitleOpacity/100};--sub-bg:rgba(23,19,16,${subtitleOpacity/100});--sub-blur:${subtitleOpacity===0?0:12}px`;
   const controls=[
     ['mic','mic',t('麦克风','Micrô')], ['speaker','speaker',t('扬声器','Loa')], ['captions','captions',t('字幕','Phụ đề')],
     ...(call.kind==='video'?[['camera','video',t('摄像头','Camera')]]:[])
   ];
-  return `<main class="call-screen active${call.rtcMode?' rtc-mode':''} ${call.kind==='video'&&call.camera?'video-live':'voice-live'}" aria-label="${call.rtcMode?t('实时通话','Cuộc gọi trực tiếp'):t('通话','Cuộc gọi')}">
+  return `<main class="call-screen active${call.rtcMode?' rtc-mode':''} ${call.kind==='video'&&call.camera?'video-live':'voice-live'} ${call.captionLocked?'subtitles-locked':''}" style="${subtitleStyle}" aria-label="${call.rtcMode?t('实时通话','Cuộc gọi trực tiếp'):t('通话','Cuộc gọi')}">
     ${call.rtcMode?`<video id="remote-call-media" class="rtc-remote-media ${call.kind==='voice'?'audio-only':''}" autoplay playsinline></video>`:''}
     <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${escape(label(person))}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('E2EE 端到端加密通话就绪','Cuộc gọi mã hóa E2EE đã sẵn sàng')}</div></header>
     ${call.kind==='video'&&call.camera?'':`<div class="call-portrait">${avatar(person,'large')}<p>${call.kind==='video'?t('摄像头已关闭','Camera đã tắt'):escape(label(person))}</p></div>`}
@@ -2748,10 +2821,15 @@ function callView() {
       <button type="button" class="call-tool" data-hold-talk aria-pressed="false">${t('按住说话','Nhấn giữ để nói')}</button>
       <button type="button" class="call-tool" data-noise aria-pressed="${!!call.noise}">${t('夜市噪声','Chợ ồn')}</button>
       <small id="voice-hint">${call.noise?t('请按住说话，松开后生成字幕。','Giữ để nói, thả để hiện phụ đề.'):t('自动识别语言，未使用麦克风。','Tự động nhận diện ngôn ngữ, không dùng micrô.')}</small></div>`:''}
+    <aside class="subtitle-toolbar" aria-label="${t('字幕控制','Điều khiển phụ đề')}">
+      <label>${t('字号','Cỡ chữ')}<input type="range" min="14" max="28" step="1" value="${subtitleFontSize}" data-subtitle-font aria-label="${t('字幕字号','Cỡ chữ phụ đề')}" ${call.captionLocked?'disabled':''}><output data-font-output>${subtitleFontSize}px</output></label>
+      <label>${t('底色','Nền')}<input type="range" min="0" max="90" step="1" value="${subtitleOpacity}" data-subtitle-opacity aria-label="${t('字幕背景不透明度','Độ mờ nền phụ đề')}" ${call.captionLocked?'disabled':''}><output data-opacity-output>${subtitleOpacity}%</output></label>
+      <button type="button" data-subtitle-visibility aria-pressed="${call.captions}" ${call.captionLocked?'disabled':''}>${call.captions?t('隐藏字幕','Ẩn phụ đề'):t('显示字幕','Hiện phụ đề')}</button>
+      <button type="button" data-subtitle-lock aria-pressed="${call.captionLocked}">${call.captionLocked?t('解锁字幕','Mở khóa'):t('锁定字幕','Khóa phụ đề')}</button>
+      <button type="button" data-caption-follow aria-pressed="${!call.followPaused}" ${call.captionLocked?'disabled':''}>${call.followPaused?t('恢复跟随','Theo dõi lại'):t('暂停跟随','Tạm dừng theo dõi')}</button>
+    </aside>
     <section class="captions call-hud-subtitles" ${call.captions?'':'hidden'}>
-      <div class="caption-tools"><button type="button" class="call-tool" data-caption-size aria-label="${t('切换字幕字号','Đổi cỡ phụ đề')}">${t('字号','Cỡ chữ')} · ${(call.captionSize || 0)+1}/3</button>
-      <button type="button" class="call-tool" data-caption-follow aria-pressed="${!call.followPaused}">${call.followPaused?t('恢复跟随','Theo dõi lại'):t('暂停跟随','Tạm dừng theo dõi')}</button></div>
-      <div class="caption-scroll" data-caption-size="${call.captionSize || 0}" tabindex="0" role="region" aria-label="${t('双语字幕','Phụ đề song ngữ')}">
+      <div class="caption-scroll" tabindex="0" role="region" aria-label="${t('双语字幕','Phụ đề song ngữ')}">
         <div id="caption-rows" role="log" aria-live="polite"></div>
       </div>
     </section>
@@ -2766,7 +2844,7 @@ function updateCall() {
   if (!call) return;
   const elapsed=Math.floor((Date.now()-call.start)/1000);
   document.querySelector('#call-time').textContent=`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;
-  if(call.rtcMode) {renderRtcCaptions(call);return;}
+  if(call.rtcMode || call.hasRtcCaptions) {renderRtcCaptions(call);return;}
   let count=1+Math.floor(elapsed/4);
   if(call.kind==='voice') {
     if(!call.noise && !call.holding && call.mic && elapsed>=call.nextTurn) {
@@ -2797,8 +2875,10 @@ function updateCall() {
   call.resumeFollow=false;
   const markup=Array.from({length:count-rendered},(_,index)=>{
     const [lang,original,translation]=lines[(rendered+index)%lines.length];
-    const [vi,zh]=lang==='vi'?[original,translation]:[translation,original];
-    return `<div class="caption-pair"><p class="hud-source-text hud-source" lang="vi">${escape(vi)}</p><p class="hud-target-text hud-target" lang="zh-CN">${escape(zh)}</p></div>`;
+    const translated=lang==='vi'?translation:original;
+    const source=lang==='vi'?original:translation;
+    const translatedLang=lang==='vi'?'zh-CN':'vi';
+    return `<div class="caption-pair role-${lang==='vi'?'peer':'self'}"><p class="sub-original" lang="${lang}">${escape(source)}</p><p class="sub-translated" lang="${translatedLang}">${escape(translated)}</p></div>`;
   }).join('');
   rows.insertAdjacentHTML('beforeend',markup);
   rows.dataset.count=count;
@@ -3067,6 +3147,7 @@ root.addEventListener('click', event => {
   }
   if(d.callPreference) {
     state.callPreferences[d.callPreference]=!state.callPreferences[d.callPreference];
+    if(d.callPreference==='captions'&&state.call) state.call.captions=state.callPreferences.captions;
     save('call-preferences',state.callPreferences);
     render({preserve:true});
   }
@@ -3218,8 +3299,14 @@ root.addEventListener('click', event => {
     }
   }
   if(d.call) openCall(d.person,d.call);
-  if('captionSize' in d) {
-    state.call.captionSize=((state.call.captionSize || 0)+1)%3;
+  if('subtitleVisibility' in d) {
+    state.call.captions=!state.call.captions;
+    state.callPreferences.captions=state.call.captions;
+    save('call-preferences',state.callPreferences);
+    render();
+  }
+  if('subtitleLock' in d) {
+    state.call.captionLocked=!state.call.captionLocked;
     render();
   }
   if('captionFollow' in d) {
@@ -3231,7 +3318,11 @@ root.addEventListener('click', event => {
     state.call.noise=!state.call.noise;
     render();
   }
-  if(d.control) { state.call[d.control]=!state.call[d.control]; render(); root.querySelector(`[data-control="${d.control}"]`).focus(); }
+  if(d.control) {
+    state.call[d.control]=!state.call[d.control];
+    if(d.control==='captions') { state.callPreferences.captions=state.call.captions; save('call-preferences',state.callPreferences); }
+    render(); root.querySelector(`[data-control="${d.control}"]`)?.focus();
+  }
   if('end' in d) closeCall();
   if(d.transcriptAction && state.pendingTranscript) {
     const {person,kind,turns,live}=state.pendingTranscript;
@@ -3328,8 +3419,29 @@ root.addEventListener('keyup',event=>{
 });
 /* 学语页：输入框回车查词 / 翻译；输入内容先记进 state，刷新不丢 */
 root.addEventListener('input',event=>{
-  if(event.target.matches('[data-learn-dict-input]')) state.learn.dictQuery=event.target.value;
-  if(event.target.matches('[data-learn-practice-input]')) state.learn.practiceInput=event.target.value;
+  const input=event.target;
+  const key=input.matches('[data-subtitle-font]')?'subtitleFontSize':input.matches('[data-subtitle-opacity]')?'subtitleOpacity':null;
+  if(key) {
+    const min=key==='subtitleFontSize'?14:0, max=key==='subtitleFontSize'?28:90;
+    const value=Math.max(min,Math.min(max,Number(input.value)));
+    state.callPreferences[key]=value;
+    const screen=document.querySelector('.call-screen');
+    if(screen) {
+      screen.style.setProperty(key==='subtitleFontSize'?'--sub-font-size':'--sub-opacity',key==='subtitleFontSize'?`${value}px`:String(value/100));
+      if(key==='subtitleOpacity') {
+        screen.style.setProperty('--sub-bg',`rgba(23,19,16,${value/100})`);
+        screen.style.setProperty('--sub-blur',value===0?'0px':'12px');
+      } else {
+        screen.style.setProperty('--sub-original-size',`${(value*.68).toFixed(2)}px`);
+      }
+    }
+    const output=input.closest('label')?.querySelector('output');
+    if(output) output.value=key==='subtitleFontSize'?`${value}px`:`${value}%`;
+    save('call-preferences',state.callPreferences);
+    return;
+  }
+  if(input.matches('[data-learn-dict-input]')) state.learn.dictQuery=input.value;
+  if(input.matches('[data-learn-practice-input]')) state.learn.practiceInput=input.value;
 });
 root.addEventListener('keydown',event=>{
   if(event.key==='Enter' && event.target.matches('[data-learn-daily-flip]')) {

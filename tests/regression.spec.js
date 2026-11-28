@@ -196,3 +196,56 @@ test('daily sentence changes on the next calendar day without a Tatoeba request'
   expect(secondDay.text).not.toBe(firstDay.text);
   expect(tatoebaRequests).toEqual([]);
 });
+
+test('call subtitle overlay streams safely and remembers its controls', async ({ page }) => {
+  await page.locator('.chat-header [data-call="voice"]').click();
+  const toolbar = page.locator('.subtitle-toolbar');
+  await expect(toolbar).toBeVisible();
+
+  const addSubtitle = (payload) => page.evaluate(value => window.CallManager.addSubtitle(value), payload);
+  const firstStream = {
+    role: 'peer',
+    langPair: { original: 'vi', translated: 'zh-CN' },
+    original: 'Xin chào, hôm nay bạn thế nào?',
+    translated: '你好，你今天过得怎么样？',
+    streaming: true,
+  };
+  expect(await addSubtitle(firstStream)).toBe(true);
+  const translated = page.locator('.caption-pair.role-peer .sub-translated');
+  await expect(translated).toHaveText(firstStream.translated, { timeout: 2_000 });
+  await expect(translated).toHaveClass(/sub-translated/);
+  await expect(page.locator('.caption-pair.role-peer')).toHaveClass(/streaming/);
+
+  const updatedTranslation = '你好，今天过得怎么样？';
+  expect(await addSubtitle({ ...firstStream, translated: updatedTranslation })).toBe(true);
+  await expect(translated).toHaveText(updatedTranslation);
+  expect(await addSubtitle({ ...firstStream, translated: updatedTranslation, streaming: false })).toBe(true);
+  await expect(page.locator('.caption-pair.role-peer')).not.toHaveClass(/streaming/);
+
+  const fontSlider = toolbar.locator('[data-subtitle-font]');
+  await fontSlider.focus();
+  await fontSlider.press('End');
+  await expect(fontSlider).toHaveValue('28');
+  const opacitySlider = toolbar.locator('[data-subtitle-opacity]');
+  await opacitySlider.focus();
+  await opacitySlider.press('Home');
+  await expect(opacitySlider).toHaveValue('0');
+  await expect(page.locator('.call-screen')).toHaveCSS('--sub-blur', '0px');
+  const savedPreferences = await page.evaluate(() => JSON.parse(localStorage.getItem('noiloi-call-preferences')));
+  expect(savedPreferences).toMatchObject({ subtitleFontSize: 28, subtitleOpacity: 0 });
+
+  await toolbar.locator('[data-subtitle-visibility]').click();
+  await expect(page.locator('.call-hud-subtitles')).toBeHidden();
+  await toolbar.locator('[data-subtitle-visibility]').click();
+  await expect(page.locator('.call-hud-subtitles')).toBeVisible();
+  await toolbar.locator('[data-subtitle-lock]').click();
+  await expect(fontSlider).toBeDisabled();
+  await toolbar.locator('[data-subtitle-lock]').click();
+  await expect(fontSlider).toBeEnabled();
+
+  await page.locator('[data-end]').click();
+  await page.locator('[data-transcript-action="cancel"]').click();
+  await page.locator('.chat-header [data-call="voice"]').click();
+  await expect(page.locator('[data-subtitle-font]')).toHaveValue('28');
+  await expect(page.locator('[data-subtitle-opacity]')).toHaveValue('0');
+});
