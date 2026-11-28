@@ -12,6 +12,8 @@
 | T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 已完成 |
 | T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 已完成 |
 | T-08 | 前端 + 测试 | 用 60 句本地双语库替换每日一句联网获取 | `index.html`、`tests/regression.spec.js`（独立 worktree） | 每年按日轮换；无 Tatoeba 前端请求；翻面/朗读保留；本地测试通过 | 已完成 |
+| T-09 | 前端 + 测试与安全 | 改进通话实时字幕 HUD | 独立 worktree `feat/call-subtitle-overlay` | HUD 控件与流式字幕用例；本地 Playwright 通过；等待 Muse 核对 | 已提交，未合入 |
+| T-10 | 产品研发团队 | 审计产品价值、校正无依据的产品承诺，并优化聊天快捷表达 | `PRODUCT_AUDIT.md`、`index.html`、`README.md`、`tests/regression.spec.js`、`TASKS.md`（独立 worktree） | 记录各模块去留的五问审查；数据流描述符合源码且不改变外发/权限策略；移除纯装饰假状态；快捷修复短语离线有译文；本地全套测试通过 | 完成，待审查 |
 
 ## 交接记录
 
@@ -34,4 +36,6 @@
 - T-08 开始：从当前远端已部署 `master` HEAD `b6150fd` 创建独立分支 `feat/daily-phrase-builtin` 与 `.worktrees/daily-phrase-builtin` worktree。已确认每日卡片当前通过 `/tatoeba` 请求数据，朗读与翻面分别由 `speakDailySentence()` 和 `dailyFlipped` 处理。
 - T-08 完成：`index.html` 内置 60 组越南语/简体中文完整日常句，越南语和中文各自均无重复；以年内日序从第 1 句开始每 60 天循环，连续日期轮换不同。移除了每日一句的前端 Tatoeba 请求，词典、陪练、翻面和朗读路径保持原状；`speakDailySentence()` 在本地句子无音频时继续走原有语音合成回退。`regression.spec.js` 新增日期固定测试，验证相邻日期句子不同且没有 `/tatoeba` 请求。独立 worktree 执行 `npm ci` 后运行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **5 passed（12.7s）**；`git diff --check` 通过，内置句库计数/去重检查为 60/60。功能提交 `836cd34` 已合入本地 `master`，在整合提交 `c9622c3` 上再次实跑 **5 passed（11.3s）**。当前改动未推送或部署，等待用户确认。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
+- T-10 审计阶段：基线 `master` `650a54f` 干净；产品/商业、创意/体验、架构/测试安全三方独立审查并交叉质疑。详见 `PRODUCT_AUDIT.md`。确认的高风险矛盾是 `README.md` 声称云翻译默认关闭且有 `enableCloud(true)`，但 `index.html` 无该方法，在线 HTTP/S 下会尝试 Worker；本任务不改变云请求/助手上下文/麦克风权限，仅校正披露与无依据文案。选定低风险改进：将现有六条快捷短语改为保留两条日常表达 + 四条沟通修复句，并补本地译文及回归用例；否决新增独立学习入口、签到/排行榜及社交 Feed。
+- T-10 实现与验证：仅在独立 worktree `product/trust-and-repair` 修改 `index.html`、`README.md`、`tests/regression.spec.js`、本文件，并新增 `PRODUCT_AUDIT.md`。移除无依据的固定网关/延迟、VIP、E2EE/动态密钥、未接入生物识别和伪引擎策略展示；移除未启用相机的扫码假入口；保留本地联系人/聊天数据和原有缓存策略。新增全局数据去向说明及详情页；README 按源码说明 Cloudflare Worker 数据流和未知保留策略；快捷短语加入四条本地可译的对话修复表达。未改云请求默认、助手历史长度、麦克风权限或数据清理规则。执行 `npm ci`（4 packages audited，0 vulnerabilities）及 `$env:YEYU_URL='http://127.0.0.1:4173/?v=product-audit'; npm test`，最终 **7 passed（14.6s）**；`git diff --check` 与 Node 内嵌脚本语法编译通过。当前未提交、未合并、未推送或部署。
 
