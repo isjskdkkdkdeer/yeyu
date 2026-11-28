@@ -1387,7 +1387,7 @@ function chatPanel(person, enterChat=false) {
       <div class="head-actions">${button('phone',t('语音通话','Gọi thoại'),`data-call="voice" data-person="${person.id}"`)}${button('video',t('视频通话','Gọi video'),`data-call="video" data-person="${person.id}"`)}${button('more',t('切换会话信息','Bật/tắt thông tin'),'data-details aria-expanded="'+state.details+'"')}</div>
     </header>
     <section class="timeline" data-conversation="${person.id}" aria-label="${t('聊天记录','Lịch sử trò chuyện')}">
-      <div class="date-divider"><span>${t('今天','Hôm nay')} <time>${person.messages[0][3]}</time></span></div>
+      <div class="date-divider"><span>${t('今天','Hôm nay')} <time>${escape(person.messages[0][3])}</time></span></div>
       ${person.group?`<div class="group-languages">${groupMembers(person).map(member=>{
         const selected=state.groupLanguages[person.id]?.[member.id] || (member===demoProfile?state.lang:'vi');
         return `<label>${member===demoProfile?t('我的显示语言','Ngôn ngữ của tôi'):escape(label(member))}<select data-member-language="${member.id}" aria-label="${escape(label(member))}"><option value="zh" ${selected==='zh'?'selected':''}>简体中文</option><option value="vi" ${selected==='vi'?'selected':''}>Tiếng Việt</option></select></label>`;
