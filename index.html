@@ -1353,7 +1353,7 @@ function listRows() {
   const rowHTML=person=>{
     const last=messages(person).at(-1);
     const preview = pendingReplyTranslations.has(last[5])?last[1]:last[5]?.transcript ? t('双语通话文字记录','Bản ghi cuộc gọi song ngữ') : last[0]===state.lang ? last[1] : last[2] || last[1];
-    return `<button class="thread thread-item ${state.active===person.id?'current':''}" data-peer-role="${roleText[conversationContext(person.id).peerRole] || 'Em'}" data-chat="${person.id}">${avatar(person)}<span class="thread-copy"><strong>${label(person)}</strong><small>${escape(preview)}</small>${contactPresence(person)}</span><span class="thread-meta"><small>${last===person.messages.at(-1)?t(person.time,person.time==='昨天'?'Hôm qua':person.time):last[3]}</small>${isUnread(person)?'<b>2</b>':''}</span></button>`;
+    return `<button class="thread thread-item ${state.active===person.id?'current':''}" data-peer-role="${roleText[conversationContext(person.id).peerRole] || 'Em'}" data-chat="${person.id}">${avatar(person)}<span class="thread-copy"><strong>${escape(label(person))}</strong><small>${escape(preview)}</small>${contactPresence(person)}</span><span class="thread-meta"><small>${escape(last===person.messages.at(-1)?t(person.time,person.time==='昨天'?'Hôm qua':person.time):last[3])}</small>${isUnread(person)?'<b>2</b>':''}</span></button>`;
   };
   const isToday=person=>/:/.test(person.time||'');
   const today=rows.filter(r=>isToday(r.person));
@@ -1383,15 +1383,15 @@ function chatPanel(person, enterChat=false) {
   return `<main class="chat-panel${enterChat?' chat-entering':''}">
     <header class="chat-header">
       ${button('back',t('返回列表','Về danh sách'),'data-back','icon-button back')}
-      ${person.group?avatar(person,'small'):`<button type="button" class="avatar-button" data-view-friend="${person.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(person,'small')}</button>`}<div class="chat-title"><strong>${label(person)}</strong><small>${person.signature?escape(person.signature):secondary(person)}</small>${contactPresence(person)}</div>
+      ${person.group?avatar(person,'small'):`<button type="button" class="avatar-button" data-view-friend="${person.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(person,'small')}</button>`}<div class="chat-title"><strong>${escape(label(person))}</strong><small>${person.signature?escape(person.signature):escape(secondary(person))}</small>${contactPresence(person)}</div>
       <div class="head-actions">${button('phone',t('语音通话','Gọi thoại'),`data-call="voice" data-person="${person.id}"`)}${button('video',t('视频通话','Gọi video'),`data-call="video" data-person="${person.id}"`)}${button('more',t('切换会话信息','Bật/tắt thông tin'),'data-details aria-expanded="'+state.details+'"')}</div>
     </header>
     <section class="timeline" data-conversation="${person.id}" aria-label="${t('聊天记录','Lịch sử trò chuyện')}">
       <div class="date-divider"><span>${t('今天','Hôm nay')} <time>${person.messages[0][3]}</time></span></div>
       ${person.group?`<div class="group-languages">${groupMembers(person).map(member=>{
         const selected=state.groupLanguages[person.id]?.[member.id] || (member===demoProfile?state.lang:'vi');
-        return `<label>${member===demoProfile?t('我的显示语言','Ngôn ngữ của tôi'):label(member)}<select data-member-language="${member.id}" aria-label="${label(member)}"><option value="zh" ${selected==='zh'?'selected':''}>简体中文</option><option value="vi" ${selected==='vi'?'selected':''}>Tiếng Việt</option></select></label>`;
-      }).join('')}<label>${t('预览成员视角','Xem theo thành viên')}<select data-group-viewer>${groupMembers(person).map(member=>`<option value="${member.id}" ${(state.groupViewer[person.id] || demoProfile.id)===member.id?'selected':''}>${label(member)}</option>`).join('')}</select></label></div>`:''}
+        return `<label>${member===demoProfile?t('我的显示语言','Ngôn ngữ của tôi'):escape(label(member))}<select data-member-language="${member.id}" aria-label="${escape(label(member))}"><option value="zh" ${selected==='zh'?'selected':''}>简体中文</option><option value="vi" ${selected==='vi'?'selected':''}>Tiếng Việt</option></select></label>`;
+      }).join('')}<label>${t('预览成员视角','Xem theo thành viên')}<select data-group-viewer>${groupMembers(person).map(member=>`<option value="${member.id}" ${(state.groupViewer[person.id] || demoProfile.id)===member.id?'selected':''}>${escape(label(member))}</option>`).join('')}</select></label></div>`:''}
       ${messages(person).map((message,index,arr)=>{const row=messageRow(person,message,index);if(index===0) return row;const sideOf=m=>(m[0]==='zh'&&!m[4])||m[4]==='self'?'me':(m[4]||'peer');return sideOf(message)!==sideOf(arr[index-1])?row.replace('class="message ','class="message message-break '):row;}).join('')}
       <div class="scroll-to-bottom-wrap"><button type="button" class="scroll-to-bottom" data-scroll-bottom aria-label="回到底部">↓ <span>回到底部</span><b class="scroll-to-bottom-count" hidden></b></button></div>
     </section>
@@ -1434,7 +1434,7 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
 
   const avatarBtn=own?`<button type="button" class="avatar-button" data-view-my-profile aria-label="${t('我的资料','Hồ sơ của tôi')}">${avatar(demoProfile,'tiny')}</button>`:`<button type="button" class="avatar-button" data-view-friend="${author.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(author,'tiny')}</button>`;
   return `<article class="message ${own?'own':''}" data-mid="${key}"><div class="message-side">${avatarBtn}</div><div class="message-content">
-    ${person.group&&!own?`<small class="sender">${label(author)}</small>`:''}
+    ${person.group&&!own?`<small class="sender">${escape(label(author))}</small>`:''}
     <div class="bubble ${primaryTranslation?'bubble-translated':''}">
       ${meta?.voice?`<div class="voice-meta"><strong>${t('语音消息','Tin nhắn thoại')}</strong><small>${elapsedLabel(meta.duration || 3)} · ${t('时长','Thời lượng')}</small></div>
       <div class="voice-actions">${voiceTrackButton(person.id,index,'original',lang,true)}${voiceTrackButton(person.id,index,'translated',otherLanguage(lang),!!translated)}</div><small>${t('语音 · 转写','Giọng nói · Bản chép lời')}</small>`:''}
@@ -1443,7 +1443,7 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
       ${originalDetails}
       ${translating&&expanded?`<div class="reply-translation-status" role="status"><i></i>${t('正在翻译…','Đang dịch…')}</div>`:''}
       ${showDetails?`<div class="translation${meta?.demoReply?' demo-reply-translation':''}" lang="${translated?textLanguage(otherLanguage(lang)):t('zh-CN','vi')}">${translated?`<span>${escape(translation)}</span>${measured}`:`<button class="message-translate" data-retry-translation="${index}" aria-label="${t('重试翻译','Thử dịch lại')}"><span aria-hidden="true">↻</span> ${t('重试','Thử lại')}</button>`}</div>`:''}
-    </div><div class="message-footer">${canToggle?`<button class="message-translate" data-message-translate="${index}" data-message-open="${expanded}" aria-expanded="${expanded}">${icon('translate')} ${expanded?t('收起译文','Thu bản dịch'):t('展开译文','Mở bản dịch')}</button>`:''}<div class="message-status" ${own?'aria-live="polite"':''}><time>${time}</time><span>${own&&['delivered','read'].includes(status)?'<b class="delivery-checks" aria-hidden="true">✓✓</b> ':''}${statuses[status]}</span>${status==='failed'?`<button data-retry-send="${localIndex}">${t('重发','Gửi lại')}</button>`:''}</div></div>
+    </div><div class="message-footer">${canToggle?`<button class="message-translate" data-message-translate="${index}" data-message-open="${expanded}" aria-expanded="${expanded}">${icon('translate')} ${expanded?t('收起译文','Thu bản dịch'):t('展开译文','Mở bản dịch')}</button>`:''}<div class="message-status" ${own?'aria-live="polite"':''}><time>${escape(time)}</time><span>${own&&['delivered','read'].includes(status)?'<b class="delivery-checks" aria-hidden="true">✓✓</b> ':''}${statuses[status]}</span>${status==='failed'?`<button data-retry-send="${localIndex}">${t('重发','Gửi lại')}</button>`:''}</div></div>
   </div></article>`;
 }
 const voiceEngine=globalThis.speechSynthesis;
@@ -1558,7 +1558,7 @@ function transcriptSpeaker(person,lang) {
 }
 function transcriptMessage(person,record,time,index) {
   const rows=record.turns.map(([seconds,lang,original,translation])=>`<li>
-    <div class="transcript-speaker"><strong>${transcriptSpeaker(person,lang)}</strong><time>${elapsedLabel(seconds)}</time></div>
+    <div class="transcript-speaker"><strong>${escape(transcriptSpeaker(person,lang))}</strong><time>${elapsedLabel(seconds)}</time></div>
     <p lang="${textLanguage(lang)}">${escape(original)}</p><p class="transcript-translation" lang="${textLanguage(otherLanguage(lang))}">${escape(translation)}</p>
   </li>`).join('');
   const kind=record.kind==='video'?t('视频通话','Cuộc gọi video'):t('语音通话','Cuộc gọi thoại');
@@ -1567,7 +1567,7 @@ function transcriptMessage(person,record,time,index) {
     <button class="message-translate" data-copy-transcript="${index}">${t('复制文字','Sao chép văn bản')}</button>
     <small class="transcript-copy-status" role="status"></small></details>
     <small>${record.live?t('实时通话 · 仅文字','Cuộc gọi trực tiếp · Chỉ văn bản'):t('通话记录 · 仅文字','Bản ghi cuộc gọi · Chỉ văn bản')}</small>
-  </div><time>${time}</time></div></article>`;
+  </div><time>${escape(time)}</time></div></article>`;
 }
 function transcriptPrompt() {
   if(!state.pendingTranscript) return '';
@@ -1970,7 +1970,7 @@ function details(person) {
       <button type="button" class="danger-button" data-block-friend="${person.id}">${pendingBlockFriend===person.id?t('确认拉黑？','Xác nhận chặn?'):t('拉黑好友','Chặn bạn bè')}</button>
     </div>`:'';
   return `<aside class="details"><div class="details-heading"><button type="button" class="text-button" data-details>${icon('back')} ${t('返回','Quay lại')}</button><h2>${title}</h2></div>
-    <div class="details-profile">${avatar(person,'large')}<strong>${label(person)}</strong><span>${secondary(person)}</span>${contactPresence(person)}${person.bio?`<small>${t(...person.bio)}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
+    <div class="details-profile">${avatar(person,'large')}<strong>${escape(label(person))}</strong><span>${escape(secondary(person))}</span>${contactPresence(person)}${person.bio?`<small>${escape(t(...person.bio))}</small>`:''}${person.signature?`<p class="contact-signature" lang="vi">${escape(person.signature)}</p>`:''}</div>
     ${state.editFriend === person.id ? friendEditForm(person) : (person.id!=='assistant' && chats.some(c => c.id === person.id) ? `<button type="button" class="text-button" data-edit-friend="${person.id}">${t('编辑资料', 'Chỉnh sửa hồ sơ')}</button>` : '')}
     ${person.id==='assistant'?'':`<div class="detail-actions"><button data-call="voice" data-person="${person.id}"><span>${icon('phone')}</span>${t('语音','Thoại')}</button><button data-call="video" data-person="${person.id}"><span>${icon('video')}</span>${t('视频','Video')}</button></div>`}
     ${dangerHtml}
@@ -1981,7 +1981,7 @@ function friendRow(person) {
   const status=chats.includes(person)?'friend':state.friends[person.id];
   const pending=status==='incoming';
   const action=status==='friend'?t('已是好友','Đã là bạn bè'):status==='sent'?t('已发送 · 待确认','Đã gửi · Đang chờ'):pending?t('接受','Chấp nhận'):t('发送申请','Gửi lời mời');
-  return `<div class="person-row">${avatar(person)}<div><strong>${label(person)}</strong><small class="contact-id">言聊ID ${person.id}</small>${pending?`<small>${t('收到申请','Đã nhận lời mời')}</small>`: ''}</div>
+  return `<div class="person-row">${avatar(person)}<div><strong>${escape(label(person))}</strong><small class="contact-id">言聊ID ${person.id}</small>${pending?`<small>${t('收到申请','Đã nhận lời mời')}</small>`: ''}</div>
     <button class="social-button" data-friend="${person.id}" ${status==='friend'||status==='sent'?'disabled':''}>${action}</button></div>`;
 }
 function qrMarkup(name,size,label) {
@@ -2011,7 +2011,7 @@ function friendPanels() {
   const qrActions=`<div class="social-actions"><button data-friend-panel="card">${t('个人名片','Danh thiếp')}</button></div>`;
   let content;
   if (panel==='card') {
-    content=`<div class="qr-card">${avatar(demoProfile,'large')}<strong>${label(demoProfile)}</strong><small>言聊ID ${demoProfile.id}</small>${profileQr()}</div>`;
+    content=`<div class="qr-card">${avatar(demoProfile,'large')}<strong>${escape(label(demoProfile))}</strong><small>言聊ID ${demoProfile.id}</small>${profileQr()}</div>`;
   } else if (panel==='scan') {
     content=`<div class="qr-card"><p class="local-note">${t('扫码添加，未启用相机。','Quét mã để kết bạn, camera chưa được bật.')}</p>
       ${qrMarkup('huy08',160,t('武光辉的二维码','Mã QR của Vũ Quang Huy'))}
@@ -2031,7 +2031,7 @@ function friendPanels() {
 }
 function blockedSection() {
   if(!state.blockedFriends.length) return '';
-  const rows=state.blockedFriends.map(id=>find(id)).filter(Boolean).map(p=>`<div class="blocked-row">${avatar(p)}<div><strong>${label(p)}</strong><small>${secondary(p)}</small></div><button type="button" class="text-button" data-unblock-friend="${p.id}">${t('解除拉黑','Bỏ chặn')}</button></div>`).join('');
+  const rows=state.blockedFriends.map(id=>find(id)).filter(Boolean).map(p=>`<div class="blocked-row">${avatar(p)}<div><strong>${escape(label(p))}</strong><small>${escape(secondary(p))}</small></div><button type="button" class="text-button" data-unblock-friend="${p.id}">${t('解除拉黑','Bỏ chặn')}</button></div>`).join('');
   return `<section class="blocked-section"><h3>${t('已拉黑','Đã chặn')}</h3>${rows}</section>`;
 }
 function contacts() {
@@ -2040,7 +2040,7 @@ function contacts() {
     <button data-friend-panel="requests">${t('好友申请','Lời mời kết bạn')}${incoming?` (${incoming})`:''}</button>
     <button data-friend-panel="card">${t('个人名片','Danh thiếp')}</button>
     </div>
-    ${friendPanels()}<div class="people-cards">${chats.filter(person=>!person.group&&!isHiddenFriend(person.id)).map((person,i)=>`<article class="card people-card${i===0?' people-featured':''}"><div class="people-card-head"><button type="button" class="avatar-button" data-view-friend="${person.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(person,'large')}</button><div><strong>${label(person)}</strong><small>${secondary(person)}</small></div>${contactPresence(person)}</div>${person.bio?`<p class="people-card-role">${t(...person.bio)}</p>`:''}${person.signature?`<p class="people-card-signature" lang="vi">${escape(person.signature)}</p>`:''}<div class="people-card-tags"><span>中文</span><span>Tiếng Việt</span></div><button type="button" class="social-button people-card-chat" data-chat="${person.id}">${icon('chat')} ${t('私密会话','Trò chuyện riêng tư')}</button></article>`).join('')}</div>${blockedSection()}`;
+    ${friendPanels()}<div class="people-cards">${chats.filter(person=>!person.group&&!isHiddenFriend(person.id)).map((person,i)=>`<article class="card people-card${i===0?' people-featured':''}"><div class="people-card-head"><button type="button" class="avatar-button" data-view-friend="${person.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(person,'large')}</button><div><strong>${escape(label(person))}</strong><small>${escape(secondary(person))}</small></div>${contactPresence(person)}</div>${person.bio?`<p class="people-card-role">${escape(t(...person.bio))}</p>`:''}${person.signature?`<p class="people-card-signature" lang="vi">${escape(person.signature)}</p>`:''}<div class="people-card-tags"><span>中文</span><span>Tiếng Việt</span></div><button type="button" class="social-button people-card-chat" data-chat="${person.id}">${icon('chat')} ${t('私密会话','Trò chuyện riêng tư')}</button></article>`).join('')}</div>${blockedSection()}`;
 }
 function savedPhrasesSection() {
   const items=state.savedPhrases||[];
@@ -2126,7 +2126,7 @@ async function downloadIdentityCard() {
   notify(t('身份卡已保存','Đã lưu thẻ danh tính'));
 }
 function profile() {
-  const identity=`<div class="profile-identity">${avatar(demoProfile,'large')}<div><strong>${label(demoProfile)}</strong><small>言聊ID ${demoProfile.id}</small></div></div>`;
+  const identity=`<div class="profile-identity">${avatar(demoProfile,'large')}<div><strong>${escape(label(demoProfile))}</strong><small>言聊ID ${demoProfile.id}</small></div></div>`;
   const back=page=>`<button class="text-button" data-profile-page="${page}">${icon('back')} ${t('返回','Quay lại')}</button>`;
   if (state.profilePage==='qr') {
     return `${back(state.qrBack)}<section class="card settings-card"><h2>${t('我的二维码','Mã QR của tôi')}</h2><div class="qr-card">${identity}${profileQr()}</div></section>`;
@@ -2173,7 +2173,7 @@ function profile() {
   const group=(name,content)=>`<section class="titanium-group"><h2>${name}</h2><div class="titanium-card">${content}</div></section>`;
   return `<article class="titanium-card titanium-profile">
     <div class="titanium-identity"><button class="titanium-avatar" data-profile-page="details" aria-label="${t('个人资料','Hồ sơ')}">${avatar(demoProfile,'large')}</button>
-      <div><small class="titanium-vip">${spotkitSVG(SPOTKIT.vip,16,'VIP',6)}TITANIUM BLACK VIP · 终身特权</small><h2>${label(demoProfile)}</h2>
+      <div><small class="titanium-vip">${spotkitSVG(SPOTKIT.vip,16,'VIP',6)}TITANIUM BLACK VIP · 终身特权</small><h2>${escape(label(demoProfile))}</h2>
       <button class="titanium-id" data-copy-id>ID: ${demoProfile.id} ${icon('copy')}</button></div>
       ${button('qr',t('我的二维码','Mã QR của tôi'),'data-profile-page="qr"')}
     </div>
@@ -2665,8 +2665,8 @@ function callView() {
   ];
   return `<main class="call-screen active${call.rtcMode?' rtc-mode':''} ${call.kind==='video'&&call.camera?'video-live':'voice-live'}" aria-label="${call.rtcMode?t('实时通话','Cuộc gọi trực tiếp'):t('通话','Cuộc gọi')}">
     ${call.rtcMode?`<video id="remote-call-media" class="rtc-remote-media ${call.kind==='voice'?'audio-only':''}" autoplay playsinline></video>`:''}
-    <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${label(person)}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('E2EE 端到端加密通话就绪','Cuộc gọi mã hóa E2EE đã sẵn sàng')}</div></header>
-    ${call.kind==='video'&&call.camera?'':`<div class="call-portrait">${avatar(person,'large')}<p>${call.kind==='video'?t('摄像头已关闭','Camera đã tắt'):label(person)}</p></div>`}
+    <header class="call-header"><div class="call-identity">${avatar(person)}<div><strong>${escape(label(person))}</strong><small>${call.kind==='video'?t('视频通话','Gọi video'):t('语音通话','Gọi thoại')} · <time id="call-time"></time></small></div></div><div class="call-badge">${call.rtcMode?(call.rtcError?t('连接失败','Kết nối thất bại'):call.rtcConnected?t('实时连接','Đã kết nối trực tiếp'):t('正在连接','Đang kết nối')):t('E2EE 端到端加密通话就绪','Cuộc gọi mã hóa E2EE đã sẵn sàng')}</div></header>
+    ${call.kind==='video'&&call.camera?'':`<div class="call-portrait">${avatar(person,'large')}<p>${call.kind==='video'?t('摄像头已关闭','Camera đã tắt'):escape(label(person))}</p></div>`}
     ${call.kind==='voice'&&!call.rtcMode?`<div class="voice-turn"><strong id="voice-language" aria-live="polite"></strong>
       <button type="button" class="call-tool" data-hold-talk aria-pressed="false">${t('按住说话','Nhấn giữ để nói')}</button>
       <button type="button" class="call-tool" data-noise aria-pressed="${!!call.noise}">${t('夜市噪声','Chợ ồn')}</button>
@@ -2721,7 +2721,7 @@ function updateCall() {
   const markup=Array.from({length:count-rendered},(_,index)=>{
     const [lang,original,translation]=lines[(rendered+index)%lines.length];
     const [vi,zh]=lang==='vi'?[original,translation]:[translation,original];
-    return `<div class="caption-pair"><p class="hud-source-text hud-source" lang="vi">${vi}</p><p class="hud-target-text hud-target" lang="zh-CN">${zh}</p></div>`;
+    return `<div class="caption-pair"><p class="hud-source-text hud-source" lang="vi">${escape(vi)}</p><p class="hud-target-text hud-target" lang="zh-CN">${escape(zh)}</p></div>`;
   }).join('');
   rows.insertAdjacentHTML('beforeend',markup);
   rows.dataset.count=count;
