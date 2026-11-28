@@ -14,6 +14,7 @@
 | T-08 | 前端 + 测试 | 用 60 句本地双语库替换每日一句联网获取 | `index.html`、`tests/regression.spec.js`（独立 worktree） | 每年按日轮换；无 Tatoeba 前端请求；翻面/朗读保留；本地测试通过 | 已完成 |
 | T-09 | 前端 + 测试与安全 | 改进通话实时字幕 HUD，支持中越气泡、字号/透明度、显隐/锁定与偏好记忆 | `index.html`、`tests/regression.spec.js`（独立 worktree） | 实时字幕按角色呈现；建议的 `addSubtitle` 接口可用；透明度为零时关闭模糊；设置持久化；Playwright 全套回归通过 | 已按序合入本地 master；整合测试通过 |
 | T-10 | 产品研发团队 | 审计产品价值、校正无依据的产品承诺，并优化聊天快捷表达 | `PRODUCT_AUDIT.md`、`index.html`、`README.md`、`tests/regression.spec.js`、`TASKS.md`（独立 worktree） | 记录各模块去留的五问审查；数据流描述符合源码且不改变外发/权限策略；移除纯装饰假状态；快捷修复短语离线有译文；本地全套测试通过 | 已按序合入本地 master；整合测试通过（功能提交 `acd29fa`） |
+| T-11 | 前端 + 测试与安全 | 为聊天译文增加复制与收藏操作，并核实名片测试条目 | `DESIGN.md`、`index.html`、`tests/regression.spec.js`、`TASKS.md`（独立 worktree `feat/chat-translation-actions`） | 译文可复制；真实聊天双语可加入现有本地收藏；不改翻译/云函数调用；只清理有证据的测试卡片；本地全套回归通过 | 完成，测试通过，已提交，待 Muse 核对 |
 
 ## 交接记录
 
@@ -45,3 +46,7 @@
 
 
 - 本次整合：先以合并提交 714dcd6 将 feat/call-subtitle-overlay（分支头 360a63d）合入，再以合并提交 06d27fb 合并 product/trust-and-repair（分支头 4f36855，功能提交 acd29fa）；保留双方测试与 T-09/T-10 任务记录。TASKS.md 冲突保留 T-09 详细任务行和 T-10 产品审计行，删除重复的旧版 T-09 行；测试文件保留字幕 HUD、离线短语和隐私披露三个用例。合并后在 master 执行 `npm ci`（4 packages audited，0 vulnerabilities）及 `$env:YEYU_URL='http://127.0.0.1:4173/?v=merge-check'; npm test`，实测 **8 passed（17.8s）**。冲突解决后保留了 HUD、离线短语、隐私披露三项新增用例，并通过 `git diff --check`。推送前已 fetch；远端 `origin/main` 为 `b6150fd` 且是本地 master 的祖先，推送为快进更新。
+
+- T-11 审计与实现（独立 worktree `feat/chat-translation-actions`，基线 `542de08`）：联系人卡片由 `contacts()` 从 `chats` 过滤生成，实际为 AI 助手和 Linh/An/Mai 三位内置联系人；群组被过滤。`friendDirectory` 的 `bao27`、`thao18`、`huy08` 仅出现在添加好友的本地搜索/申请流程，不进入名片卡片。没有标记为测试的名片条目，因此未删除任何联系人；新增回归用例锁定这一边界。
+- T-11 产品筛选：候选为聊天译文复制、真实聊天表达收藏、联系人搜索、未读会话筛选；先实现前两项，复用现有收藏区，拒绝重复学习入口。
+- T-11 实现与验证：先更新 `DESIGN.md` 交互表，再改 `index.html` 增加译文复制/收藏；收藏只写现有 `noiloi-saved-phrases`（最多 50 条，按原文/译文/方向去重），复制仅使用浏览器剪贴板并在失败时提供手动复制后备；未改翻译链、Worker 路由或密钥。`tests/regression.spec.js` 新增复制、收藏及名片来源 3 个用例。本地执行 `npm ci`（4 packages audited，0 vulnerabilities）和 `$env:YEYU_URL='http://127.0.0.1:4173/?v=chat-actions'; npm test`，**11 passed（9.9s）**；`git diff --check` 通过。
