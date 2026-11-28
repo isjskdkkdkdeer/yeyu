@@ -5,21 +5,21 @@
 | ID | 负责人 | 任务 | 可编辑范围 | 验收条件 | 状态 |
 |---|---|---|---|---|---|
 | T-01 | 技术总监 | 初始化 Git，提交基线并登记分支方案 | Git 元数据、`TASKS.md` | 指定文件纳入单次基线提交；默认分支和工作区状态确认 | 已完成 |
-| T-02 | 前端 + 测试与安全 | 审计并修复 `index.html` 所有动态 HTML 插入点 | `index.html`（独立 worktree） | 列出所有 sink、追踪动态值、修复不安全插值并记录逐处验证 | 进行中 |
-| T-03 | 测试与安全 | 配置两个 Playwright 用例本地运行 | `tests/`、必要的测试配置/脚本（独立 worktree） | `YEYU_URL` 指向本地服务；默认目标不再是线上；提供本地命令并实际运行 | 进行中 |
+| T-02 | 前端 + 测试与安全 | 审计并修复 `index.html` 所有动态 HTML 插入点 | `index.html`（独立 worktree） | 列出所有 sink、追踪动态值、修复不安全插值并记录逐处验证 | 已完成 |
+| T-03 | 测试与安全 | 配置两个 Playwright 用例本地运行 | `tests/`、必要的测试配置/脚本（独立 worktree） | `YEYU_URL` 指向本地服务；默认目标不再是线上；提供本地命令并实际运行 | 已完成 |
 | T-04 | 后端 | 梳理翻译、助手、实时陪练接口与数据流 | 无（只读审计，结果由协调者登记） | 标注已证实信息及未知的限流/保留策略 | 已完成 |
 
 ## 交接记录
 
-- 2026-11-28：技术总监初始化本地 Git 仓库，默认分支为 `master`；基线提交 `eaca0cf03c4c1695712586a36ffbbb23594054be` 包含 `index.html`、`DESIGN.md`、`MOTION.md`、`README.md`、`AGENTS.md`、`TASKS.md`、`assets/`、`tests/`。提交后核验工作区干净。
-- 2026-11-28：分支方案：前端安全修复使用 `security/dynamic-html-sinks` 分支和独立 `.worktrees/dynamic-html-sinks` worktree；Playwright 本地化使用 `test/local-playwright` 分支和独立 `.worktrees/local-playwright` worktree；后端审计只读，不创建代码分支。各分支均从本地默认分支基线创建，不推送、不发布。任务结束后协调者审查并决定是否合并。
+- 2026-11-28：技术总监初始化本地 Git 仓库，默认分支为 `master`；基线提交 `dd449aa` 包含指定的 22 个文件（`index.html`、`DESIGN.md`、`MOTION.md`、`README.md`、`AGENTS.md`、`TASKS.md`、`assets/`、`tests/`）。提交后核验工作区干净。
+- 2026-11-28：分支方案：前端安全修复使用 `security/dynamic-html-sinks` 分支和独立 `.worktrees/dynamic-html-sinks` worktree；Playwright 本地化使用 `test/local-playwright` 分支和独立 `.worktrees/local-playwright` worktree；后端审计只读，不创建代码分支。各分支均从本地默认分支基线创建；未推送或发布。完成审查后均已合入本地 `master`，分支和 worktree 保留。
 - 2026-11-28：首次只读审查已完成；当前阶段按用户要求以 Git 基线为准，重新分配后续工作。
 - 基线阶段未修改应用源码，未运行测试。
-- T-04 后端审计完成：翻译 POST 发送原文/目标语言/语气/称谓；助手 `/assistant` 携带最近 10 条消息；实时陪练通过 `/realtime` WebSocket 并传输麦克风音频。另有 `/tatoeba` 例句、`/dict` 词典接口。Worker 服务端源码不在仓库中，故限流、鉴权、日志和服务端保留策略均未知。实际证据见 `index.html` 与上一轮后端审查位置清单。
-- T-02 和 T-03 已在各自独立 worktree 并行开始；截至此记录尚未完成或验证。
+- T-04 后端审计完成：翻译 POST 发送原文/目标语言/语气/称谓（`index.html:1658-1673`）；助手 `/assistant` 携带最近 10 条消息（`1675-1698`）；实时陪练通过 `/realtime` WebSocket 并传输麦克风音频（`2296`、`2420-2510`）。另有 `/tatoeba`（`2208-2216`）和 `/dict`（`2231-2257`）。Worker 服务端源码不在仓库中，限流、鉴权、日志及服务端保留策略均未知。
+- T-02 完成并合入：扫描到 8 个 HTML sink：`index.html:1838` (`innerHTML` 字幕)、`2330` (`innerHTML` 固定按钮)、`2657` (`outerHTML` 提词器)、`2726` (`insertAdjacentHTML` 演示字幕)、`2819`/`2827`/`2832` (`root.innerHTML` 退出页/通话页/主应用)、`3289` (会话搜索结果 `innerHTML`)。无 `document.write`、`createContextualFragment` 或 `DOMParser` 命中。修复了用户可编辑姓名/简介/签名、联系人名称、转录说话人、本地消息时间等到达 HTML 文本上下文时缺少转义的问题；RTC 字幕与演示字幕均转义。相关属性值为固定枚举或应用内受限 ID，动态头像 URL 虽经过 HTML 属性转义，仍可触发用户指定外域图片请求，属于外联隐私边界，未在本任务改 URL 策略。
+- T-02 验证：`git diff --check` 通过；使用 Node 从 UTF-8 文件提取并编译内嵌脚本通过；整合后两项 Playwright 回归通过。
+- T-03 完成并合入：新增 Playwright 配置、锁文件、本地静态服务器和忽略规则；两个回归用例迁移到当前源码已有的聊天翻译与学习卡片行为。默认目标为 `127.0.0.1:4173`；Worker API 使用确定性本地 mock，其他外源请求拦截。设置本地 `YEYU_URL` 时也会自动启动本地 server。
+- T-03 本地运行：首次 `npm ci`，安装 Chromium 一次性运行 `npx playwright install chromium`；PowerShell 命令 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`。已在整合后的 `master` 实跑，结果 **2 passed**。外部头像请求被测试策略拦截，控制台出现 `ERR_BLOCKED_BY_CLIENT` 属于预期，不代表用例失败或访问外站。
+- 整合验证：本轮测试时 `master` 代码 HEAD 为 `e9434f0`；已运行 `npm ci`（4 个包审计，0 漏洞）和上述本地 Playwright 命令；验证后工作区干净。未推送、未部署。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
-- 后端审查：源码将翻译文本发往 Worker，助手请求包含最近 10 条对话；实时陪练通过 Worker 的 `/realtime` WebSocket；状态通过 `localStorage` 保存在本机。后端实现、限流和数据保留策略无法从本项目源码确认。
-- 前端审查：页面使用模板字符串与 `innerHTML` 渲染，动态字段应逐处审查转义；建议核实源码字面量在浏览器中的编码显示后再修复乱码风险。
-- 测试审查：目前只有两个 Playwright 用例，默认目标是线上 GitHub Pages，涉及真实翻译 Worker；尚未验证本地可重复性。未运行测试。
-- 安全审查：翻译文本、助手最近 10 条上下文和语音流会发送至外部 Worker；`localStorage` 保存本地状态；字幕路径有转义，其他动态 HTML sink 仍需逐项审查。未据抽查断言存在可利用 XSS。
 
