@@ -1,0 +1,21 @@
+<!-- NOCTIS Logo 概念 B：两张面对面的脸拼成 N
+  左右两道竖笔是 N 的两条边；中间两张侧脸剪影相对而视，脸之间的虚线斜笔
+  是两人在说话——N 的斜笔就是对话本身。概念稿，等 Ha 选方向后再出套件。 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="140" viewBox="0 0 360 140">
+  <defs>
+    <g id="markB" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 76 V20 M80 76 V20" stroke-width="5"/>
+      <path d="M34 22 C46 22 50 32 48 42 C47 47 44 50 46 54 C48 58 46 62 43 66 C41 70 42 74 40 76" stroke-width="2.5"/>
+      <path d="M62 22 C50 22 46 32 48 42 C49 47 52 50 50 54 C48 58 50 62 53 66 C55 70 54 74 56 76" stroke-width="2.5"/>
+      <path d="M34 76 L62 20" stroke-width="2" stroke-dasharray="1 4"/>
+    </g>
+  </defs>
+  <rect x="12" y="12" width="96" height="96" rx="18" fill="#0B0A08" stroke="#D8B56D" stroke-opacity=".35" stroke-width="0.75"/>
+  <use href="#markB" x="12" y="12" color="#D8B56D"/>
+  <use href="#markB" transform="translate(172,52) scale(0.1667)" color="#D8B56D"/>
+  <rect x="252" y="12" width="96" height="96" rx="18" fill="#D8B56D"/>
+  <use href="#markB" x="252" y="12" color="#0B0A08"/>
+  <text x="60" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#A4A6A5">黑底金色</text>
+  <text x="180" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#A4A6A5">16 px 小尺寸</text>
+  <text x="300" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#A4A6A5">反白</text>
+</svg>

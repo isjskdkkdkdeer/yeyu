@@ -1,0 +1,25 @@
+<!-- NOCTIS Logo 概念 C：新月 + 声波拼成 N
+  左上新月是夜；下面七根声波竖条，左右两端最长是 N 的两条竖笔，
+  中间三根由低到高排成斜笔——声音本身走成了 N。概念稿，等 Ha 选方向后再出套件。 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="140" viewBox="0 0 360 140">
+  <defs>
+    <g id="markC" fill="currentColor" stroke="none">
+      <path d="M40 14 A16 16 0 1 0 40 46 A13 13 0 1 1 40 14 Z"/>
+      <rect x="18" y="52" width="5" height="32" rx="2.5"/>
+      <rect x="26" y="52" width="5" height="32" rx="2.5"/>
+      <rect x="36" y="68" width="5" height="16" rx="2.5"/>
+      <rect x="46" y="62" width="5" height="22" rx="2.5"/>
+      <rect x="56" y="56" width="5" height="28" rx="2.5"/>
+      <rect x="66" y="52" width="5" height="32" rx="2.5"/>
+      <rect x="74" y="52" width="5" height="32" rx="2.5"/>
+    </g>
+  </defs>
+  <rect x="12" y="12" width="96" height="96" rx="18" fill="#0B0A08" stroke="#D8B56D" stroke-opacity=".35" stroke-width="0.75"/>
+  <use href="#markC" x="12" y="12" color="#D8B56D"/>
+  <use href="#markC" transform="translate(172,52) scale(0.1667)" color="#D8B56D"/>
+  <rect x="252" y="12" width="96" height="96" rx="18" fill="#D8B56D"/>
+  <use href="#markC" x="252" y="12" color="#0B0A08"/>
+  <text x="60" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#A4A6A5">黑底金色</text>
+  <text x="180" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#A4A6A5">16 px 小尺寸</text>
+  <text x="300" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#A4A6A5">反白</text>
+</svg>
