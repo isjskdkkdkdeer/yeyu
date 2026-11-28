@@ -285,3 +285,48 @@ test('privacy disclosure matches the visible data flow and removes mock security
   await expect(page.locator('.section-content')).toContainText('最近 10 条消息');
   await expect(page.locator('.section-content')).toContainText('数据保留策略未知');
 });
+
+test('translated chat text can be copied by itself', async ({ page }) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: new URL(BASE).origin });
+  const input = page.locator('#message-form input[name="message"]');
+  await input.fill(SOURCE_TEXT);
+  await input.press('Enter');
+
+  const message = page.locator('article.message.own').filter({ hasText: SOURCE_TEXT }).last();
+  await expect(message.locator('[data-copy-message-translation]')).toBeVisible();
+  await message.locator('[data-copy-message-translation]').click();
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(MOCK_TRANSLATION);
+});
+
+test('translated chat text can be saved into the existing local phrase collection', async ({ page }) => {
+  await page.locator('.thread[data-chat="linh"]').click();
+  const incomingMessage = page.locator('article.message:not(.own)').first();
+  await expect(incomingMessage.locator('[data-save-message-translation]')).toBeVisible();
+  await incomingMessage.locator('[data-save-message-translation]').click();
+  let saved = await page.evaluate(() => JSON.parse(localStorage.getItem('noiloi-saved-phrases')));
+  expect(saved[0].side).toBe('peer');
+
+  const input = page.locator('#message-form input[name="message"]');
+  await input.fill(SOURCE_TEXT);
+  await input.press('Enter');
+
+  const message = page.locator('article.message.own').filter({ hasText: SOURCE_TEXT }).last();
+  await expect(message.locator('[data-save-message-translation]')).toBeVisible();
+  await message.locator('[data-save-message-translation]').click();
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('noiloi-saved-phrases')));
+  expect(saved[0]).toMatchObject({ src: SOURCE_TEXT, trans: MOCK_TRANSLATION, side: 'self' });
+  expect(saved[1].side).toBe('peer');
+
+  await page.locator('[data-tab="learn"]').click();
+  await expect(page.locator('.saved-card').first()).toContainText(SOURCE_TEXT);
+  await expect(page.locator('.saved-card').first()).toContainText(MOCK_TRANSLATION);
+});
+
+test('contact cards contain saved contacts, not friend-search directory samples', async ({ page }) => {
+  await page.locator('[data-tab="contacts"]').click();
+  const cards = page.locator('.people-card-chat');
+  await expect(cards).toHaveCount(4);
+  const ids = await cards.evaluateAll(elements => elements.map(element => element.dataset.chat).sort());
+  expect(ids).toEqual(['an', 'assistant', 'linh', 'mai']);
+  await expect(page.locator('.people-card-chat[data-chat="bao27"], .people-card-chat[data-chat="thao18"], .people-card-chat[data-chat="huy08"]')).toHaveCount(0);
+});

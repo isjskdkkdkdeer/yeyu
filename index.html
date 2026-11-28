@@ -651,6 +651,11 @@ button.setting-row:active,a.setting-row:active {background:var(--settings-presse
 .bubble {padding:6px 9px;line-height:1.45}
 .message-original,.translation>span {white-space:pre-wrap}
 .translation {margin-top:4px;padding-top:4px;font-size:var(--text-sm);line-height:1.45}
+.translation-actions {display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.translation-actions button {display:inline-flex;align-items:center;gap:6px;min-width:44px;min-height:44px;padding:6px 9px;border:1px solid var(--line);border-radius:var(--radius-control);background:transparent;color:var(--muted);font:inherit;font-size:var(--text-xs);cursor:pointer}
+.translation-actions button:hover,.translation-actions button:focus-visible {background:var(--soft);color:var(--strong)}
+.translation-actions button:focus-visible {outline:2px solid var(--gold);outline-offset:2px}
+.translation-actions svg {width:15px;height:15px;flex:none}
 .message-footer {display:flex;flex-wrap:wrap;align-items:center;gap:0 8px}
 .message-footer>.message-translate {padding:0 4px;gap:4px;font-size:var(--text-xs);min-width:44px}
 .message-footer .message-status {padding-top:2px;min-height:24px}
@@ -1464,6 +1469,7 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
   const showDetails=!translating && (state.translated[person.id]!==false && (expanded || meta?.voice)) && !primaryTranslation;
   const canToggle=!translating && state.translated[person.id]!==false && !primaryTranslation && !meta?.voice;
   const originalDetails=primaryTranslation?`<details class="message-original-details" ${meta?.voice?'open':''}><summary>${t('查看原文','Xem nguyên văn')}</summary><div class="message-original" lang="${textLanguage(lang)}">${escape(original)}</div></details>`:'';
+  const translationActions=translated?`<div class="translation-actions"><button type="button" data-copy-message-translation="${index}" aria-label="${t('复制译文','Sao chép bản dịch')}">${icon('copy')} ${t('复制译文','Sao chép')}</button><button type="button" data-save-message-translation="${index}" aria-label="${t('收藏这条双语表达','Lưu câu song ngữ này')}">${icon('heart')} ${t('收藏短语','Lưu câu')}</button></div>`:'';
 
   const avatarBtn=own?`<button type="button" class="avatar-button" data-view-my-profile aria-label="${t('我的资料','Hồ sơ của tôi')}">${avatar(demoProfile,'tiny')}</button>`:`<button type="button" class="avatar-button" data-view-friend="${author.id}" aria-label="${t('查看资料','Xem hồ sơ')}">${avatar(author,'tiny')}</button>`;
   return `<article class="message ${own?'own':''}" data-mid="${key}"><div class="message-side">${avatarBtn}</div><div class="message-content">
@@ -1474,8 +1480,9 @@ function messageRow(person,[lang,original,translation,time,sender,meta],index) {
       <div class="message-original" lang="${textLanguage(primaryLang)}">${escape(primary)}</div>
       ${primaryTranslation?measured:''}
       ${originalDetails}
+      ${primaryTranslation?translationActions:''}
       ${translating&&expanded?`<div class="reply-translation-status" role="status"><i></i>${t('正在翻译…','Đang dịch…')}</div>`:''}
-      ${showDetails?`<div class="translation${meta?.demoReply?' demo-reply-translation':''}" lang="${translated?textLanguage(otherLanguage(lang)):t('zh-CN','vi')}">${translated?`<span>${escape(translation)}</span>${measured}`:`<button class="message-translate" data-retry-translation="${index}" aria-label="${t('重试翻译','Thử dịch lại')}"><span aria-hidden="true">↻</span> ${t('重试','Thử lại')}</button>`}</div>`:''}
+      ${showDetails?`<div class="translation${meta?.demoReply?' demo-reply-translation':''}" lang="${translated?textLanguage(otherLanguage(lang)):t('zh-CN','vi')}">${translated?`<span>${escape(translation)}</span>${measured}`:`<button class="message-translate" data-retry-translation="${index}" aria-label="${t('重试翻译','Thử dịch lại')}"><span aria-hidden="true">↻</span> ${t('重试','Thử lại')}</button>`}</div>${translationActions}`:''}
     </div><div class="message-footer">${canToggle?`<button class="message-translate" data-message-translate="${index}" data-message-open="${expanded}" aria-expanded="${expanded}">${icon('translate')} ${expanded?t('收起译文','Thu bản dịch'):t('展开译文','Mở bản dịch')}</button>`:''}<div class="message-status" ${own?'aria-live="polite"':''}><time>${escape(time)}</time><span>${own&&['delivered','read'].includes(status)?'<b class="delivery-checks" aria-hidden="true">✓✓</b> ':''}${statuses[status]}</span>${status==='failed'?`<button data-retry-send="${localIndex}">${t('重发','Gửi lại')}</button>`:''}</div></div>
   </div></article>`;
 }
@@ -1628,6 +1635,45 @@ async function copyTranscript(control,index) {
     field.focus();
     field.select();
   }
+}
+async function copyMessageTranslation(index) {
+  const person=find(state.active);
+  const text=messages(person)[index]?.[2];
+  if(typeof text!=='string'||!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    notify(t('已复制译文','Đã sao chép bản dịch'));
+  } catch {
+    const field=document.createElement('textarea');
+    field.readOnly=true;
+    field.value=text;
+    field.setAttribute('aria-label',t('请手动复制译文','Hãy sao chép bản dịch thủ công'));
+    field.style.position='fixed';
+    field.style.opacity='0';
+    document.body.append(field);
+    field.select();
+    let copied=false;
+    try { copied=document.execCommand('copy'); } catch {}
+    field.remove();
+    if(copied) notify(t('已复制译文','Đã sao chép bản dịch'));
+    else globalThis.prompt?.(t('浏览器未允许复制，请手动复制译文','Trình duyệt chưa cho phép sao chép; hãy sao chép bản dịch thủ công'),text);
+  }
+}
+function saveMessageTranslation(index) {
+  const person=find(state.active);
+  const message=messages(person)[index];
+  if(!message || typeof message[1]!=='string' || typeof message[2]!=='string' || !message[2]) return;
+  if(!Array.isArray(state.savedPhrases)) state.savedPhrases=[];
+  const [lang,original,translation]=message;
+  const side=lang==='vi'?'peer':'self';
+  if(state.savedPhrases.some(item=>item.src===original&&item.trans===translation&&item.side===side)) {
+    notify(t('这条表达已经收藏','Câu này đã được lưu'));
+    return;
+  }
+  state.savedPhrases.unshift({src:original,trans:translation,side,ts:Date.now()});
+  state.savedPhrases=state.savedPhrases.slice(0,50);
+  save('saved-phrases',state.savedPhrases);
+  notify(t('已收藏到学习页','Đã lưu vào trang học'));
 }
 const pendingMessages=new Set();
 const pendingReplyTranslations=new Set();
@@ -3067,6 +3113,8 @@ root.addEventListener('click', event => {
   }
   if(d.playVoice!==undefined) playOrStopVoice(control);
   if(d.copyTranscript!==undefined) void copyTranscript(control,Number(d.copyTranscript));
+  if(d.copyMessageTranslation!==undefined) { void copyMessageTranslation(Number(d.copyMessageTranslation)); return; }
+  if(d.saveMessageTranslation!==undefined) { saveMessageTranslation(Number(d.saveMessageTranslation)); return; }
   if(d.messageTranslate!==undefined) {
     const key=state.active+':'+d.messageTranslate;
     state.expanded[key]=d.messageOpen!=='true';
