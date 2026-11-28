@@ -12,6 +12,7 @@
 | T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 已完成 |
 | T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 已完成 |
 | T-08 | 前端 + 测试 | 用 60 句本地双语库替换每日一句联网获取 | `index.html`、`tests/regression.spec.js`（独立 worktree） | 每年按日轮换；无 Tatoeba 前端请求；翻面/朗读保留；本地测试通过 | 已完成 |
+| T-09 | 前端 + 测试与安全 | 改进通话实时字幕 HUD，支持中越气泡、字号/透明度、显隐/锁定与偏好记忆 | `index.html`、`tests/regression.spec.js`（独立 worktree） | 实时字幕按角色呈现；建议的 `addSubtitle` 接口可用；透明度为零时关闭模糊；设置持久化；Playwright 全套回归通过 | 已提交，待审查 |
 
 ## 交接记录
 
@@ -34,4 +35,7 @@
 - T-08 开始：从当前远端已部署 `master` HEAD `b6150fd` 创建独立分支 `feat/daily-phrase-builtin` 与 `.worktrees/daily-phrase-builtin` worktree。已确认每日卡片当前通过 `/tatoeba` 请求数据，朗读与翻面分别由 `speakDailySentence()` 和 `dailyFlipped` 处理。
 - T-08 完成：`index.html` 内置 60 组越南语/简体中文完整日常句，越南语和中文各自均无重复；以年内日序从第 1 句开始每 60 天循环，连续日期轮换不同。移除了每日一句的前端 Tatoeba 请求，词典、陪练、翻面和朗读路径保持原状；`speakDailySentence()` 在本地句子无音频时继续走原有语音合成回退。`regression.spec.js` 新增日期固定测试，验证相邻日期句子不同且没有 `/tatoeba` 请求。独立 worktree 执行 `npm ci` 后运行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`，实测 **5 passed（12.7s）**；`git diff --check` 通过，内置句库计数/去重检查为 60/60。功能提交 `836cd34` 已合入本地 `master`，在整合提交 `c9622c3` 上再次实跑 **5 passed（11.3s）**。当前改动未推送或部署，等待用户确认。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
+- T-09 开始：从当前本地 `master` HEAD `650a54f` 创建 `feat/call-subtitle-overlay` 与独立 worktree `.worktrees/call-subtitle-overlay`。现有通话 HUD 位于 `index.html:830-843, 2736-2758`，实时字幕来自 RTC data channel 的 `receiveCaption()`；当前无 `addSubtitle`、`.sub-translated`，字号仅三档，字幕是原文在前。实现将复用 RTC 字幕存储与渲染，补充公开适配入口与浮层控件。尚未运行测试或部署。
+- T-09 实现完成（独立 worktree `feat/call-subtitle-overlay`）：字幕浮层为底部中央宽卡片，列表顶部渐隐；使用 Inter / Noto Sans / 系统无衬线、1.55 行高、译文主显/原文弱化及按说话方左右气泡。右上控制条提供 14–28px 字号、0–90% 底色、显隐、锁定和跟随；字号/透明度写入 `noiloi-call-preferences` localStorage，透明度为 0 时背景透明且 blur 归零。`platform.CallManager.addSubtitle({role,langPair,translated,original,...})` 复用字幕数据流；流式片段保留 `.streaming` 并安全地增量更新文本，最终片段移除该状态。修改文件：`index.html`、`tests/regression.spec.js` 和本任务记录。
+- T-09 本地验证：`npm ci` 完成（4 packages audited，0 vulnerabilities）；PowerShell 执行 `$env:YEYU_URL='http://127.0.0.1:4173/?v=subtitle-overlay'; npm test`，本地静态服务由 Playwright 配置自动启动，最终 **6 passed（8.9s）**。新增用例覆盖流式字幕更新/结束、字号与透明度范围、0% 时关闭模糊、本地偏好持久化、显隐和锁定状态。首次实跑 5 passed/1 failed，原因是测试选择器命中两个语音按钮；限定 `.chat-header` 后重跑通过。`git diff --check` 和 Node 内嵌脚本语法编译通过。功能与测试提交：`f741871`。当前仅在本地功能分支，未合并 `master`、未推送或部署。
 
