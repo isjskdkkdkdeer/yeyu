@@ -44,4 +44,4 @@
 
 
 
-- 本次整合：先将 feat/call-subtitle-overlay（f741871）合入，再合并 product/trust-and-repair（acd29fa）；保留双方测试与 T-09/T-10 任务记录。TASKS.md 冲突保留 T-09 详细任务行和 T-10 产品审计行，删除重复的旧版 T-09 行；测试文件保留字幕 HUD、离线短语和隐私披露三个用例。合并后在 master 执行 `npm ci`（4 packages audited，0 vulnerabilities）及 `$env:YEYU_URL='http://127.0.0.1:4173/?v=merge-check'; npm test`，实测 **8 passed（17.8s）**。冲突解决后保留了 HUD、离线短语、隐私披露三项新增用例，并通过 `git diff --check`。推送前核对远端 main。
+- 本次整合：先以合并提交 714dcd6 将 feat/call-subtitle-overlay（分支头 360a63d）合入，再以合并提交 06d27fb 合并 product/trust-and-repair（分支头 4f36855，功能提交 acd29fa）；保留双方测试与 T-09/T-10 任务记录。TASKS.md 冲突保留 T-09 详细任务行和 T-10 产品审计行，删除重复的旧版 T-09 行；测试文件保留字幕 HUD、离线短语和隐私披露三个用例。合并后在 master 执行 `npm ci`（4 packages audited，0 vulnerabilities）及 `$env:YEYU_URL='http://127.0.0.1:4173/?v=merge-check'; npm test`，实测 **8 passed（17.8s）**。冲突解决后保留了 HUD、离线短语、隐私披露三项新增用例，并通过 `git diff --check`。推送前已 fetch；远端 `origin/main` 为 `b6150fd` 且是本地 master 的祖先，推送为快进更新。
