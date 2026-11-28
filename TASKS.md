@@ -8,11 +8,14 @@
 | T-02 | 前端 + 测试与安全 | 审计并修复 `index.html` 所有动态 HTML 插入点 | `index.html`（独立 worktree） | 列出所有 sink、追踪动态值、修复不安全插值并记录逐处验证 | 已完成 |
 | T-03 | 测试与安全 | 配置两个 Playwright 用例本地运行 | `tests/`、必要的测试配置/脚本（独立 worktree） | `YEYU_URL` 指向本地服务；默认目标不再是线上；提供本地命令并实际运行 | 已完成 |
 | T-04 | 后端 | 梳理翻译、助手、实时陪练接口与数据流 | 无（只读审计，结果由协调者登记） | 标注已证实信息及未知的限流/保留策略 | 已完成 |
+| T-05 | 协调者 | 补齐 d372965 合并、推送与线上验证交接 | `TASKS.md`（独立 worktree） | 明确保留远端 main 历史、推送成功和 Pages 验证结果；清理过时状态 | 已完成 |
+| T-06 | 测试与安全 | 在 d372965 上重跑 2 个本地 Playwright 用例 | 独立验证 worktree（只读） | `YEYU_URL` 指向本地，2 个用例通过并记录实跑结果 | 待开始 |
+| T-07 | 前端 + 测试与安全 | 审计并改为仅本地上传用户头像 | `index.html`、必要的测试 | 内置三头像保持原样；外部头像 URL 不再加载；本地上传可用；回归测试通过 | 待开始 |
 
 ## 交接记录
 
 - 2026-11-28：技术总监初始化本地 Git 仓库，默认分支为 `master`；基线提交 `dd449aa` 包含指定的 22 个文件（`index.html`、`DESIGN.md`、`MOTION.md`、`README.md`、`AGENTS.md`、`TASKS.md`、`assets/`、`tests/`）。提交后核验工作区干净。
-- 2026-11-28：分支方案：前端安全修复使用 `security/dynamic-html-sinks` 分支和独立 `.worktrees/dynamic-html-sinks` worktree；Playwright 本地化使用 `test/local-playwright` 分支和独立 `.worktrees/local-playwright` worktree；后端审计只读，不创建代码分支。各分支均从本地默认分支基线创建；未推送或发布。完成审查后均已合入本地 `master`，分支和 worktree 保留。
+- 2026-11-28：分支方案：前端安全修复使用 `security/dynamic-html-sinks` 分支和独立 `.worktrees/dynamic-html-sinks` worktree；Playwright 本地化使用 `test/local-playwright` 分支和独立 `.worktrees/local-playwright` worktree；后端审计只读，不创建代码分支。各分支从本地基线创建并合入 `master`。后续推送记录见本节末尾。
 - 2026-11-28：首次只读审查已完成；当前阶段按用户要求以 Git 基线为准，重新分配后续工作。
 - 基线阶段未修改应用源码，未运行测试。
 - T-04 后端审计完成：翻译 POST 发送原文/目标语言/语气/称谓（`index.html:1658-1673`）；助手 `/assistant` 携带最近 10 条消息（`1675-1698`）；实时陪练通过 `/realtime` WebSocket 并传输麦克风音频（`2296`、`2420-2510`）。另有 `/tatoeba`（`2208-2216`）和 `/dict`（`2231-2257`）。Worker 服务端源码不在仓库中，限流、鉴权、日志及服务端保留策略均未知。
@@ -20,6 +23,8 @@
 - T-02 验证：`git diff --check` 通过；使用 Node 从 UTF-8 文件提取并编译内嵌脚本通过；整合后两项 Playwright 回归通过。
 - T-03 完成并合入：新增 Playwright 配置、锁文件、本地静态服务器和忽略规则；两个回归用例迁移到当前源码已有的聊天翻译与学习卡片行为。默认目标为 `127.0.0.1:4173`；Worker API 使用确定性本地 mock，其他外源请求拦截。设置本地 `YEYU_URL` 时也会自动启动本地 server。
 - T-03 本地运行：首次 `npm ci`，安装 Chromium 一次性运行 `npx playwright install chromium`；PowerShell 命令 `$env:YEYU_URL='http://127.0.0.1:4173/?v=regression'; npm test`。已在整合后的 `master` 实跑，结果 **2 passed**。外部头像请求被测试策略拦截，控制台出现 `ERR_BLOCKED_BY_CLIENT` 属于预期，不代表用例失败或访问外站。
-- 整合验证：本轮测试时 `master` 代码 HEAD 为 `e9434f0`；已运行 `npm ci`（4 个包审计，0 漏洞）和上述本地 Playwright 命令；验证后工作区干净。未推送、未部署。
+- 整合验证：本轮测试时 `master` 代码 HEAD 为 `e9434f0`；已运行 `npm ci`（4 个包审计，0 漏洞）和上述本地 Playwright 命令；验证后工作区干净。
+- T-05 完成：推送前 `master` 干净且 HEAD 为 `c247288`。远端 `main` 已有独立历史，首次 push 被拒绝（fetch first）；随后将 `origin/main` 合并到 `master`，生成 `d372965`，保留远端历史且代码树与 `c247288` 一致。仅执行 `git push origin master:main`，远端从 `016e9d9` 前进到 `d372965`，推送成功。
+- T-05 线上验证：推送后等待 90 秒，`https://isjskdkkdkdeer.github.io/yeyu/?v=c247288` 返回 HTTP 200；Pages 内容与 GitHub `main/index.html` 完全一致，已核实姓名和时间转义修复存在。
 - 技术审查：项目是单页应用，核心代码集中在 `index.html`；云翻译/助手依赖外部 Cloudflare Worker，通话适配器需要外部配置；暂未发现后端源码。
 
